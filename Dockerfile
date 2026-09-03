@@ -1,5 +1,5 @@
 # Build stage
-FROM gradle:jdk17 AS build
+FROM eclipse-temurin:17-jdk AS build
 
 WORKDIR /app
 # Copy everything (respecting .dockerignore)
@@ -13,7 +13,7 @@ RUN chmod +x gradlew
 RUN ./gradlew :server:installDist --no-daemon
 
 # Run stage
-FROM openjdk:17-slim
+FROM eclipse-temurin:17-jre
 
 ENV PORT 8080
 EXPOSE 8080
