@@ -1,5 +1,5 @@
 # Build stage
-FROM gradle:8.7-jdk17 AS build
+FROM gradle:jdk17 AS build
 
 WORKDIR /app
 # Copy everything (respecting .dockerignore)
