@@ -9,8 +9,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.plugins.callloging.*
+import com.example.vtiu.server.db.DatabaseFactory
 
 fun main() {
+    DatabaseFactory.init()
     embeddedServer(Netty, port = System.getenv("PORT")?.toInt() ?: 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
