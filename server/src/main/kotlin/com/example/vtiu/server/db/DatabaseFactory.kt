@@ -45,8 +45,7 @@ object DatabaseFactory {
         Database.connect(dataSource)
         
         transaction {
-            // Create tables here
-            // SchemaUtils.create(Users)
+            SchemaUtils.create(Users, Courses, Fees, Notifications, Appointments)
         }
     }
 }
