@@ -54,7 +54,7 @@ object DatabaseFactory {
                 Meetings, Questions, Options, StudentQuizSubmissions, CourseMaterials,
                 TeacherCourseAssignments, StudentCourseRegistrations, AttendanceRecords,
                 CourseAssessmentSchemes, AssignmentSubmissions, SemesterResultReleases,
-                SchoolSettings
+                SchoolSettings, ProgrammeFeeStructures
             )
         }
     }

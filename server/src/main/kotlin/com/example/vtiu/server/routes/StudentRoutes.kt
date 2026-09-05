@@ -7,9 +7,11 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.datetime.toKotlinLocalDateTime
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.LocalDateTime
 
 fun Route.studentRoutes() {
     route("/api") {
@@ -291,8 +293,35 @@ fun Route.studentRoutes() {
         }
 
         get("/api/fees/balance/{userId}") {
-            // Placeholder for now
-            call.respond(mapOf("balance" to 1200.0, "paid" to 800.0, "total" to 2000.0))
+            val userId = call.parameters["userId"] ?: ""
+            val balance = transaction {
+                val studentRow = StudentFeeBalances.select { StudentFeeBalances.studentId eq userId }.singleOrNull()
+                if (studentRow != null) {
+                    FeeBalanceApi(
+                        balance = (studentRow[StudentFeeBalances.amountDue] - studentRow[StudentFeeBalances.amountPaid]).toDouble(),
+                        paid = studentRow[StudentFeeBalances.amountPaid].toDouble(),
+                        total = studentRow[StudentFeeBalances.amountDue].toDouble()
+                    )
+                } else FeeBalanceApi(0.0, 0.0, 0.0)
+            }
+            call.respond(balance)
+        }
+
+        post("/student/fees/pay") {
+            val request = call.receive<PayFeesRequest>()
+            val success = transaction {
+                val userRow = Users.select { Users.userId eq request.userId }.singleOrNull() ?: return@transaction false
+                StudentFeeTransactions.insert {
+                    it[studentId] = userRow[Users.id]
+                    it[amount] = request.amount.toFloat()
+                    it[description] = request.description
+                    it[academicYear] = request.academicYear
+                    it[semester] = request.semester
+                    it[timestamp] = LocalDateTime.now().toKotlinLocalDateTime()
+                    it[isApproved] = false
+                }.insertedCount > 0
+            }
+            if (success) call.respond(HttpStatusCode.OK) else call.respond(HttpStatusCode.InternalServerError)
         }
 
         get("/api/student/results/{userId}") {

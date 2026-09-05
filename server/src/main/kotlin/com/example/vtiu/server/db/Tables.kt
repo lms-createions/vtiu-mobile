@@ -195,7 +195,7 @@ object StudentFeeTransactions : Table("student_fee_transaction") {
 object StudentFeeBalances : Table("student_fee_balance") {
     val id = integer("id").autoIncrement()
     val studentId = varchar("student_id", 20).references(Users.userId)
-    val feeStructureId = integer("fee_structure_id")
+    val feeStructureId = integer("fee_structure_id").references(ProgrammeFeeStructures.id)
     val programmeName = varchar("programme_name", 120)
     val programmeLevel = varchar("programme_level", 20)
     val studyFormat = varchar("study_format", 50).default("Regular")
@@ -207,6 +207,21 @@ object StudentFeeBalances : Table("student_fee_balance") {
     val paidOn = datetime("paid_on").nullable()
     val createdAt = datetime("created_at")
     val updatedAt = datetime("updated_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object ProgrammeFeeStructures : Table("programme_fee_structure") {
+    val id = integer("id").autoIncrement()
+    val programmeName = varchar("programme_name", 120)
+    val programmeLevel = varchar("programme_level", 20)
+    val studyFormat = varchar("study_format", 50)
+    val academicYear = varchar("academic_year", 20)
+    val semester = varchar("semester", 10)
+    val description = varchar("description", 255).default("Default")
+    val amount = float("amount").default(0.0f)
+    val items = text("items").default("[]") // JSON string
+    val createdAt = datetime("created_at")
 
     override val primaryKey = PrimaryKey(id)
 }

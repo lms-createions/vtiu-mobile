@@ -330,6 +330,13 @@ data class FeeTransactionApi(
 )
 
 @Serializable
+data class FeeBalanceApi(
+    val balance: Double,
+    val paid: Double,
+    val total: Double
+)
+
+@Serializable
 data class AppointmentSlotApi(
     val id: Int,
     @SerialName("teacher_name") val teacherName: String,
