@@ -30,7 +30,12 @@ class LmsRepository @Inject constructor(
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }
-            response.body()
+            if (response.status == HttpStatusCode.OK || response.status == HttpStatusCode.Unauthorized) {
+                response.body()
+            } else {
+                val errorBody = response.bodyAsText()
+                LoginResponse(success = false, message = "Server Error (${response.status}): $errorBody")
+            }
         } catch (e: Exception) {
             LoginResponse(success = false, message = e.message ?: "Network error")
         }

@@ -16,37 +16,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 fun Route.authRoutes() {
     route("/api") {
         post("/login") {
-            val request = call.receive<LoginRequest>()
-            
-            val user = transaction {
-                // Check if user exists with provided userId and role
-                val query = Users.select { 
-                    (Users.userId eq request.userId) and (Users.role eq request.role) 
-                }
-                
-                val userRow = query.singleOrNull()
-                if (userRow != null) {
-                    // In a real app, verify the hashed password
-                    // For now, we compare hashed passwords as strings
-                    // Flask uses pbkdf2:sha256
-                    val passwordHash = userRow[Users.passwordHash]
-                    
-                    // Simple check for testing
-                    UserData(
-                        id = userRow[Users.id],
-                        userId = userRow[Users.userId],
-                        name = "${userRow[Users.firstName]} ${userRow[Users.lastName]}",
-                        role = userRow[Users.role],
-                        profilePictureUrl = userRow[Users.profilePicture]
-                    )
-                } else null
-            }
-
-            if (user != null) {
-                call.respond(LoginResponse(success = true, user = user))
-            } else {
-                call.respond(HttpStatusCode.Unauthorized, LoginResponse(success = false, message = "Invalid credentials"))
-            }
+            call.respond(mapOf("message" to "Reached login route"))
         }
 
         get("/profile/{role}/{userId}") {
