@@ -110,3 +110,45 @@ data class VClassAssignmentApi(
     @SerialName("max_score") val maxScore: Float,
     val status: String = "Pending"
 )
+
+@Serializable
+data class VClassMeetingApi(
+    val id: Int,
+    val title: String,
+    val description: String?,
+    @SerialName("course_name") val courseName: String,
+    @SerialName("scheduled_start") val scheduledStart: String,
+    @SerialName("scheduled_end") val scheduledEnd: String,
+    @SerialName("join_url") val joinUrl: String?,
+    @SerialName("meeting_code") val meetingCode: String,
+    val status: String = "Upcoming"
+)
+
+@Serializable
+data class QuizDetailApi(
+    val id: Int,
+    val title: String,
+    @SerialName("course_name") val courseName: String,
+    @SerialName("duration_minutes") val durationMinutes: Int,
+    @SerialName("max_score") val maxScore: Float,
+    @SerialName("start_datetime") val startDatetime: String,
+    @SerialName("end_datetime") val endDatetime: String,
+    @SerialName("attempts_allowed") val attemptsAllowed: Int,
+    val questions: List<QuizQuestionApi> = emptyList()
+)
+
+@Serializable
+data class QuizQuestionApi(
+    val id: Int,
+    @SerialName("text") val questionText: String,
+    @SerialName("type") val questionType: String,
+    val points: Float,
+    val options: List<QuizOptionApi> = emptyList()
+)
+
+@Serializable
+data class QuizOptionApi(
+    val id: Int,
+    val text: String,
+    @SerialName("is_correct") val isCorrect: Boolean = false
+)

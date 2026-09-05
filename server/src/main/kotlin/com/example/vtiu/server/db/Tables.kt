@@ -280,3 +280,63 @@ object StudentCourseGrades : Table("student_course_grade") {
 
     override val primaryKey = PrimaryKey(id)
 }
+
+object Meetings : Table("meetings") {
+    val id = integer("id").autoIncrement()
+    val title = varchar("title", 200)
+    val description = text("description").nullable()
+    val hostId = integer("host_id").references(Users.id)
+    val meetingCode = varchar("meeting_code", 80).uniqueIndex()
+    val courseId = integer("course_id").references(Courses.id)
+    val scheduledStart = datetime("scheduled_start").nullable()
+    val scheduledEnd = datetime("scheduled_end").nullable()
+    val joinUrl = varchar("join_url", 500).nullable()
+    val startUrl = varchar("start_url", 500).nullable()
+    val createdAt = datetime("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object Questions : Table("question") {
+    val id = integer("id").autoIncrement()
+    val quizId = integer("quiz_id").references(Quizzes.id)
+    val text = text("text")
+    val points = float("points").default(1.0f)
+    val questionType = varchar("question_type", 50).default("mcq")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object Options : Table("options") {
+    val id = integer("id").autoIncrement()
+    val questionId = integer("question_id").references(Questions.id)
+    val text = varchar("text", 1000)
+    val isCorrect = bool("is_correct").default(false)
+    val createdAt = datetime("created_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object StudentQuizSubmissions : Table("student_quiz_submissions") {
+    val id = integer("id").autoIncrement()
+    val studentId = integer("student_id").references(Users.id)
+    val quizId = integer("quiz_id").references(Quizzes.id)
+    val score = float("score").nullable()
+    val submittedAt = datetime("submitted_at")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object CourseMaterials : Table("course_material") {
+    val id = integer("id").autoIncrement()
+    val title = varchar("title", 120)
+    val programmeName = varchar("programme_name", 100)
+    val programmeLevel = varchar("programme_level", 50)
+    val courseName = varchar("course_name", 100)
+    val filename = varchar("filename", 200)
+    val originalName = varchar("original_name", 200)
+    val fileType = varchar("file_type", 20)
+    val uploadDate = datetime("upload_date")
+
+    override val primaryKey = PrimaryKey(id)
+}

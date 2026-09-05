@@ -50,7 +50,8 @@ object DatabaseFactory {
                 Courses, Assignments, Quizzes, Exams,
                 StudentFeeTransactions, StudentFeeBalances,
                 Notifications, AppointmentBookings, AppointmentSlots,
-                AcademicCalendar, TimetableEntries, StudentCourseGrades
+                AcademicCalendar, TimetableEntries, StudentCourseGrades,
+                Meetings, Questions, Options, StudentQuizSubmissions, CourseMaterials
             )
         }
     }
