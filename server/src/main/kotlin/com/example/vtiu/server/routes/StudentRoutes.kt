@@ -149,6 +149,99 @@ fun Route.studentRoutes() {
             call.respond(txns)
         }
 
+        get("/student/results/current/{userId}") {
+            val userId = call.parameters["userId"] ?: ""
+            val results = transaction {
+                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction null
+                val settings = SchoolSettings.selectAll().singleOrNull()
+                val currentYear = settings?.get(SchoolSettings.currentAcademicYear) ?: "2024/2025"
+                val currentSemester = settings?.get(SchoolSettings.currentSemester) ?: "First"
+
+                val release = SemesterResultReleases.select { 
+                    (SemesterResultReleases.academicYear eq currentYear) and (SemesterResultReleases.semester eq currentSemester) 
+                }.singleOrNull()
+
+                if (release == null || !release[SemesterResultReleases.isReleased]) return@transaction null
+
+                val grades = (StudentCourseGrades innerJoin Courses).select {
+                    (StudentCourseGrades.studentId eq userRow[Users.id]) and
+                    (StudentCourseGrades.academicYear eq currentYear) and
+                    (StudentCourseGrades.semester eq currentSemester)
+                }.map {
+                    TranscriptCourseApi(
+                        code = it[Courses.code],
+                        name = it[Courses.name],
+                        credits = it[Courses.creditHours],
+                        score = it[StudentCourseGrades.finalScore],
+                        grade = it[StudentCourseGrades.gradeLetter]
+                    )
+                }
+
+                SemesterResultApi(
+                    academicYear = currentYear,
+                    semester = currentSemester,
+                    isReleased = true,
+                    gpa = 4.0f, // Placeholder
+                    totalCredits = grades.sumOf { it.credits },
+                    results = grades
+                )
+            }
+            if (results != null) call.respond(results) else call.respond(HttpStatusCode.NoContent)
+        }
+
+        get("/student/results/semester/{academicYear}/{semester}/{userId}") {
+            val userId = call.parameters["userId"] ?: ""
+            val academicYear = call.parameters["academicYear"] ?: ""
+            val semester = call.parameters["semester"] ?: ""
+
+            val results = transaction {
+                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction null
+                val release = SemesterResultReleases.select { 
+                    (SemesterResultReleases.academicYear eq academicYear) and (SemesterResultReleases.semester eq semester) 
+                }.singleOrNull()
+
+                if (release == null || !release[SemesterResultReleases.isReleased]) return@transaction null
+
+                val grades = (StudentCourseGrades innerJoin Courses).select {
+                    (StudentCourseGrades.studentId eq userRow[Users.id]) and
+                    (StudentCourseGrades.academicYear eq academicYear) and
+                    (StudentCourseGrades.semester eq semester)
+                }.map {
+                    TranscriptCourseApi(
+                        code = it[Courses.code],
+                        name = it[Courses.name],
+                        credits = it[Courses.creditHours],
+                        score = it[StudentCourseGrades.finalScore],
+                        grade = it[StudentCourseGrades.gradeLetter]
+                    )
+                }
+
+                SemesterResultApi(
+                    academicYear = academicYear,
+                    semester = semester,
+                    isReleased = true,
+                    gpa = 4.0f, // Placeholder
+                    totalCredits = grades.sumOf { it.credits },
+                    results = grades
+                )
+            }
+            if (results != null) call.respond(results) else call.respond(HttpStatusCode.NotFound, "Results not found or not released")
+        }
+
+        get("/student/results/summary/{userId}") {
+            val userId = call.parameters["userId"] ?: ""
+            val summary = transaction {
+                val studentProfile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction null
+                AcademicSummaryApi(
+                    cumulativeGpa = 4.0f, // Placeholder
+                    totalCreditsEarned = 120, // Placeholder
+                    academicStatus = studentProfile[StudentProfiles.academicStatus],
+                    currentLevel = studentProfile[StudentProfiles.programmeLevel]
+                )
+            }
+            if (summary != null) call.respond(summary) else call.respond(HttpStatusCode.NotFound)
+        }
+
         get("/notifications/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val list = transaction {

@@ -408,3 +408,13 @@ object SemesterResultReleases : Table("semester_result_release") {
 
     override val primaryKey = PrimaryKey(id)
 }
+
+object SchoolSettings : Table("school_settings") {
+    val id = integer("id").autoIncrement()
+    val schoolName = varchar("school_name", 255)
+    val currentAcademicYear = varchar("current_academic_year", 20)
+    val currentSemester = varchar("current_semester", 20)
+    val updatedAt = datetime("updated_at")
+
+    override val primaryKey = PrimaryKey(id)
+}

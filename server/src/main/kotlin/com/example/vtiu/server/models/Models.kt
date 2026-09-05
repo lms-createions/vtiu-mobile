@@ -423,7 +423,28 @@ data class TranscriptCourseApi(
     val name: String,
     val credits: Int,
     val score: Float?,
-    val grade: String?
+    val grade: String?,
+    @SerialName("quiz_score") val quizScore: Float? = null,
+    @SerialName("assignment_score") val assignmentScore: Float? = null,
+    @SerialName("exam_score") val examScore: Float? = null
+)
+
+@Serializable
+data class SemesterResultApi(
+    @SerialName("academic_year") val academicYear: String,
+    val semester: String,
+    @SerialName("is_released") val isReleased: Boolean,
+    @SerialName("semester_gpa") val gpa: Float,
+    @SerialName("total_credits") val totalCredits: Int,
+    val results: List<TranscriptCourseApi>
+)
+
+@Serializable
+data class AcademicSummaryApi(
+    @SerialName("cumulative_gpa") val cumulativeGpa: Float,
+    @SerialName("total_credits_earned") val totalCreditsEarned: Int,
+    @SerialName("academic_status") val academicStatus: String,
+    @SerialName("current_level") val currentLevel: Int
 )
 
 @Serializable
