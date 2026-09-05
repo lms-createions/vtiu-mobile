@@ -111,6 +111,165 @@ data class VClassAssignmentApi(
     val status: String = "Pending"
 )
 
+// Teacher Request/Response Models
+@Serializable
+data class MarkAttendanceRequest(
+    @SerialName("student_id") val studentId: String,
+    @SerialName("course_id") val courseId: Int,
+    val date: String,
+    @SerialName("is_present") val isPresent: Boolean
+)
+
+@Serializable
+data class AttendanceRecordApi(
+    val id: Int,
+    @SerialName("student_name") val studentName: String,
+    @SerialName("student_id") val studentId: String,
+    val date: String,
+    @SerialName("is_present") val isPresent: Boolean
+)
+
+@Serializable
+data class AttendanceAnalyticsApi(
+    @SerialName("student_name") val studentName: String,
+    @SerialName("total_classes") val totalClasses: Int,
+    @SerialName("attended_count") val attendedCount: Int,
+    @SerialName("attendance_percentage") val attendancePercentage: Float
+)
+
+@Serializable
+data class GradeSubmissionRequest(
+    @SerialName("submission_id") val submissionId: Int,
+    val score: Float,
+    val feedback: String? = null
+)
+
+@Serializable
+data class AssignmentSubmissionApi(
+    val id: Int,
+    @SerialName("student_name") val studentName: String,
+    @SerialName("student_id") val studentId: String,
+    @SerialName("assignment_title") val assignmentTitle: String,
+    @SerialName("submitted_at") val submittedAt: String,
+    val filename: String,
+    val score: Float? = null,
+    val feedback: String? = null
+)
+
+@Serializable
+data class TeacherSlotApi(
+    val id: Int,
+    val date: String,
+    @SerialName("start_time") val startTime: String,
+    @SerialName("end_time") val endTime: String,
+    @SerialName("is_booked") val isBooked: Boolean
+)
+
+@Serializable
+data class TeacherBookingApi(
+    val id: Int,
+    @SerialName("student_name") val studentName: String,
+    val date: String,
+    @SerialName("start_time") val startTime: String,
+    @SerialName("end_time") val endTime: String,
+    val status: String,
+    val note: String?
+)
+
+@Serializable
+data class QuizSubmissionApi(
+    val id: Int,
+    @SerialName("student_name") val studentName: String,
+    @SerialName("quiz_title") val quizTitle: String,
+    val score: Float?,
+    @SerialName("submitted_at") val submittedAt: String
+)
+
+@Serializable
+data class ExamSubmissionApi(
+    val id: Int,
+    @SerialName("student_name") val studentName: String,
+    @SerialName("exam_title") val examTitle: String,
+    val score: Float?,
+    @SerialName("submitted_at") val submittedAt: String
+)
+
+@Serializable
+data class CourseAssessmentSchemeApi(
+    val id: Int,
+    @SerialName("course_id") val courseId: Int,
+    @SerialName("course_name") val courseName: String,
+    @SerialName("quiz_weight") val quizWeight: Float,
+    @SerialName("assignment_weight") val assignmentWeight: Float,
+    @SerialName("exam_weight") val examWeight: Float
+)
+
+@Serializable
+data class CreateMeetingRequest(
+    val title: String,
+    val description: String?,
+    @SerialName("course_id") val courseId: Int,
+    @SerialName("scheduled_start") val scheduledStart: String,
+    @SerialName("scheduled_end") val scheduledEnd: String
+)
+
+@Serializable
+data class QuizCreateRequest(
+    val title: String,
+    @SerialName("course_id") val courseId: Int,
+    @SerialName("programme_name") val programmeName: String,
+    @SerialName("programme_level") val programmeLevel: String,
+    @SerialName("start_datetime") val startDatetime: String,
+    @SerialName("end_datetime") val endDatetime: String,
+    @SerialName("duration_minutes") val durationMinutes: Int,
+    val questions: List<QuizQuestionCreateRequest>
+)
+
+@Serializable
+data class QuizQuestionCreateRequest(
+    val text: String,
+    val type: String,
+    val points: Float,
+    val options: List<QuizOptionCreateRequest>
+)
+
+@Serializable
+data class QuizOptionCreateRequest(
+    val text: String,
+    @SerialName("is_correct") val isCorrect: Boolean
+)
+
+@Serializable
+data class ExamCreateRequest(
+    val title: String,
+    @SerialName("course_id") val courseId: Int,
+    @SerialName("programme_name") val programmeName: String,
+    @SerialName("programme_level") val programmeLevel: String,
+    @SerialName("start_datetime") val startDatetime: String,
+    @SerialName("end_datetime") val endDatetime: String,
+    @SerialName("duration_minutes") val durationMinutes: Int,
+    @SerialName("assignment_mode") val assignmentMode: String = "random"
+)
+
+@Serializable
+data class ClassPerformanceApi(
+    @SerialName("student_name") val studentName: String,
+    @SerialName("quiz_avg") val quizAvg: Float,
+    @SerialName("assignment_avg") val assignmentAvg: Float,
+    @SerialName("exam_score") val examScore: Float?,
+    @SerialName("final_grade") val finalGrade: String?
+)
+
+@Serializable
+data class UploadMaterialRequest(
+    val title: String,
+    @SerialName("programme_name") val programmeName: String,
+    @SerialName("programme_level") val programmeLevel: String,
+    @SerialName("course_name") val courseName: String,
+    val filename: String,
+    @SerialName("file_type") val fileType: String
+)
+
 @Serializable
 data class VClassMeetingApi(
     val id: Int,

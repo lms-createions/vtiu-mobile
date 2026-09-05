@@ -281,6 +281,62 @@ object StudentCourseGrades : Table("student_course_grade") {
     override val primaryKey = PrimaryKey(id)
 }
 
+object TeacherCourseAssignments : Table("teacher_course_assignment") {
+    val id = integer("id").autoIncrement()
+    val teacherId = integer("teacher_id").references(TeacherProfiles.id)
+    val courseId = integer("course_id").references(Courses.id)
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object StudentCourseRegistrations : Table("student_course_registration") {
+    val id = integer("id").autoIncrement()
+    val studentId = integer("student_id").references(Users.id)
+    val courseId = integer("course_id").references(Courses.id)
+    val academicYear = varchar("academic_year", 20)
+    val semester = varchar("semester", 10)
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object AttendanceRecords : Table("attendance_record") {
+    val id = integer("id").autoIncrement()
+    val studentId = varchar("student_id", 20).references(Users.userId)
+    val teacherId = integer("teacher_id").references(TeacherProfiles.id)
+    val courseId = integer("course_id").references(Courses.id).nullable()
+    val date = varchar("date", 50)
+    val isPresent = bool("is_present").default(false)
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object CourseAssessmentSchemes : Table("course_assessment_scheme") {
+    val id = integer("id").autoIncrement()
+    val courseId = integer("course_id").references(Courses.id)
+    val teacherId = integer("teacher_id").references(TeacherProfiles.id)
+    val quizWeight = float("quiz_weight").default(10.0f)
+    val assignmentWeight = float("assignment_weight").default(30.0f)
+    val examWeight = float("exam_weight").default(60.0f)
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object AssignmentSubmissions : Table("assignment_submissions") {
+    val id = integer("id").autoIncrement()
+    val assignmentId = integer("assignment_id").references(Assignments.id)
+    val studentId = integer("student_id").references(Users.id)
+    val filename = varchar("filename", 255)
+    val originalName = varchar("original_name", 255)
+    val submittedAt = datetime("submitted_at")
+    val score = float("score").nullable()
+    val feedback = text("feedback").nullable()
+    val scoredAt = datetime("scored_at").nullable()
+    val gradeLetter = varchar("grade_letter", 5).nullable()
+    val passFail = varchar("pass_fail", 10).nullable()
+
+    override val primaryKey = PrimaryKey(id)
+}
+
 object Meetings : Table("meetings") {
     val id = integer("id").autoIncrement()
     val title = varchar("title", 200)
