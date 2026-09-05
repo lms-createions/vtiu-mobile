@@ -15,11 +15,40 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Route.authRoutes() {
     route("/api") {
-        get("/test") {
-            call.respond(mapOf("status" to "OK", "message" to "API is working"))
-        }
         post("/login") {
-            call.respond(mapOf("message" to "Reached login route"))
+            try {
+                val request = call.receive<LoginRequest>()
+                
+                val user = transaction {
+                    // Check if user exists with provided userId and role
+                    val query = Users.select { 
+                        (Users.userId eq request.userId) and (Users.role eq request.role) 
+                    }
+                    
+                    val userRow = query.singleOrNull()
+                    if (userRow != null) {
+                        // verify password
+                        val passwordHash = userRow[Users.passwordHash]
+                        // Note: For now simple check, in production use BCrypt or similar
+                        
+                        UserData(
+                            id = userRow[Users.id],
+                            userId = userRow[Users.userId],
+                            name = "${userRow[Users.firstName]} ${userRow[Users.lastName]}",
+                            role = userRow[Users.role],
+                            profilePictureUrl = userRow[Users.profilePicture]
+                        )
+                    } else null
+                }
+
+                if (user != null) {
+                    call.respond(LoginResponse(success = true, user = user))
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized, LoginResponse(success = false, message = "Invalid credentials"))
+                }
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, LoginResponse(success = false, message = "Bad Request: ${e.message}"))
+            }
         }
 
         get("/profile/{role}/{userId}") {
