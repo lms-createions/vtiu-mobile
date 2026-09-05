@@ -271,6 +271,94 @@ data class UploadMaterialRequest(
 )
 
 @Serializable
+data class CourseRegistrationApi(
+    val id: Int,
+    val name: String,
+    val code: String,
+    val credits: Int,
+    @SerialName("is_mandatory") val isMandatory: Boolean,
+    val semester: String,
+    @SerialName("academic_year") val academicYear: String
+)
+
+@Serializable
+data class RegisterCoursesRequest(
+    @SerialName("user_id") val userId: String,
+    @SerialName("course_ids") val courseIds: List<Int>,
+    val semester: String,
+    @SerialName("academic_year") val academicYear: String
+)
+
+@Serializable
+data class StudentAssessmentApi(
+    val type: String, // Quiz, Assignment, Exam
+    val course: String,
+    val title: String,
+    @SerialName("raw_score") val rawScore: Float,
+    @SerialName("max_score") val maxScore: Float,
+    val date: String,
+    val feedback: String? = null
+)
+
+@Serializable
+data class TimetableEntryApi(
+    val id: Int,
+    @SerialName("course_name") val courseName: String,
+    @SerialName("day_of_week") val dayOfWeek: String,
+    @SerialName("start_time") val startTime: String,
+    @SerialName("end_time") val endTime: String
+)
+
+@Serializable
+data class PayFeesRequest(
+    @SerialName("user_id") val userId: String,
+    val amount: Double,
+    val description: String,
+    val semester: String,
+    @SerialName("academic_year") val academicYear: String
+)
+
+@Serializable
+data class FeeTransactionApi(
+    val id: Int,
+    val amount: Double,
+    val description: String,
+    val date: String,
+    val status: String, // Approved, Pending
+    @SerialName("academic_year") val academicYear: String,
+    val semester: String
+)
+
+@Serializable
+data class AppointmentSlotApi(
+    val id: Int,
+    @SerialName("teacher_name") val teacherName: String,
+    val date: String,
+    @SerialName("start_time") val startTime: String,
+    @SerialName("end_time") val endTime: String
+)
+
+@Serializable
+data class AppointmentBookingApi(
+    val id: Int,
+    @SerialName("teacher_name") val teacherName: String,
+    val title: String,
+    val date: String,
+    @SerialName("start_time") val startTime: String,
+    @SerialName("end_time") val endTime: String,
+    val status: String
+)
+
+@Serializable
+data class NotificationApi(
+    val id: Int,
+    val title: String,
+    val message: String,
+    val date: String,
+    @SerialName("is_read") val isRead: Boolean
+)
+
+@Serializable
 data class VClassMeetingApi(
     val id: Int,
     val title: String,
