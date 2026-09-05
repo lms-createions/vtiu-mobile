@@ -15,6 +15,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Route.authRoutes() {
     route("/api") {
+        get("/test") {
+            call.respond(mapOf("status" to "OK", "message" to "API is working"))
+        }
         post("/login") {
             call.respond(mapOf("message" to "Reached login route"))
         }
