@@ -311,3 +311,37 @@ data class QuizOptionApi(
     val text: String,
     @SerialName("is_correct") val isCorrect: Boolean = false
 )
+
+@Serializable
+data class TranscriptApi(
+    @SerialName("student_id") val studentId: String,
+    @SerialName("student_name") val studentName: String,
+    @SerialName("academic_year") val academicYear: String? = null,
+    val semester: String? = null,
+    @SerialName("is_released") val isReleased: Boolean = true,
+    val gpa: Float,
+    @SerialName("weighted_gpa") val weightedGpa: Float? = null,
+    @SerialName("cumulative_gpa") val cumulativeGpa: Float? = null,
+    @SerialName("total_credits") val totalCredits: Int,
+    @SerialName("total_credits_attempted") val totalCreditsAttempted: Int? = null,
+    @SerialName("total_credits_earned") val totalCreditsEarned: Int? = null,
+    val courses: List<TranscriptCourseApi> = emptyList(),
+    val semesters: List<TranscriptSemesterApi> = emptyList()
+)
+
+@Serializable
+data class TranscriptCourseApi(
+    val code: String,
+    val name: String,
+    val credits: Int,
+    val score: Float?,
+    val grade: String?
+)
+
+@Serializable
+data class TranscriptSemesterApi(
+    @SerialName("academic_year") val academicYear: String,
+    val semester: String,
+    val gpa: Float,
+    val courses: List<TranscriptCourseApi>
+)

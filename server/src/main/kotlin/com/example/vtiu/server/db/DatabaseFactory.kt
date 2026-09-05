@@ -53,7 +53,7 @@ object DatabaseFactory {
                 AcademicCalendar, TimetableEntries, StudentCourseGrades,
                 Meetings, Questions, Options, StudentQuizSubmissions, CourseMaterials,
                 TeacherCourseAssignments, StudentCourseRegistrations, AttendanceRecords,
-                CourseAssessmentSchemes, AssignmentSubmissions
+                CourseAssessmentSchemes, AssignmentSubmissions, SemesterResultReleases
             )
         }
     }

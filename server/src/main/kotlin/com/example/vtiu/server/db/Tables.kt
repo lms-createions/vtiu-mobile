@@ -60,7 +60,7 @@ object Users : Table("user") {
 object StudentProfiles : Table("student_profile") {
     val id = integer("id").autoIncrement()
     val userId = varchar("user_id", 20).references(Users.userId).uniqueIndex().nullable()
-    val dob = varchar("dob", 50).nullable() // Stored as String for ease, adjust to date if needed
+    val dob = varchar("dob", 50).nullable()
     val gender = varchar("gender", 10).nullable()
     val nationality = varchar("nationality", 50).nullable()
     val religion = varchar("religion", 50).nullable()
@@ -195,7 +195,7 @@ object StudentFeeTransactions : Table("student_fee_transaction") {
 object StudentFeeBalances : Table("student_fee_balance") {
     val id = integer("id").autoIncrement()
     val studentId = varchar("student_id", 20).references(Users.userId)
-    val feeStructureId = integer("fee_structure_id") // Should reference programme_fee_structure
+    val feeStructureId = integer("fee_structure_id")
     val programmeName = varchar("programme_name", 120)
     val programmeLevel = varchar("programme_level", 20)
     val studyFormat = varchar("study_format", 50).default("Regular")
@@ -393,6 +393,18 @@ object CourseMaterials : Table("course_material") {
     val originalName = varchar("original_name", 200)
     val fileType = varchar("file_type", 20)
     val uploadDate = datetime("upload_date")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object SemesterResultReleases : Table("semester_result_release") {
+    val id = integer("id").autoIncrement()
+    val academicYear = varchar("academic_year", 20)
+    val semester = varchar("semester", 10)
+    val isReleased = bool("is_released").default(false)
+    val isLocked = bool("is_locked").default(false)
+    val releasedAt = datetime("released_at").nullable()
+    val lockedAt = datetime("locked_at").nullable()
 
     override val primaryKey = PrimaryKey(id)
 }
