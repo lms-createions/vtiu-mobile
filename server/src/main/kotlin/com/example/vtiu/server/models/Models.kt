@@ -408,6 +408,16 @@ data class QuizOptionApi(
 )
 
 @Serializable
+data class StudentResultApi(
+    val id: Int,
+    @SerialName("course_name") val courseName: String,
+    @SerialName("course_code") val courseCode: String,
+    val grade: String,
+    val credits: Int,
+    val score: Float
+)
+
+@Serializable
 data class TranscriptApi(
     @SerialName("student_id") val studentId: String,
     @SerialName("student_name") val studentName: String,

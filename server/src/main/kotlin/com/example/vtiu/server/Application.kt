@@ -41,5 +41,6 @@ fun Application.module() {
         teacherRoutes()
         vClassRoutes()
         financeRoutes()
+        appointmentRoutes()
     }
 }
