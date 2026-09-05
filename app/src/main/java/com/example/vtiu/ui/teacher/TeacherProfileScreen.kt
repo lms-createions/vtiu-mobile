@@ -83,9 +83,9 @@ fun TeacherProfileScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         if (!teacher.profilePictureUrl.isNullOrBlank()) {
-                            val baseUrl = "https://vtiu-mobile-production.up.railway.app"
+                            val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
                             coil.compose.AsyncImage(
-                                model = "$baseUrl${teacher.profilePictureUrl}",
+                                model = "$staticUrl${teacher.profilePictureUrl}",
                                 contentDescription = "Profile Picture",
                                 modifier = Modifier
                                     .size(100.dp)

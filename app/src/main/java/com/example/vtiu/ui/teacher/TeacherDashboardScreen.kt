@@ -166,7 +166,7 @@ fun TeacherDashboardScreen(
 
 @Composable
 fun TeacherDashboardHeader(name: String, dept: String, profilePicUrl: String?, onLogoutClick: () -> Unit) {
-    val baseUrl = "https://vtiu-mobile-production.up.railway.app"
+    val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
     Surface(
         color = TeacherPrimary,
         modifier = Modifier.fillMaxWidth()
@@ -180,7 +180,7 @@ fun TeacherDashboardHeader(name: String, dept: String, profilePicUrl: String?, o
         ) {
             if (!profilePicUrl.isNullOrBlank()) {
                 coil.compose.AsyncImage(
-                    model = "$baseUrl$profilePicUrl",
+                    model = "$staticUrl$profilePicUrl",
                     contentDescription = "Profile Picture",
                     modifier = Modifier
                         .size(32.dp)

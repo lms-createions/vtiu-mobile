@@ -27,16 +27,20 @@ fun Route.authRoutes() {
                     
                     val userRow = query.singleOrNull()
                     if (userRow != null) {
-                        // verify password
-                        val passwordHash = userRow[Users.passwordHash]
-                        // Note: For now simple check, in production use BCrypt or similar
+                        val rawProfilePic = userRow[Users.profilePicture]
+                        val profilePicPath = if (rawProfilePic.isNullOrBlank() || rawProfilePic == "default.png") {
+                            "/static/uploads/profile_pictures/default_avatar.png"
+                        } else {
+                            if (rawProfilePic.startsWith("/static")) rawProfilePic 
+                            else "/static/uploads/profile_pictures/${rawProfilePic.substringAfterLast("/")}"
+                        }
                         
                         UserData(
                             id = userRow[Users.id],
                             userId = userRow[Users.userId],
                             name = "${userRow[Users.firstName]} ${userRow[Users.lastName]}",
                             role = userRow[Users.role],
-                            profilePictureUrl = userRow[Users.profilePicture]
+                            profilePictureUrl = profilePicPath
                         )
                     } else null
                 }
@@ -58,6 +62,14 @@ fun Route.authRoutes() {
             val profile = transaction {
                 val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction null
                 
+                val rawProfilePic = userRow[Users.profilePicture]
+                val profilePicPath = if (rawProfilePic.isNullOrBlank() || rawProfilePic == "default.png") {
+                    "/static/uploads/profile_pictures/default_avatar.png"
+                } else {
+                    if (rawProfilePic.startsWith("/static")) rawProfilePic 
+                    else "/static/uploads/profile_pictures/${rawProfilePic.substringAfterLast("/")}"
+                }
+
                 val profileData = when (role) {
                     "student" -> {
                         val studentRow = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull()
@@ -71,7 +83,7 @@ fun Route.authRoutes() {
                             level = studentRow?.get(StudentProfiles.programmeLevel),
                             indexNumber = studentRow?.get(StudentProfiles.indexNumber),
                             academicStatus = studentRow?.get(StudentProfiles.academicStatus),
-                            profilePictureUrl = userRow[Users.profilePicture]
+                            profilePictureUrl = profilePicPath
                         )
                     }
                     "teacher" -> {
@@ -85,7 +97,7 @@ fun Route.authRoutes() {
                             employeeId = teacherRow?.get(TeacherProfiles.employeeId),
                             department = teacherRow?.get(TeacherProfiles.department),
                             officeLocation = teacherRow?.get(TeacherProfiles.officeLocation),
-                            profilePictureUrl = userRow[Users.profilePicture]
+                            profilePictureUrl = profilePicPath
                         )
                     }
                     else -> null

@@ -117,7 +117,7 @@ fun DashboardScreen(
 
 @Composable
 fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick: () -> Unit) {
-    val baseUrl = "https://vtiu-mobile-production.up.railway.app"
+    val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,7 +128,7 @@ fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick:
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (!profilePicUrl.isNullOrBlank()) {
                 coil.compose.AsyncImage(
-                    model = "$baseUrl$profilePicUrl",
+                    model = "$staticUrl$profilePicUrl",
                     contentDescription = "Profile Picture",
                     modifier = Modifier
                         .size(48.dp)

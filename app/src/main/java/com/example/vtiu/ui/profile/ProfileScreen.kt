@@ -86,9 +86,9 @@ fun ProfileScreen(
                     ) {
                         // Circular Profile Placeholder
                         if (!profile.profilePictureUrl.isNullOrBlank()) {
-                            val baseUrl = "https://vtiu-mobile-production.up.railway.app"
+                            val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
                             coil.compose.AsyncImage(
-                                model = "$baseUrl${profile.profilePictureUrl}",
+                                model = "$staticUrl${profile.profilePictureUrl}",
                                 contentDescription = "Profile Picture",
                                 modifier = Modifier
                                     .size(100.dp)
