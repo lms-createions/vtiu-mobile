@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.logback.classic)
 
     // Database
     implementation(libs.exposed.core)
