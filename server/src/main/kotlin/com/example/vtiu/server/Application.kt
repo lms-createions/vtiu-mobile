@@ -45,7 +45,7 @@ fun Application.module() {
 
     routing {
         get("/") {
-            call.respondText("VTIU Server is running!")
+            call.respondText("VTIU Server version 2.0 (Debugging 400)")
         }
         
         get("/health") {
