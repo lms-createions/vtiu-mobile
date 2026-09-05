@@ -8,7 +8,9 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.plugins.cors.routing.*
+import io.ktor.http.HttpHeaders
 import com.example.vtiu.server.db.DatabaseFactory
+import com.example.vtiu.server.routes.*
 
 fun main() {
     DatabaseFactory.init()
@@ -22,6 +24,7 @@ fun Application.module() {
     }
     install(CORS) {
         anyHost()
+        allowHeader(HttpHeaders.ContentType)
     }
 
     routing {
@@ -33,11 +36,9 @@ fun Application.module() {
             call.respond(mapOf("status" to "UP"))
         }
 
-        // Add your LMS API routes here
-        route("/api") {
-            get("/test") {
-                call.respond(mapOf("message" to "API is working"))
-            }
-        }
+        authRoutes()
+        studentRoutes()
+        teacherRoutes()
+        vClassRoutes()
     }
 }
