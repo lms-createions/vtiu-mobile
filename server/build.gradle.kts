@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinjvm)
+    alias(libs.plugins.kotlin.serialization)
     application
 }
 
