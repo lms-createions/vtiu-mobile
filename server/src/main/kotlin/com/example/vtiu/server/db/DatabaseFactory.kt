@@ -45,7 +45,13 @@ object DatabaseFactory {
         Database.connect(dataSource)
         
         transaction {
-            SchemaUtils.create(Users, Courses, Fees, Notifications, Appointments)
+            SchemaUtils.create(
+                Admins, Users, StudentProfiles, TeacherProfiles,
+                Courses, Assignments, Quizzes, Exams,
+                StudentFeeTransactions, StudentFeeBalances,
+                Notifications, AppointmentBookings, AppointmentSlots,
+                AcademicCalendar, TimetableEntries, StudentCourseGrades
+            )
         }
     }
 }
