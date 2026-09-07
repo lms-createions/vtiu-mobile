@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,6 +41,7 @@ import java.util.*
 @Composable
 fun AcademicCalendarScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     viewModel: TeacherViewModel = hiltViewModel()
 ) {
     var calendar by remember { mutableStateOf(Calendar.getInstance()) }
@@ -87,18 +89,21 @@ fun AcademicCalendarScreen(
                     )
                 }
                 
-                IconButton(onClick = { 
-                    calendar = Calendar.getInstance()
-                    selectedDate = Calendar.getInstance()
-                }) {
-                    Icon(Icons.Default.CalendarToday, contentDescription = "Today", tint = SchoolPrimary)
+                Row {
+                    IconButton(onClick = { 
+                        calendar = Calendar.getInstance()
+                        selectedDate = Calendar.getInstance()
+                    }) {
+                        Icon(Icons.Default.CalendarToday, contentDescription = "Today", tint = SchoolPrimary)
+                    }
+                    IconButton(onClick = onMenuClick) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                    }
                 }
             }
 
-            // Legend
             CalendarLegend()
 
-            // Calendar Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -109,7 +114,6 @@ fun AcademicCalendarScreen(
                 border = BorderStroke(1.dp, Color(0xFFF1F5F9))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // Month Selector
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -147,7 +151,6 @@ fun AcademicCalendarScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Days of Week
                     val daysOfWeek = listOf("S", "M", "T", "W", "T", "F", "S")
                     Row(modifier = Modifier.fillMaxWidth()) {
                         daysOfWeek.forEach { day ->
@@ -164,14 +167,12 @@ fun AcademicCalendarScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Calendar Grid
                     CalendarGrid(
                         calendar = calendar,
                         selectedDate = selectedDate,
                         events = eventsApi.map { AcademicEvent(it.id, it.title, it.date, it.type, it.isWorkday, "") },
                         onDateSelected = { newDate ->
                             selectedDate = newDate
-                            // If the selected date is in a different month than currently displayed, switch the view
                             if (newDate.get(Calendar.MONTH) != calendar.get(Calendar.MONTH) || 
                                 newDate.get(Calendar.YEAR) != calendar.get(Calendar.YEAR)) {
                                 val newCal = newDate.clone() as Calendar
@@ -183,7 +184,6 @@ fun AcademicCalendarScreen(
                 }
             }
 
-            // Events List Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -213,7 +213,6 @@ fun AcademicCalendarScreen(
                 }
             }
 
-            // Events List
             if (dayEvents.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize().padding(bottom = 60.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -306,7 +305,6 @@ fun CalendarGrid(
         modifier = Modifier.height(260.dp),
         userScrollEnabled = false
     ) {
-        // Previous Month Padding
         items((0 until firstDayOfWeek).toList()) { i ->
             val day = daysInPrevMonth - firstDayOfWeek + i + 1
             val prevMonthDayCal = calendar.clone() as Calendar
@@ -323,7 +321,6 @@ fun CalendarGrid(
             )
         }
 
-        // Current Month Days
         items((1..daysInMonth).toList()) { day ->
             val currentDayCal = calendar.clone() as Calendar
             currentDayCal.set(Calendar.DAY_OF_MONTH, day)
@@ -342,7 +339,6 @@ fun CalendarGrid(
             )
         }
 
-        // Next Month Padding to fill the grid (usually 42 cells total for 6 rows)
         val totalCellsShown = firstDayOfWeek + daysInMonth
         val nextMonthPadding = 42 - totalCellsShown
         items((1..nextMonthPadding).toList()) { day ->
@@ -375,7 +371,7 @@ fun DayItem(
         modifier = Modifier
             .aspectRatio(1f)
             .padding(4.dp)
-            .clip(RoundedCornerShape(12.dp)) // Modern squared-round shape
+            .clip(RoundedCornerShape(12.dp))
             .background(
                 when {
                     isSelected -> SchoolPrimary
@@ -418,9 +414,9 @@ fun DayItem(
 @Composable
 fun AcademicEventCard(event: AcademicEvent) {
     val color = when (event.type) {
-        "Lecture" -> Color(0xFF10B981) // Modern Emerald
-        "Exam" -> Color(0xFFEF4444)    // Modern Red
-        "Holiday" -> Color(0xFFF59E0B) // Modern Amber
+        "Lecture" -> Color(0xFF10B981)
+        "Exam" -> Color(0xFFEF4444)
+        "Holiday" -> Color(0xFFF59E0B)
         else -> SchoolPrimary
     }
 
@@ -436,7 +432,6 @@ fun AcademicEventCard(event: AcademicEvent) {
             modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Type Icon
             Box(
                 modifier = Modifier
                     .size(48.dp)

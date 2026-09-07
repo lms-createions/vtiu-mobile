@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,6 +32,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 fun ResultsScreen(
     onBackClick: () -> Unit,
     onViewTranscriptClick: () -> Unit,
+    onMenuClick: () -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
 ) {
@@ -79,14 +81,19 @@ fun ResultsScreen(
                     )
                 }
                 
-                IconButton(onClick = {
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Generating Results PDF...")
-                        kotlinx.coroutines.delay(1500)
-                        snackbarHostState.showSnackbar("PDF Ready. Opening Print Service...")
+                Row {
+                    IconButton(onClick = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Generating Results PDF...")
+                            kotlinx.coroutines.delay(1500)
+                            snackbarHostState.showSnackbar("PDF Ready. Opening Print Service...")
+                        }
+                    }) {
+                        Icon(Icons.Default.Print, contentDescription = "Print", tint = Color.Black)
                     }
-                }) {
-                    Icon(Icons.Default.Print, contentDescription = "Print", tint = Color.Black)
+                    IconButton(onClick = onMenuClick) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                    }
                 }
             }
 
@@ -94,12 +101,10 @@ fun ResultsScreen(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp)
             ) {
-                // Header Info
                 item {
                     ResultsHeader(profileApi?.academicYear ?: "N/A", profileApi?.semester ?: "N/A")
                 }
 
-                // Summary Cards
                 item {
                     val mappedResults = resultsApi.map {
                         CourseResult(it.courseCode, it.courseName, it.score, it.grade, it.credits, it.gp, it.quizWeight, it.assignmentWeight, it.examWeight, it.remark)
@@ -134,7 +139,6 @@ fun ResultsScreen(
                     }
                 }
 
-                // Results List
                 items(resultsApi) { result ->
                     ResultCard(
                         CourseResult(
@@ -152,7 +156,6 @@ fun ResultsScreen(
                     )
                 }
 
-                // Footer Info
                 item {
                     InfoAlert()
                 }
@@ -338,12 +341,13 @@ fun InfoAlert() {
         color = Color(0xFFE3F2FD),
         shape = RoundedCornerShape(8.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF1976D2), modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFF1976D2), modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "About These Results", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color(0xFF1976D2))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Results are calculated according to each course's assessment scheme. Contact Academic Affairs for queries.",
                 fontSize = 12.sp,
