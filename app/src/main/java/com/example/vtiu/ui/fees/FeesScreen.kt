@@ -28,6 +28,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 @Composable
 fun FeesScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     onPayNowClick: () -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
@@ -69,21 +70,28 @@ fun FeesScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp, vertical = 0.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = "Back",
-                        tint = Color.Black
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "Fees & Payments",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
                 }
-                Text(
-                    text = "Fees & Payments",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
+                
+                IconButton(onClick = onMenuClick) {
+                    Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                }
             }
 
             LazyColumn(
@@ -109,7 +117,6 @@ fun FeesScreen(
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
                 }
-                // For now, if feeApi is available, show a generic assigned fee
                 item {
                     if (feeApi != null) {
                         AssignedFeeItem(AssignedFee("Total Semester Fees", "Academic", totalFee, "", ""))

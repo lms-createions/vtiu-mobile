@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +29,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 @Composable
 fun ExamListScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     onExamClick: (Int) -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
@@ -65,21 +67,28 @@ fun ExamListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp, vertical = 0.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = "Back",
-                        tint = Color.Black
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "Exams Portal",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
                 }
-                Text(
-                    text = "Exams Portal",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
+                
+                IconButton(onClick = onMenuClick) {
+                    Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                }
             }
 
             LazyColumn(
@@ -99,6 +108,8 @@ fun ExamListScreen(
                 items(exams) { exam ->
                     ExamCard(exam = exam, onClick = { onExamClick(exam.id) })
                 }
+                
+                item { Spacer(modifier = Modifier.height(32.dp)) }
             }
         }
     }

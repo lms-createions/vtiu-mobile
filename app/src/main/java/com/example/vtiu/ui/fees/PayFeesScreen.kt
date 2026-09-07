@@ -32,6 +32,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 @Composable
 fun PayFeesScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
 ) {
@@ -76,21 +77,28 @@ fun PayFeesScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp, vertical = 0.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = "Back",
-                        tint = Color.Black
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "Submit Payment",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
                 }
-                Text(
-                    text = "Submit Payment",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
+                
+                IconButton(onClick = onMenuClick) {
+                    Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                }
             }
 
             LazyColumn(
@@ -98,7 +106,6 @@ fun PayFeesScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 1. Session Filter
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -116,7 +123,6 @@ fun PayFeesScreen(
                     }
                 }
 
-                // 2. Summary
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -146,7 +152,6 @@ fun PayFeesScreen(
                     }
                 }
 
-                // 3. Level 100 Notice
                 item {
                     val noticeColor = if (studentLevel == 100) Color(0xFFFFF3E0) else Color(0xFFE3F2FD)
                     val iconColor = if (studentLevel == 100) Color(0xFFE65100) else Color(0xFF1976D2)
@@ -170,7 +175,6 @@ fun PayFeesScreen(
                     }
                 }
 
-                // 4. Payment Form
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -205,7 +209,6 @@ fun PayFeesScreen(
                                 shape = RoundedCornerShape(12.dp)
                             )
 
-                            // Proof Upload
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -256,6 +259,7 @@ fun PayFeesScreen(
                         }
                     }
                 }
+                item { Spacer(modifier = Modifier.height(32.dp)) }
             }
         }
     }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.VideoCall
 import androidx.compose.material.icons.filled.Videocam
@@ -38,6 +39,7 @@ import java.util.*
 @Composable
 fun VClassLiveScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     onJoinClick: (Int) -> Unit,
     onRecordingClick: (Int) -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
@@ -68,21 +70,28 @@ fun VClassLiveScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 4.dp, vertical = 0.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = onBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = "Back",
-                        tint = Color.Black
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "Live Classes",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
                 }
-                Text(
-                    text = "Live Classes",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
+                
+                IconButton(onClick = onMenuClick) {
+                    Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                }
             }
 
             LazyColumn(

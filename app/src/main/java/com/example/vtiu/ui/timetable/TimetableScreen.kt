@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,6 +27,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 @Composable
 fun TimetableScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
 ) {
@@ -74,8 +76,13 @@ fun TimetableScreen(
                     )
                 }
                 
-                IconButton(onClick = { /* Download handle */ }) {
-                    Icon(Icons.Default.Download, contentDescription = "Download PDF", tint = Color.Black)
+                Row {
+                    IconButton(onClick = { /* Download handle */ }) {
+                        Icon(Icons.Default.Download, contentDescription = "Download PDF", tint = Color.Black)
+                    }
+                    IconButton(onClick = onMenuClick) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                    }
                 }
             }
 

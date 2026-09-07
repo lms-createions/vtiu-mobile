@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
@@ -34,6 +35,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 @Composable
 fun AppointmentBookingScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     onViewMyAppointments: () -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
@@ -86,8 +88,13 @@ fun AppointmentBookingScreen(
                     )
                 }
                 
-                IconButton(onClick = onViewMyAppointments) {
-                    Icon(Icons.Default.History, contentDescription = "History", tint = Color.Black)
+                Row {
+                    IconButton(onClick = onViewMyAppointments) {
+                        Icon(Icons.Default.History, contentDescription = "History", tint = Color.Black)
+                    }
+                    IconButton(onClick = onMenuClick) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                    }
                 }
             }
 

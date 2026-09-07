@@ -31,6 +31,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 @Composable
 fun NotificationScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
 ) {
@@ -73,8 +74,13 @@ fun NotificationScreen(
                     )
                 }
                 
-                TextButton(onClick = { /* Mark all as read */ }) {
-                    Text("Mark all read", color = SchoolPrimary, fontSize = 12.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TextButton(onClick = { /* Mark all as read */ }) {
+                        Text("Mark all read", color = SchoolPrimary, fontSize = 12.sp)
+                    }
+                    IconButton(onClick = onMenuClick) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                    }
                 }
             }
 

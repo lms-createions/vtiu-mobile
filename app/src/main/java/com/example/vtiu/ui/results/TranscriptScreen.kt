@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 @Composable
 fun TranscriptScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
 ) {
@@ -84,6 +86,9 @@ fun TranscriptScreen(
                         IconButton(onClick = { /* Download Full Transcript */ }) {
                             Icon(Icons.Default.Download, contentDescription = "Download", tint = Color.Black)
                         }
+                        IconButton(onClick = onMenuClick) {
+                            Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                        }
                     }
                 }
 
@@ -92,7 +97,6 @@ fun TranscriptScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Student Header
                     item {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
@@ -107,7 +111,6 @@ fun TranscriptScreen(
                         }
                     }
 
-                    // Cumulative Stats
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             TranscriptStatCard(Modifier.weight(1f), "Cum. GPA", "%.2f".format(transcript.cumulativeGpa ?: 0.0f), SchoolPrimary)
@@ -125,7 +128,6 @@ fun TranscriptScreen(
                         }
                     }
 
-                    // Semester breakdown
                     items(transcript.semesters) { semester ->
                         SemesterBreakdownCard(
                             SemesterTranscript(
