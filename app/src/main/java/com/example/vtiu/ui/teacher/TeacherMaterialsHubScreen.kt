@@ -24,49 +24,63 @@ fun TeacherMaterialsHubScreen(
     onUploadClick: () -> Unit,
     onManageClick: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Course Materials", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Material Management",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            
-            HubActionCard(
-                title = "Upload New Materials",
-                description = "Share lecture notes, slides, or reading material",
-                icon = Icons.Default.CloudUpload,
-                color = Color(0xFF36B9CC),
-                onClick = onUploadClick
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Course Materials",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
 
-            HubActionCard(
-                title = "Manage Uploaded Materials",
-                description = "View or remove materials you've shared",
-                icon = Icons.Default.FolderCopy,
-                color = Color(0xFF8E24AA),
-                onClick = onManageClick
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Material Management",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                
+                HubActionCard(
+                    title = "Upload New Materials",
+                    description = "Share lecture notes, slides, or reading material",
+                    icon = Icons.Default.CloudUpload,
+                    color = Color(0xFF36B9CC),
+                    onClick = onUploadClick
+                )
+
+                HubActionCard(
+                    title = "Manage Uploaded Materials",
+                    description = "View or remove materials you've shared",
+                    icon = Icons.Default.FolderCopy,
+                    color = Color(0xFF8E24AA),
+                    onClick = onManageClick
+                )
+            }
         }
     }
 }

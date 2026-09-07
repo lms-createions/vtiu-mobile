@@ -44,25 +44,41 @@ fun TimetableScreen(
     
     val dayEntries = timetableApi.filter { it.day.equals(currentDay, ignoreCase = true) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("My Timetable", fontWeight = FontWeight.SemiBold, fontSize = 20.sp) },
-                navigationIcon = {
+    Scaffold { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F6F8))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
                     }
-                },
-                actions = {
-                    IconButton(onClick = { /* Download handle */ }) {
-                        Icon(Icons.Default.Download, contentDescription = "Download PDF")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+                    Text(
+                        text = "My Timetable",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+                
+                IconButton(onClick = { /* Download handle */ }) {
+                    Icon(Icons.Default.Download, contentDescription = "Download PDF", tint = Color.Black)
+                }
+            }
+
             // Day Selector
             ScrollableTabRow(
                 selectedTabIndex = selectedDayIndex,

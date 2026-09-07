@@ -42,24 +42,7 @@ fun TeacherProfileScreen(
     
     val scrollState = rememberScrollState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("My Profile", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* Edit Profile Simulation */ }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         val teacher = profile
         if (teacher == null) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
@@ -69,103 +52,135 @@ fun TeacherProfileScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
+                    .padding(top = padding.calculateTopPadding())
                     .background(Color(0xFFF4F6F8))
-                    .verticalScroll(scrollState)
             ) {
-                // Header with picture
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.White)
-                        .padding(vertical = 32.dp),
-                    contentAlignment = Alignment.Center
+                        .padding(horizontal = 4.dp, vertical = 0.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        if (!teacher.profilePictureUrl.isNullOrBlank()) {
-                            val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
-                            coil.compose.AsyncImage(
-                                model = "$staticUrl${teacher.profilePictureUrl}",
-                                contentDescription = "Profile Picture",
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(CircleShape),
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "Back",
+                                tint = Color.Black
                             )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(CircleShape)
-                                    .background(TeacherPrimary.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = teacher.name.take(1),
-                                    fontSize = 40.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TeacherPrimary
-                                )
-                            }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = teacher.name, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                        Text(text = teacher.department ?: "N/A", fontSize = 14.sp, color = Color.Gray)
+                        Text(
+                            text = "My Profile",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
+                    IconButton(onClick = { /* Edit Profile Simulation */ }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Black)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Information Sections
-                ProfileInfoSection(
-                    title = "Personal Information",
-                    items = listOf(
-                        ProfileItem("Full Name", teacher.name, Icons.Default.Person),
-                        ProfileItem("Username", teacher.username, Icons.Default.Badge),
-                        ProfileItem("Email", teacher.email ?: "N/A", Icons.Default.Email),
-                        ProfileItem("Phone", teacher.phone ?: "N/A", Icons.Default.Phone)
-                    )
-                )
-
-                ProfileInfoSection(
-                    title = "Professional Details",
-                    items = listOf(
-                        ProfileItem("Department", teacher.department ?: "N/A", Icons.Default.School),
-                        ProfileItem("Qualification", teacher.qualification ?: "N/A", Icons.Default.WorkspacePremium),
-                        ProfileItem("Specialization", teacher.specialization ?: "N/A", Icons.Default.History),
-                        ProfileItem("Office", teacher.officeLocation ?: "N/A", Icons.Default.LocationOn)
-                    )
-                )
-
-                ProfileInfoSection(
-                    title = "Account Settings",
-                    items = listOf(
-                        ProfileItem("Role", "Teacher", Icons.Default.AdminPanelSettings),
-                        ProfileItem("User ID", teacher.userId, Icons.Default.Fingerprint)
-                    )
-                )
-
-                // Logout Action
-                Card(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
                 ) {
-                    TextButton(
-                        onClick = onLogoutClick,
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
-                        colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
+                    // Header with picture
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.White)
+                            .padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("Logout from Portal", fontWeight = FontWeight.Bold)
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            if (!teacher.profilePictureUrl.isNullOrBlank()) {
+                                val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
+                                coil.compose.AsyncImage(
+                                    model = "$staticUrl${teacher.profilePictureUrl}",
+                                    contentDescription = "Profile Picture",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .clip(CircleShape),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .clip(CircleShape)
+                                        .background(TeacherPrimary.copy(alpha = 0.1f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = teacher.name.take(1),
+                                        fontSize = 40.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TeacherPrimary
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(text = teacher.name, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                            Text(text = teacher.department ?: "N/A", fontSize = 14.sp, color = Color.Gray)
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Information Sections
+                    ProfileInfoSection(
+                        title = "Personal Information",
+                        items = listOf(
+                            ProfileItem("Full Name", teacher.name, Icons.Default.Person),
+                            ProfileItem("Username", teacher.username, Icons.Default.Badge),
+                            ProfileItem("Email", teacher.email ?: "N/A", Icons.Default.Email),
+                            ProfileItem("Phone", teacher.phone ?: "N/A", Icons.Default.Phone)
+                        )
+                    )
+
+                    ProfileInfoSection(
+                        title = "Professional Details",
+                        items = listOf(
+                            ProfileItem("Department", teacher.department ?: "N/A", Icons.Default.School),
+                            ProfileItem("Qualification", teacher.qualification ?: "N/A", Icons.Default.WorkspacePremium),
+                            ProfileItem("Specialization", teacher.specialization ?: "N/A", Icons.Default.History),
+                            ProfileItem("Office", teacher.officeLocation ?: "N/A", Icons.Default.LocationOn)
+                        )
+                    )
+
+                    ProfileInfoSection(
+                        title = "Account Settings",
+                        items = listOf(
+                            ProfileItem("Role", "Teacher", Icons.Default.AdminPanelSettings),
+                            ProfileItem("User ID", teacher.userId, Icons.Default.Fingerprint)
+                        )
+                    )
+
+                    // Logout Action
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        TextButton(
+                            onClick = onLogoutClick,
+                            modifier = Modifier.fillMaxWidth().padding(8.dp),
+                            colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text("Logout from Portal", fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
         }
     }

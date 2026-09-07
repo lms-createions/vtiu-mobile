@@ -69,94 +69,87 @@ fun TeacherCreateLiveScreen(
     val scrollState = rememberScrollState()
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Schedule Lecture", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
-                .verticalScroll(scrollState)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("Lecture Details", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = { Text("Session Title") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        leadingIcon = { Icon(Icons.Default.VideoCall, contentDescription = null, tint = Color(0xFF2D8CFF)) }
-                    )
-
-                    DropdownSelector(
-                        options = courses,
-                        selected = selectedCourse,
-                        onSelect = { selectedCourse = it }
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
                     )
                 }
+                Text(
+                    text = "Schedule Lecture",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
             }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text("Timing", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    
-                    // Date Picker Trigger
-                    OutlinedTextField(
-                        value = dateFormatter.format(selectedDate),
-                        onValueChange = {},
-                        label = { Text("Date") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showDatePicker = true },
-                        enabled = false,
-                        shape = RoundedCornerShape(12.dp),
-                        leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = Color.Gray) },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledTextColor = Color.Black,
-                            disabledBorderColor = Color.LightGray,
-                            disabledLabelColor = Color.Gray,
-                            disabledLeadingIconColor = Color.Gray
-                        )
-                    )
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        // Start Time Trigger
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text("Lecture Details", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        
                         OutlinedTextField(
-                            value = timeFormatter.format(startHour, startMinute),
+                            value = title,
+                            onValueChange = { title = it },
+                            label = { Text("Session Title") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            leadingIcon = { Icon(Icons.Default.VideoCall, contentDescription = null, tint = Color(0xFF2D8CFF)) }
+                        )
+
+                        DropdownSelector(
+                            options = courses,
+                            selected = selectedCourse,
+                            onSelect = { selectedCourse = it }
+                        )
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Text("Timing", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        
+                        OutlinedTextField(
+                            value = dateFormatter.format(selectedDate),
                             onValueChange = {},
-                            label = { Text("Start Time") },
+                            label = { Text("Date") },
                             modifier = Modifier
-                                .weight(1f)
-                                .clickable { showStartTimePicker = true },
+                                .fillMaxWidth()
+                                .clickable { showDatePicker = true },
                             enabled = false,
                             shape = RoundedCornerShape(12.dp),
-                            leadingIcon = { Icon(Icons.Default.Schedule, contentDescription = null, tint = Color.Gray) },
+                            leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = Color.Gray) },
                             colors = OutlinedTextFieldDefaults.colors(
                                 disabledTextColor = Color.Black,
                                 disabledBorderColor = Color.LightGray,
@@ -164,85 +157,105 @@ fun TeacherCreateLiveScreen(
                                 disabledLeadingIconColor = Color.Gray
                             )
                         )
-                        // End Time Trigger
-                        OutlinedTextField(
-                            value = timeFormatter.format(endHour, endMinute),
-                            onValueChange = {},
-                            label = { Text("End Time") },
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable { showEndTimePicker = true },
-                            enabled = false,
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                disabledTextColor = Color.Black,
-                                disabledBorderColor = Color.LightGray,
-                                disabledLabelColor = Color.Gray
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            OutlinedTextField(
+                                value = timeFormatter.format(startHour, startMinute),
+                                onValueChange = {},
+                                label = { Text("Start Time") },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable { showStartTimePicker = true },
+                                enabled = false,
+                                shape = RoundedCornerShape(12.dp),
+                                leadingIcon = { Icon(Icons.Default.Schedule, contentDescription = null, tint = Color.Gray) },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    disabledTextColor = Color.Black,
+                                    disabledBorderColor = Color.LightGray,
+                                    disabledLabelColor = Color.Gray,
+                                    disabledLeadingIconColor = Color.Gray
+                                )
                             )
+                            OutlinedTextField(
+                                value = timeFormatter.format(endHour, endMinute),
+                                onValueChange = {},
+                                label = { Text("End Time") },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable { showEndTimePicker = true },
+                                enabled = false,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    disabledTextColor = Color.Black,
+                                    disabledBorderColor = Color.LightGray,
+                                    disabledLabelColor = Color.Gray
+                                )
+                            )
+                        }
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Require Approval", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Text("Manually let each student into the room", fontSize = 12.sp, color = Color.Gray)
+                        }
+                        Switch(
+                            checked = requiresApproval,
+                            onCheckedChange = { requiresApproval = it },
+                            colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF2D8CFF))
                         )
                     }
                 }
-            }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("Require Approval", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        Text("Manually let each student into the room", fontSize = 12.sp, color = Color.Gray)
-                    }
-                    Switch(
-                        checked = requiresApproval,
-                        onCheckedChange = { requiresApproval = it },
-                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFF2D8CFF))
-                    )
-                }
-            }
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Button(
-                onClick = {
-                    val dateStr = dateFormatter.format(selectedDate)
-                    val startStr = "${dateStr}T${timeFormatter.format(startHour, startMinute)}:00"
-                    val endStr = "${dateStr}T${timeFormatter.format(endHour, endMinute)}:00"
-                    
-                    val request = com.example.vtiu.data.model.api.CreateMeetingRequest(
-                        title = title,
-                        hostUserId = userId,
-                        courseName = selectedCourse,
-                        start = startStr,
-                        end = endStr
-                    )
-                    
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Generating Zoom link and scheduling...")
-                        viewModel.createMeeting(request, userId) {
-                            onScheduleSuccess()
+                Button(
+                    onClick = {
+                        val dateStr = dateFormatter.format(selectedDate)
+                        val startStr = "${dateStr}T${timeFormatter.format(startHour, startMinute)}:00"
+                        val endStr = "${dateStr}T${timeFormatter.format(endHour, endMinute)}:00"
+                        
+                        val request = com.example.vtiu.data.model.api.CreateMeetingRequest(
+                            title = title,
+                            hostUserId = userId,
+                            courseName = selectedCourse,
+                            start = startStr,
+                            end = endStr
+                        )
+                        
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Generating Zoom link and scheduling...")
+                            viewModel.createMeeting(request, userId) {
+                                onScheduleSuccess()
+                            }
                         }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                enabled = title.isNotBlank() && selectedCourse.isNotBlank(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D8CFF))
-            ) {
-                Icon(Icons.Default.Link, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Generate & Schedule", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    enabled = title.isNotBlank() && selectedCourse.isNotBlank(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2D8CFF))
+                ) {
+                    Icon(Icons.Default.Link, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Generate & Schedule", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                }
+                
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
 
-    // Date Picker Dialog
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDate.time)
         DatePickerDialog(
@@ -263,7 +276,6 @@ fun TeacherCreateLiveScreen(
         }
     }
 
-    // Start Time Picker
     if (showStartTimePicker) {
         val timePickerState = rememberTimePickerState(initialHour = startHour, initialMinute = startMinute)
         TimePickerDialog(
@@ -278,7 +290,6 @@ fun TeacherCreateLiveScreen(
         }
     }
 
-    // End Time Picker
     if (showEndTimePicker) {
         val timePickerState = rememberTimePickerState(initialHour = endHour, initialMinute = endMinute)
         TimePickerDialog(

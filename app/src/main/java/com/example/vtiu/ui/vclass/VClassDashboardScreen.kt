@@ -50,30 +50,34 @@ fun VClassDashboardScreen(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf("Quizzes", "Assignments")
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Column {
-                        Text("Virtual Class", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color.White)
-                        Text("Interactive Learning Hub", fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VClassPrimary)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F4F4))
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Virtual Class",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
             // 1. Live Clock Section
             LiveClockHeader()
 

@@ -55,87 +55,97 @@ fun VClassVideoPlayerScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Lesson Player", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VClassPrimary, titleContentColor = Color.White)
-            )
-        }
-    ) { padding ->
-        LazyColumn(
+    Scaffold { padding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F4F4))
         ) {
-            // Functional Video Player Area
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                        .background(Color.Black),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AndroidView(
-                        factory = {
-                            PlayerView(context).apply {
-                                player = exoPlayer
-                                useController = true
-                            }
-                        },
-                        modifier = Modifier.fillMaxSize()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
                     )
                 }
-            }
-
-            // Recording Info
-            item {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = recording.title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "${recording.courseName} • ${recording.teacherName}", fontSize = 14.sp, color = Color.Gray)
-                    Text(text = "Recorded on ${recording.recordedAt}", fontSize = 12.sp, color = Color.LightGray, modifier = Modifier.padding(top = 4.dp))
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        AssistChip(
-                            onClick = { /* Download Simulation */ },
-                            label = { Text("Download") },
-                            leadingIcon = { Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                        )
-                        AssistChip(
-                            onClick = { /* Share Simulation */ },
-                            label = { Text("Share") },
-                            leadingIcon = { Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                        )
-                    }
-                }
-            }
-
-            // Divider
-            item {
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color.LightGray.copy(alpha = 0.5f))
-            }
-
-            // Related Recordings
-            item {
                 Text(
-                    text = "Related Sessions",
-                    fontSize = 18.sp,
+                    text = "Lesson Player",
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(16.dp)
+                    color = Color.Black
                 )
             }
 
-            items(otherRecordings) { item ->
-                RecordingItem(title = item.title)
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f)
+                            .background(Color.Black),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AndroidView(
+                            factory = {
+                                PlayerView(context).apply {
+                                    player = exoPlayer
+                                    useController = true
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
+                item {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(text = recording.title, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "${recording.courseName} • ${recording.teacherName}", fontSize = 14.sp, color = Color.Gray)
+                        Text(text = "Recorded on ${recording.recordedAt}", fontSize = 12.sp, color = Color.LightGray, modifier = Modifier.padding(top = 4.dp))
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            AssistChip(
+                                onClick = { /* Simulation */ },
+                                label = { Text("Download") },
+                                leadingIcon = { Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                            )
+                            AssistChip(
+                                onClick = { /* Simulation */ },
+                                label = { Text("Share") },
+                                leadingIcon = { Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color.LightGray.copy(alpha = 0.5f))
+                }
+
+                item {
+                    Text(
+                        text = "Related Sessions",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+
+                items(otherRecordings) { item ->
+                    RecordingItem(title = item.title)
+                }
             }
         }
     }

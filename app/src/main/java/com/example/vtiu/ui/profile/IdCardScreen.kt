@@ -43,18 +43,7 @@ fun IdCardScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("My Student ID Card", fontWeight = FontWeight.SemiBold, fontSize = 20.sp) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         val profile = profileApi
         if (profile == null) {
@@ -62,47 +51,73 @@ fun IdCardScreen(
                 CircularProgressIndicator(color = SchoolPrimary)
             }
         } else {
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(top = padding.calculateTopPadding())
+                    .background(Color(0xFFF4F6F8))
             ) {
-                item {
-                    IdCardVisual(profile)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 0.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "ID Card",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
                 }
 
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Button(
-                            onClick = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar("Downloading ID Card PDF...")
-                                }
-                            },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = SchoolPrimary)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        IdCardVisual(profile)
+                    }
+
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Download PDF", fontSize = 14.sp)
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Downloading ID Card PDF...")
+                                    }
+                                },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = SchoolPrimary)
+                            ) {
+                                Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Download PDF", fontSize = 14.sp)
+                            }
                         }
                     }
-                }
 
-                item {
-                    CardInfoSection(profile)
-                }
+                    item {
+                        CardInfoSection(profile)
+                    }
 
-                item {
-                    Spacer(modifier = Modifier.height(32.dp))
+                    item {
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
                 }
             }
         }
@@ -139,9 +154,9 @@ fun IdCardVisual(profile: com.example.vtiu.data.model.api.UserProfileData) {
             ) {
                 Box(modifier = Modifier.size(90.dp).clip(RoundedCornerShape(8.dp)).background(Color.LightGray), contentAlignment = Alignment.Center) {
                     if (!profile.profilePictureUrl.isNullOrBlank()) {
-                        val baseUrl = "https://vtiu-mobile-production.up.railway.app"
+                        val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
                         coil.compose.AsyncImage(
-                            model = "$baseUrl${profile.profilePictureUrl}",
+                            model = "$staticUrl${profile.profilePictureUrl}",
                             contentDescription = "Profile Picture",
                             modifier = Modifier.fillMaxSize(),
                             contentScale = androidx.compose.ui.layout.ContentScale.Crop

@@ -25,57 +25,71 @@ fun TeacherExamHubScreen(
     onManageExamsClick: () -> Unit,
     onViewSubmissionsClick: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Manage Examinations", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Exam Management",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            
-            HubActionCard(
-                title = "Create New Exam",
-                description = "Design and set up a final or mid-term exam",
-                icon = Icons.Default.Add,
-                color = Color(0xFFD32F2F), // Exam Red
-                onClick = onCreateExamClick
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Manage Examinations",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
 
-            HubActionCard(
-                title = "Manage Existing Exams",
-                description = "View, edit, or delete exams you've created",
-                icon = Icons.Default.Description,
-                color = Color(0xFFFB8C00),
-                onClick = onManageExamsClick
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Exam Management",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                
+                HubActionCard(
+                    title = "Create New Exam",
+                    description = "Design and set up a final or mid-term exam",
+                    icon = Icons.Default.Add,
+                    color = Color(0xFFD32F2F), // Exam Red
+                    onClick = onCreateExamClick
+                )
 
-            HubActionCard(
-                title = "Exam Submissions",
-                description = "Review and grade student examination attempts",
-                icon = Icons.Default.Description,
-                color = TeacherPrimary,
-                onClick = onViewSubmissionsClick
-            )
+                HubActionCard(
+                    title = "Manage Existing Exams",
+                    description = "View, edit, or delete exams you've created",
+                    icon = Icons.Default.Description,
+                    color = Color(0xFFFB8C00),
+                    onClick = onManageExamsClick
+                )
+
+                HubActionCard(
+                    title = "Exam Submissions",
+                    description = "Review and grade student examination attempts",
+                    icon = Icons.Default.Description,
+                    color = TeacherPrimary,
+                    onClick = onViewSubmissionsClick
+                )
+            }
         }
     }
 }

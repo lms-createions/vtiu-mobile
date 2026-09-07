@@ -25,49 +25,63 @@ fun TeacherAppointmentHubScreen(
     onManageSlotsClick: () -> Unit,
     onViewRequestsClick: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Appointment Hub", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Office Hours & Bookings",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            
-            HubActionCard(
-                title = "Manage Time Slots",
-                description = "Set your availability for student appointments",
-                icon = Icons.Default.EventNote,
-                color = Color(0xFF1E88E5),
-                onClick = onManageSlotsClick
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Appointment Hub",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
 
-            HubActionCard(
-                title = "Appointment Requests",
-                description = "View and respond to student booking requests",
-                icon = Icons.Default.Mail,
-                color = TeacherPrimary,
-                onClick = onViewRequestsClick
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Office Hours & Bookings",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                
+                HubActionCard(
+                    title = "Manage Time Slots",
+                    description = "Set your availability for student appointments",
+                    icon = Icons.Default.EventNote,
+                    color = Color(0xFF1E88E5),
+                    onClick = onManageSlotsClick
+                )
+
+                HubActionCard(
+                    title = "Appointment Requests",
+                    description = "View and respond to student booking requests",
+                    icon = Icons.Default.Mail,
+                    color = TeacherPrimary,
+                    onClick = onViewRequestsClick
+                )
+            }
         }
     }
 }

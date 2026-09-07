@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vtiu.ui.dashboard.StudentViewModel
-import androidx.compose.ui.unit.sp
 import com.example.vtiu.data.model.api.NotificationApi
 import com.example.vtiu.data.model.Notification
 import com.example.vtiu.ui.theme.SchoolPrimary
@@ -44,51 +43,66 @@ fun NotificationScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Notifications", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    TextButton(onClick = { /* Mark all as read */ }) {
-                        Text("Mark all read", color = SchoolPrimary, fontSize = 12.sp)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
-        LazyColumn(
+    Scaffold { padding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .background(Color(0xFFF4F6F8)),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F6F8))
         ) {
-            if (notificationsApi.isEmpty()) {
-                item {
-                    Text(text = "No notifications yet.", color = Color.Gray, modifier = Modifier.padding(16.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "Notifications",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+                
+                TextButton(onClick = { /* Mark all as read */ }) {
+                    Text("Mark all read", color = SchoolPrimary, fontSize = 12.sp)
                 }
             }
-            items(notificationsApi) { notification ->
-                NotificationItem(
-                    Notification(
-                        id = notification.id,
-                        title = notification.title,
-                        message = notification.message,
-                        type = notification.type,
-                        priority = notification.priority,
-                        senderName = notification.sender,
-                        senderType = "admin", // Placeholder
-                        createdAt = notification.date,
-                        isRead = notification.isRead
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (notificationsApi.isEmpty()) {
+                    item {
+                        Text(text = "No notifications yet.", color = Color.Gray, modifier = Modifier.padding(16.dp))
+                    }
+                }
+                items(notificationsApi) { notification ->
+                    NotificationItem(
+                        Notification(
+                            id = notification.id,
+                            title = notification.title,
+                            message = notification.message,
+                            type = notification.type,
+                            priority = notification.priority,
+                            senderName = notification.sender,
+                            senderType = "admin", // Placeholder
+                            createdAt = notification.date,
+                            isRead = notification.isRead
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -111,7 +125,7 @@ fun NotificationItem(notification: Notification) {
             .clickable { /* View details */ },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (notification.isRead) Color.White else Color.White
+            containerColor = Color.White
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (notification.isRead) 1.dp else 2.dp),
         border = if (!notification.isRead) CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(SchoolPrimary.copy(alpha = 0.5f))) else null

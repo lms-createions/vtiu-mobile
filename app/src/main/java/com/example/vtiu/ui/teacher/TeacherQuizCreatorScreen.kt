@@ -77,14 +77,12 @@ fun TeacherQuizCreatorScreen(
         }
     }
 
-    // Load existing quiz if editing
     LaunchedEffect(existingQuizDetail) {
         if (quizId != null && existingQuizDetail != null) {
             val existing = existingQuizDetail!!
             title = existing.title
             selectedCourse = existing.courseName
             duration = existing.durationMinutes.toString()
-            // Parse date/time from ISO string
             try {
                 val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
                 val date = sdf.parse(existing.startDatetime)
@@ -97,7 +95,6 @@ fun TeacherQuizCreatorScreen(
                 }
             } catch (e: Exception) {}
             
-            // Load questions
             questions.clear()
             existing.questions.forEach { q ->
                 val correctIndex = q.options.indexOfFirst { it.isCorrect }.coerceAtLeast(0)
@@ -115,28 +112,37 @@ fun TeacherQuizCreatorScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Create New Quiz", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (currentStep > 1) currentStep-- else onBackClick()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
         ) {
-            // Progress Indicator
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = {
+                    if (currentStep > 1) currentStep-- else onBackClick()
+                }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = if (quizId == null) "Create New Quiz" else "Edit Quiz",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
             StepProgressBar(currentStep = currentStep)
 
             Box(modifier = Modifier.weight(1f)) {
@@ -158,7 +164,7 @@ fun TeacherQuizCreatorScreen(
                             level = selectedLevel, onLevelChange = { selectedLevel = it },
                             course = selectedCourse, onCourseChange = { selectedCourse = it },
                             duration = duration, onDurationChange = { duration = it },
-                            selectedDate = selectedDate, onDateClick = { /* Handled in sub-component or dialog */ },
+                            selectedDate = selectedDate, onDateClick = { /* dialog */ },
                             onDateChange = { selectedDate = it },
                             startHour = startHour, startMinute = startMinute,
                             onTimeChange = { h, m -> startHour = h; startMinute = m },
@@ -274,7 +280,6 @@ fun QuizSetupStep(
         .filter { it.programme == programme && it.level == level }
         .map { it.courseName }
 
-    // Auto-select first available if current selection is invalid
     LaunchedEffect(availableProgrammes) {
         if (programme.isEmpty() || !availableProgrammes.contains(programme)) {
             if (availableProgrammes.isNotEmpty()) onProgrammeChange(availableProgrammes.first())
@@ -398,6 +403,7 @@ fun QuizSetupStep(
                 Text("Continue to Questions", fontWeight = FontWeight.Bold)
             }
         }
+        item { Spacer(modifier = Modifier.height(32.dp)) }
     }
 
     if (showDatePicker) {
@@ -477,7 +483,6 @@ fun QuestionBuilderStep(
             }
         }
 
-        // Action Buttons
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)

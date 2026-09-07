@@ -57,38 +57,44 @@ fun AcademicCalendarScreen(
 
     val dayEvents = eventsApi.filter { it.date == selectedDateStr }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Column {
-                        Text("Academic Calendar", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                        Text("Session 2024/2025", fontSize = 11.sp, color = Color.Gray)
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { 
-                        calendar = Calendar.getInstance()
-                        selectedDate = Calendar.getInstance()
-                    }) {
-                        Icon(Icons.Default.CalendarToday, contentDescription = "Today", tint = SchoolPrimary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .background(Color(0xFFF8FAFC)) // Modern light background
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF8FAFC))
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "Academic Calendar",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+                
+                IconButton(onClick = { 
+                    calendar = Calendar.getInstance()
+                    selectedDate = Calendar.getInstance()
+                }) {
+                    Icon(Icons.Default.CalendarToday, contentDescription = "Today", tint = SchoolPrimary)
+                }
+            }
+
             // Legend
             CalendarLegend()
 

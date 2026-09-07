@@ -41,53 +41,62 @@ fun CourseListScreen(
             viewModel.loadStudentData(userId)
         }
     }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("My Courses", fontWeight = FontWeight.SemiBold, fontSize = 20.sp) },
-                navigationIcon = {
-                    Button(
-                        onClick = onBackClick,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Color.Black),
-                        contentPadding = PaddingValues(horizontal = 8.dp)
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                        Text("Back", fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
-        LazyColumn(
+    Scaffold { padding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(24.dp)
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F6F8))
         ) {
-            item {
-                AcademicOverviewHeader()
-            }
-
-            if (coursesApi.isEmpty()) {
-                item {
-                    Text(text = "No courses found in Flask database.", color = Color.Gray, modifier = Modifier.padding(16.dp))
-                }
-            }
-
-            items(coursesApi) { course ->
-                CourseItem(
-                    Course(
-                        id = course.id,
-                        name = course.name,
-                        code = course.code,
-                        programmeName = "",
-                        programmeLevel = course.level,
-                        semester = "",
-                        creditHours = course.credits,
-                        isMandatory = true
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
                     )
+                }
+                Text(
+                    text = "My Courses",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
                 )
+            }
+            
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(24.dp)
+            ) {
+                item {
+                    AcademicOverviewHeader()
+                }
+
+                if (coursesApi.isEmpty()) {
+                    item {
+                        Text(text = "No courses found in Flask database.", color = Color.Gray, modifier = Modifier.padding(16.dp))
+                    }
+                }
+
+                items(coursesApi) { course ->
+                    CourseItem(
+                        Course(
+                            id = course.id,
+                            name = course.name,
+                            code = course.code,
+                            programmeName = "",
+                            programmeLevel = course.level,
+                            semester = "",
+                            creditHours = course.credits,
+                            isMandatory = true
+                        )
+                    )
+                }
             }
         }
     }

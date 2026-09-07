@@ -57,63 +57,76 @@ fun VClassLiveScreen(
     }
     val recordings = emptyList<VClassRecording>()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Live Classes", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VClassPrimary, titleContentColor = Color.White)
-            )
-        }
-    ) { padding ->
-        LazyColumn(
+    Scaffold { padding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .background(Color(0xFFF4F4F4)),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F4F4))
         ) {
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Scheduled Sessions",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
                     )
-                    Text(text = "Auto-updates", fontSize = 12.sp, color = Color.Gray)
                 }
-            }
-
-            items(meetings) { meeting ->
-                EnhancedMeetingCard(
-                    meeting = meeting,
-                    onJoinClick = { onJoinClick(meeting.id) }
-                )
-            }
-
-            item {
                 Text(
-                    text = "Past Recordings",
-                    fontSize = 18.sp,
+                    text = "Live Classes",
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
+                    color = Color.Black
                 )
             }
-            
-            items(recordings) { recording ->
-                RecordingItem(
-                    title = recording.title,
-                    onPlayClick = { onRecordingClick(recording.id) }
-                )
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Scheduled Sessions",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(text = "Auto-updates", fontSize = 12.sp, color = Color.Gray)
+                    }
+                }
+
+                items(meetings) { meeting ->
+                    EnhancedMeetingCard(
+                        meeting = meeting,
+                        onJoinClick = { onJoinClick(meeting.id) }
+                    )
+                }
+
+                item {
+                    Text(
+                        text = "Past Recordings",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+                
+                items(recordings) { recording ->
+                    RecordingItem(
+                        title = recording.title,
+                        onPlayClick = { onRecordingClick(recording.id) }
+                    )
+                }
             }
         }
     }

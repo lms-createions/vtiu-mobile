@@ -56,22 +56,6 @@ fun TeacherManageSlotsScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Column {
-                        Text("Manage Time Slots", fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-                        Text("Appointment Availability", fontSize = 11.sp, color = Color.Gray)
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
@@ -87,9 +71,30 @@ fun TeacherManageSlotsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .background(Color(0xFFF8FAFC)) // Modern background
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF8FAFC))
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Manage Time Slots",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
             // Stats Summary
             SlotsStatsSummary(slotsApi)
 
@@ -112,9 +117,7 @@ fun TeacherManageSlotsScreen(
                         EmptySlotsState()
                     }
                 } else {
-                    // Sort slots by date and time
                     val sortedSlots = slotsApi.sortedWith(compareBy({ it.date }, { it.start }))
-                    
                     items(sortedSlots) { slot ->
                         TeacherSlotCard(
                             slot = AppointmentSlot(
@@ -134,10 +137,7 @@ fun TeacherManageSlotsScreen(
                         )
                     }
                 }
-                
-                item {
-                    Spacer(modifier = Modifier.height(100.dp))
-                }
+                item { Spacer(modifier = Modifier.height(100.dp)) }
             }
         }
     }
@@ -234,7 +234,6 @@ fun TeacherSlotCard(slot: AppointmentSlot, onDelete: () -> Unit) {
             modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon Column
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -319,7 +318,6 @@ fun AddSlotDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> Unit
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text("Select when you will be available for appointments.", fontSize = 13.sp, color = Color.Gray)
                 
-                // Date Picker Trigger
                 OutlinedCard(
                     onClick = { showDatePicker = true },
                     modifier = Modifier.fillMaxWidth(),
@@ -340,7 +338,6 @@ fun AddSlotDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> Unit
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // Start Time Trigger
                     OutlinedCard(
                         onClick = { showStartTimePicker = true },
                         modifier = Modifier.weight(1f),
@@ -357,7 +354,6 @@ fun AddSlotDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> Unit
                         }
                     }
 
-                    // End Time Trigger
                     OutlinedCard(
                         onClick = { showEndTimePicker = true },
                         modifier = Modifier.weight(1f),
@@ -398,7 +394,6 @@ fun AddSlotDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> Unit
         }
     )
 
-    // Material 3 Date Picker Dialog
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
             initialSelectedDateMillis = selectedDate.time
@@ -421,12 +416,8 @@ fun AddSlotDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> Unit
         }
     }
 
-    // Material 3 Time Picker Dialogs
     if (showStartTimePicker) {
-        val timePickerState = rememberTimePickerState(
-            initialHour = startHour,
-            initialMinute = startMinute
-        )
+        val timePickerState = rememberTimePickerState(initialHour = startHour, initialMinute = startMinute)
         CommonTimePickerDialog(
             onDismiss = { showStartTimePicker = false },
             onConfirm = {
@@ -440,10 +431,7 @@ fun AddSlotDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> Unit
     }
 
     if (showEndTimePicker) {
-        val timePickerState = rememberTimePickerState(
-            initialHour = endHour,
-            initialMinute = endMinute
-        )
+        val timePickerState = rememberTimePickerState(initialHour = endHour, initialMinute = endMinute)
         CommonTimePickerDialog(
             onDismiss = { showEndTimePicker = false },
             onConfirm = {

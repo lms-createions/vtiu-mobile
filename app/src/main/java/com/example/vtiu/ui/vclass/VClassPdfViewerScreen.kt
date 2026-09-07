@@ -42,33 +42,10 @@ fun VClassPdfViewerScreen(
     }
     var isLoading by remember { mutableStateOf(true) }
     
-    // Mock PDF Viewer using Google Docs Viewer URL
     val pdfUrl = "https://docs.google.com/viewer?embedded=true&url=https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { 
-                    Column {
-                        Text(material.title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text("PDF Preview", fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f))
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* Download */ }) {
-                        Icon(Icons.Default.Download, contentDescription = "Download", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VClassPrimary)
-            )
-        },
         bottomBar = {
-            // Simulated Zoom Controls
             Surface(
                 color = Color.Black.copy(alpha = 0.8f),
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
@@ -90,30 +67,67 @@ fun VClassPdfViewerScreen(
             }
         }
     ) { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .background(Color.Gray),
-            contentAlignment = Alignment.Center
+                .padding(top = padding.calculateTopPadding())
+                .background(Color.Gray)
         ) {
-            AndroidView(
-                factory = { context ->
-                    WebView(context).apply {
-                        settings.javaScriptEnabled = true
-                        webViewClient = object : WebViewClient() {
-                            override fun onPageFinished(view: WebView?, url: String?) {
-                                isLoading = false
-                            }
-                        }
-                        loadUrl(pdfUrl)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
                     }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
+                    Column {
+                        Text(
+                            text = material.title,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                        Text(text = "PDF Preview", fontSize = 11.sp, color = Color.Gray)
+                    }
+                }
+                IconButton(onClick = { /* Download */ }) {
+                    Icon(Icons.Default.Download, contentDescription = "Download", tint = Color.Black)
+                }
+            }
 
-            if (isLoading) {
-                CircularProgressIndicator(color = VClassPrimary)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                AndroidView(
+                    factory = { context ->
+                        WebView(context).apply {
+                            settings.javaScriptEnabled = true
+                            webViewClient = object : WebViewClient() {
+                                override fun onPageFinished(view: WebView?, url: String?) {
+                                    isLoading = false
+                                }
+                            }
+                            loadUrl(pdfUrl)
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                if (isLoading) {
+                    CircularProgressIndicator(color = VClassPrimary)
+                }
             }
         }
     }

@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vtiu.ui.dashboard.StudentViewModel
-import com.example.vtiu.data.model.api.FeeBalanceApi
 import com.example.vtiu.data.model.AssignedFee
 import com.example.vtiu.data.model.FeeTransaction
 import com.example.vtiu.ui.theme.SchoolPrimary
@@ -50,17 +49,6 @@ fun FeesScreen(
     val paidPercentage = if (totalFee > 0) (currentPaid / totalFee) else 0f
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Fees & Payments", fontWeight = FontWeight.SemiBold, fontSize = 20.sp) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onPayNowClick,
@@ -71,62 +59,88 @@ fun FeesScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp)
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F6F8))
         ) {
-            // Summary Card
-            item {
-                FeeSummaryCard(totalFee, profileApi?.academicYear ?: "N/A", remaining, paidPercentage)
-            }
-
-            // Level Notice
-            item {
-                LevelNotice(profileApi?.level ?: 100)
-            }
-
-            // Assigned Fees Section
-            item {
-                Text(
-                    text = "Assigned Fees",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-            }
-            // For now, if feeApi is available, show a generic assigned fee
-            item {
-                if (feeApi != null) {
-                    AssignedFeeItem(AssignedFee("Total Semester Fees", "Academic", totalFee, "", ""))
-                } else {
-                    Text(text = "No fee data found.", color = Color.Gray)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
                 }
-            }
-
-            // Payment History Section
-            item {
                 Text(
-                    text = "Payment History",
-                    fontSize = 18.sp,
+                    text = "Fees & Payments",
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)
+                    color = Color.Black
                 )
             }
-            
-            if (txnsApi.isEmpty()) {
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                // Summary Card
                 item {
-                    Text(text = "No payment history found.", color = Color.Gray)
+                    FeeSummaryCard(totalFee, profileApi?.academicYear ?: "N/A", remaining, paidPercentage)
                 }
-            } else {
-                items(txnsApi) { txn ->
-                    TransactionItem(FeeTransaction(txn.id, txn.date.split("T")[0], txn.description, txn.amount.toFloat(), txn.isApproved))
+
+                // Level Notice
+                item {
+                    LevelNotice(profileApi?.level ?: 100)
                 }
-            }
-            
-            item {
-                Spacer(modifier = Modifier.height(80.dp))
+
+                // Assigned Fees Section
+                item {
+                    Text(
+                        text = "Assigned Fees",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+                // For now, if feeApi is available, show a generic assigned fee
+                item {
+                    if (feeApi != null) {
+                        AssignedFeeItem(AssignedFee("Total Semester Fees", "Academic", totalFee, "", ""))
+                    } else {
+                        Text(text = "No fee data found.", color = Color.Gray)
+                    }
+                }
+
+                // Payment History Section
+                item {
+                    Text(
+                        text = "Payment History",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 24.dp, bottom = 16.dp)
+                    )
+                }
+                
+                if (txnsApi.isEmpty()) {
+                    item {
+                        Text(text = "No payment history found.", color = Color.Gray)
+                    }
+                } else {
+                    items(txnsApi) { txn ->
+                        TransactionItem(FeeTransaction(txn.id, txn.date.split("T")[0], txn.description, txn.amount.toFloat(), txn.isApproved))
+                    }
+                }
+                
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
             }
         }
     }

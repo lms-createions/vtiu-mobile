@@ -1,5 +1,6 @@
 package com.example.vtiu.ui.results
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -47,101 +48,118 @@ fun ResultsScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Semester Results", fontWeight = FontWeight.SemiBold, fontSize = 20.sp) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Generating Results PDF...")
-                            kotlinx.coroutines.delay(1500)
-                            snackbarHostState.showSnackbar("PDF Ready. Opening Print Service...")
-                        }
-                    }) {
-                        Icon(Icons.Default.Print, contentDescription = "Print")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp)
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F6F8))
         ) {
-            // Header Info
-            item {
-                ResultsHeader(profileApi?.academicYear ?: "N/A", profileApi?.semester ?: "N/A")
-            }
-
-            // Summary Cards
-            item {
-                val mappedResults = resultsApi.map {
-                    CourseResult(it.courseCode, it.courseName, it.score, it.grade, it.credits, it.gp, it.quizWeight, it.assignmentWeight, it.examWeight, it.remark)
-                }
-                ResultsSummary(mappedResults)
-            }
-
-            item {
-                OutlinedButton(
-                    onClick = onViewTranscriptClick,
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(Icons.Default.History, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("View Full Academic History")
-                }
-            }
-
-            item {
-                Text(
-                    text = "Course Results",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-            }
-
-            if (resultsApi.isEmpty()) {
-                item {
-                    Text(text = "No results found in Flask database.", color = Color.Gray, modifier = Modifier.padding(16.dp))
-                }
-            }
-
-            // Results List
-            items(resultsApi) { result ->
-                ResultCard(
-                    CourseResult(
-                        courseCode = result.courseCode,
-                        courseName = result.courseName,
-                        score = result.score,
-                        grade = result.grade,
-                        creditHours = result.credits,
-                        points = result.gp,
-                        quizWeight = result.quizWeight,
-                        assignmentWeight = result.assignmentWeight,
-                        examWeight = result.examWeight,
-                        remark = result.remark
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "Semester Results",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
-                )
+                }
+                
+                IconButton(onClick = {
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Generating Results PDF...")
+                        kotlinx.coroutines.delay(1500)
+                        snackbarHostState.showSnackbar("PDF Ready. Opening Print Service...")
+                    }
+                }) {
+                    Icon(Icons.Default.Print, contentDescription = "Print", tint = Color.Black)
+                }
             }
 
-            // Footer Info
-            item {
-                InfoAlert()
-            }
-            
-            item {
-                Spacer(modifier = Modifier.height(32.dp))
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                // Header Info
+                item {
+                    ResultsHeader(profileApi?.academicYear ?: "N/A", profileApi?.semester ?: "N/A")
+                }
+
+                // Summary Cards
+                item {
+                    val mappedResults = resultsApi.map {
+                        CourseResult(it.courseCode, it.courseName, it.score, it.grade, it.credits, it.gp, it.quizWeight, it.assignmentWeight, it.examWeight, it.remark)
+                    }
+                    ResultsSummary(mappedResults)
+                }
+
+                item {
+                    OutlinedButton(
+                        onClick = onViewTranscriptClick,
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.History, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("View Full Academic History")
+                    }
+                }
+
+                item {
+                    Text(
+                        text = "Course Results",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+
+                if (resultsApi.isEmpty()) {
+                    item {
+                        Text(text = "No results found in Flask database.", color = Color.Gray, modifier = Modifier.padding(16.dp))
+                    }
+                }
+
+                // Results List
+                items(resultsApi) { result ->
+                    ResultCard(
+                        CourseResult(
+                            courseCode = result.courseCode,
+                            courseName = result.courseName,
+                            score = result.score,
+                            grade = result.grade,
+                            creditHours = result.credits,
+                            points = result.gp,
+                            quizWeight = result.quizWeight,
+                            assignmentWeight = result.assignmentWeight,
+                            examWeight = result.examWeight,
+                            remark = result.remark
+                        )
+                    )
+                }
+
+                // Footer Info
+                item {
+                    InfoAlert()
+                }
+                
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
         }
     }

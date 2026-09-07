@@ -25,57 +25,71 @@ fun TeacherQuizHubScreen(
     onManageQuizzesClick: () -> Unit,
     onViewSubmissionsClick: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Manage Quizzes", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Quiz Management",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            
-            HubActionCard(
-                title = "Create New Quiz",
-                description = "Set up a new assessment for your students",
-                icon = Icons.Default.Add,
-                color = Color(0xFF43A047),
-                onClick = onCreateQuizClick
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Manage Quizzes",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
 
-            HubActionCard(
-                title = "Manage Existing Quizzes",
-                description = "View, edit, or delete quizzes you've created",
-                icon = Icons.Default.Description,
-                color = Color(0xFFFB8C00),
-                onClick = onManageQuizzesClick
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Quiz Management",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                
+                HubActionCard(
+                    title = "Create New Quiz",
+                    description = "Set up a new assessment for your students",
+                    icon = Icons.Default.Add,
+                    color = Color(0xFF43A047),
+                    onClick = onCreateQuizClick
+                )
 
-            HubActionCard(
-                title = "Quiz Submissions",
-                description = "Review and grade student quiz attempts",
-                icon = Icons.Default.Description,
-                color = TeacherPrimary,
-                onClick = onViewSubmissionsClick
-            )
+                HubActionCard(
+                    title = "Manage Existing Quizzes",
+                    description = "View, edit, or delete quizzes you've created",
+                    icon = Icons.Default.Description,
+                    color = Color(0xFFFB8C00),
+                    onClick = onManageQuizzesClick
+                )
+
+                HubActionCard(
+                    title = "Quiz Submissions",
+                    description = "Review and grade student quiz attempts",
+                    icon = Icons.Default.Description,
+                    color = TeacherPrimary,
+                    onClick = onViewSubmissionsClick
+                )
+            }
         }
     }
 }

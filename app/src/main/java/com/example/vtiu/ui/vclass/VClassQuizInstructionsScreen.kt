@@ -45,78 +45,93 @@ fun VClassQuizInstructionsScreen(
 
     val quiz = quizApi!!
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Quiz Instructions", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VClassPrimary, titleContentColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F4F4))
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
         ) {
-            Text(
-                text = "Quiz Instructions: ${quiz.title}",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    QuizInfoRow("Course", quiz.courseName)
-                    QuizInfoRow("Duration", "${quiz.durationMinutes} minutes")
-                    QuizInfoRow("Max Score", "${quiz.maxScore} points")
-                    QuizInfoRow("Start Time", quiz.startDatetime)
-                    QuizInfoRow("End Time", quiz.endDatetime)
-                    QuizInfoRow("Attempts Allowed", quiz.attemptsAllowed.toString())
-
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-
-                    Text(text = "Before You Begin:", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    val guidelines = listOf(
-                        "Find a quiet place free from distractions.",
-                        "The quiz timer starts immediately and cannot be paused.",
-                        "Avoid switching apps or closing the app during the quiz.",
-                        "Submit all answers before time runs out."
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
                     )
-                    guidelines.forEach { guideline ->
-                        Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                            Text(text = "• ", fontWeight = FontWeight.Bold)
-                            Text(text = guideline, fontSize = 14.sp, color = Color.DarkGray)
+                }
+                Text(
+                    text = "Quiz Instructions",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = quiz.title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        QuizInfoRow("Course", quiz.courseName)
+                        QuizInfoRow("Duration", "${quiz.durationMinutes} minutes")
+                        QuizInfoRow("Max Score", "${quiz.maxScore} points")
+                        QuizInfoRow("Start Time", quiz.startDatetime)
+                        QuizInfoRow("End Time", quiz.endDatetime)
+                        QuizInfoRow("Attempts Allowed", quiz.attemptsAllowed.toString())
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+                        Text(text = "Before You Begin:", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        val guidelines = listOf(
+                            "Find a quiet place free from distractions.",
+                            "The quiz timer starts immediately and cannot be paused.",
+                            "Avoid switching apps or closing the app during the quiz.",
+                            "Submit all answers before time runs out."
+                        )
+                        guidelines.forEach { guideline ->
+                            Row(modifier = Modifier.padding(vertical = 4.dp)) {
+                                Text(text = "• ", fontWeight = FontWeight.Bold)
+                                Text(text = guideline, fontSize = 14.sp, color = Color.DarkGray)
+                            }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = { onStartQuizClick(quizId) },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = VClassPrimary),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Start Quiz", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Button(
+                    onClick = { onStartQuizClick(quizId) },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = VClassPrimary),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(Icons.Default.PlayArrow, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Start Quiz", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

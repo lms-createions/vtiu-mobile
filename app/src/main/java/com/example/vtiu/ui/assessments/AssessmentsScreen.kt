@@ -21,8 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vtiu.ui.dashboard.StudentViewModel
-import androidx.compose.ui.unit.sp
-import com.example.vtiu.data.model.api.StudentResultApi
 import com.example.vtiu.data.model.Assessment
 import com.example.vtiu.ui.theme.SchoolPrimary
 
@@ -42,61 +40,75 @@ fun AssessmentsScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Assessment Feedback", fontWeight = FontWeight.SemiBold, fontSize = 20.sp) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
-        LazyColumn(
+    Scaffold { padding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp)
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F6F8))
         ) {
-            item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
                 Text(
-                    text = "My Assessment Results",
+                    text = "Assessment Feedback",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
-                Text(
-                    text = "Raw scores and feedback from quizzes, assignments, and exams",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 24.dp)
-                )
             }
 
-            items(assessmentsApi) { res ->
-                AssessmentCard(
-                    Assessment(
-                        id = res.id,
-                        type = res.type,
-                        course = res.course,
-                        title = res.title,
-                        rawScore = res.rawScore,
-                        maxScore = res.maxScore,
-                        date = res.date,
-                        feedback = res.feedback ?: "No feedback available"
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                item {
+                    Text(
+                        text = "My Assessment Results",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
                     )
-                )
-            }
+                    Text(
+                        text = "Raw scores and feedback from quizzes, assignments, and exams",
+                        fontSize = 14.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 24.dp)
+                    )
+                }
 
-            item {
-                InfoAlert()
-            }
-            
-            item {
-                Spacer(modifier = Modifier.height(32.dp))
+                items(assessmentsApi) { res ->
+                    AssessmentCard(
+                        Assessment(
+                            id = res.id,
+                            type = res.type,
+                            course = res.course,
+                            title = res.title,
+                            rawScore = res.rawScore,
+                            maxScore = res.maxScore,
+                            date = res.date,
+                            feedback = res.feedback ?: "No feedback available"
+                        )
+                    )
+                }
+
+                item {
+                    InfoAlert()
+                }
+                
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
         }
     }

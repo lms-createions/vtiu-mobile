@@ -79,27 +79,37 @@ fun TeacherMaterialsUploaderScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Upload Materials", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (currentStep > 1) currentStep-- else onBackClick()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = {
+                    if (currentStep > 1) currentStep-- else onBackClick()
+                }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Upload Materials",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
             // Progress Indicator
             UploaderProgressBar(currentStep = currentStep)
 
@@ -242,7 +252,6 @@ fun MaterialDetailsStep(
         .filter { it.programme == programme && it.level == level }
         .map { it.courseName }
 
-    // Auto-select first available if current selection is invalid
     LaunchedEffect(availableProgrammes) {
         if (programme.isEmpty() || !availableProgrammes.contains(programme)) {
             if (availableProgrammes.isNotEmpty()) onProgrammeChange(availableProgrammes.first())
@@ -322,6 +331,7 @@ fun MaterialDetailsStep(
                 Text("Next: Select Files", fontWeight = FontWeight.Bold)
             }
         }
+        item { Spacer(modifier = Modifier.height(32.dp)) }
     }
 }
 
@@ -418,6 +428,7 @@ fun FileSelectionStep(
         ) {
             Text("Next: Final Review", fontWeight = FontWeight.Bold)
         }
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 

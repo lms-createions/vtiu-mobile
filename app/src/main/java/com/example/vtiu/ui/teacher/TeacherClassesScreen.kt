@@ -41,48 +41,65 @@ fun TeacherClassesScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("My Assigned Classes", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
-        LazyColumn(
+    Scaffold { padding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .background(Color(0xFFF4F6F8)),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F6F8))
         ) {
-            if (classesApi.isEmpty()) {
-                item {
-                    Column(modifier = Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.School, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(64.dp))
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = "No classes assigned in Flask database.", color = Color.Gray)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "My Classes",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (classesApi.isEmpty()) {
+                    item {
+                        Column(modifier = Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.School, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(64.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(text = "No classes assigned in Flask database.", color = Color.Gray)
+                        }
                     }
                 }
-            }
-            items(classesApi) { cls ->
-                TeacherClassCard(
-                    teacherClass = TeacherClass(
-                        id = cls.id,
-                        courseName = cls.courseName,
-                        courseCode = cls.courseCode,
-                        programmeName = cls.programme,
-                        programmeLevel = cls.level,
-                        studentCount = cls.studentCount
-                    ),
-                    onClick = { onClassClick(cls.id) }
-                )
+                items(classesApi) { cls ->
+                    TeacherClassCard(
+                        teacherClass = TeacherClass(
+                            id = cls.id,
+                            courseName = cls.courseName,
+                            courseCode = cls.courseCode,
+                            programmeName = cls.programme,
+                            programmeLevel = cls.level,
+                            studentCount = cls.studentCount
+                        ),
+                        onClick = { onClassClick(cls.id) }
+                    )
+                }
+                
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
         }
     }

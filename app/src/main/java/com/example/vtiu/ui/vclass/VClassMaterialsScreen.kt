@@ -52,25 +52,34 @@ fun VClassMaterialsScreen(
         it.title.contains(searchQuery, ignoreCase = true)
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Materials Hub", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VClassPrimary, titleContentColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F4F4))
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Materials Hub",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
             // Search Bar
             OutlinedTextField(
                 value = searchQuery,
@@ -91,7 +100,7 @@ fun VClassMaterialsScreen(
             ScrollableTabRow(
                 selectedTabIndex = types.indexOf(selectedType),
                 containerColor = Color.Transparent,
-                contentColor = VClassPrimary,
+                contentColor = SchoolPrimary,
                 edgePadding = 16.dp,
                 divider = {}
             ) {
@@ -205,7 +214,7 @@ fun MaterialFileCard(
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = VClassPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = SchoolPrimary)
                 ) {
                     Text("Get", fontSize = 10.sp)
                 }

@@ -65,7 +65,6 @@ fun VClassTakeQuizScreen(
             delay(1000)
             timeLeftSeconds--
         }
-        // Auto-submit when timer hits zero
         val answers = userAnswers.mapKeys { it.key.toString() }
         viewModel.submitQuiz(userId, quiz.id, answers) { score, total ->
             onSubmitSuccess(quiz.title, score, total)
@@ -77,37 +76,51 @@ fun VClassTakeQuizScreen(
     val timerText = "%02d:%02d".format(minutes, seconds)
     val progress = if (questions.isNotEmpty()) userAnswers.size.toFloat() / questions.size else 0f
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(quiz.title, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                actions = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(end = 16.dp)
-                    ) {
-                        Icon(Icons.Default.Timer, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(timerText, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VClassPrimary, titleContentColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F4F4))
-                .navigationBarsPadding() // Smartly sits on top of system navigation
+                .navigationBarsPadding()
         ) {
-            // Progress Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(VClassPrimary)
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.White
+                        )
+                    }
+                    Text(
+                        text = quiz.title,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                }
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = 16.dp)
+                ) {
+                    Icon(Icons.Default.Timer, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(timerText, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            }
+
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier.fillMaxWidth().height(8.dp),
@@ -139,6 +152,7 @@ fun VClassTakeQuizScreen(
                     ) {
                         Text("Submit Quiz", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }

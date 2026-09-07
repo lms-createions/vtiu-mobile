@@ -41,59 +41,73 @@ fun TeacherLiveHubScreen(
     val meetings = meetingsApi.map {
         com.example.vtiu.data.model.VClassMeeting(it.id, it.title, it.courseName, "", it.start, it.end, null, it.isLive, false)
     }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Live Class Hub", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Lecture Management",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            
-            HubActionCard(
-                title = "Schedule New Lecture",
-                description = "Create a new live session link for your courses",
-                icon = Icons.Default.Add,
-                color = Color(0xFF2D8CFF), // Zoom Blue
-                onClick = onCreateLiveClick
-            )
-
-            Text(
-                text = "Active & Upcoming Sessions",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.DarkGray,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                items(meetings) { meeting ->
-                    TeacherMeetingCard(
-                        meeting = meeting,
-                        onHostClick = { onHostClick(meeting.id) }
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
                     )
+                }
+                Text(
+                    text = "Live Class Hub",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Lecture Management",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                
+                HubActionCard(
+                    title = "Schedule New Lecture",
+                    description = "Create a new live session link for your courses",
+                    icon = Icons.Default.Add,
+                    color = Color(0xFF2D8CFF), // Zoom Blue
+                    onClick = onCreateLiveClick
+                )
+
+                Text(
+                    text = "Active & Upcoming Sessions",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(meetings) { meeting ->
+                        TeacherMeetingCard(
+                            meeting = meeting,
+                            onHostClick = { onHostClick(meeting.id) }
+                        )
+                    }
                 }
             }
         }

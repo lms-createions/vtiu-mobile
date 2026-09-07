@@ -41,88 +41,105 @@ fun TranscriptScreen(
     
     var showGpaInfo by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Academic Transcript", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { showGpaInfo = true }) {
-                        Icon(Icons.Default.Info, contentDescription = "GPA Info", tint = SchoolPrimary)
-                    }
-                    IconButton(onClick = { /* Download Full Transcript */ }) {
-                        Icon(Icons.Default.Download, contentDescription = "Download")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         val transcript = transcriptApi
         if (transcript == null) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = SchoolPrimary)
             }
         } else {
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .background(Color(0xFFF4F6F8)),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(top = padding.calculateTopPadding())
+                    .background(Color(0xFFF4F6F8))
             ) {
-                // Student Header
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = SchoolPrimary),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(20.dp)) {
-                            Text(text = transcript.studentName, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                            Text(text = "Student ID: ${transcript.studentId}", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 0.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "Back",
+                                tint = Color.Black
+                            )
+                        }
+                        Text(
+                            text = "Academic Transcript",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
+                    
+                    Row {
+                        IconButton(onClick = { showGpaInfo = true }) {
+                            Icon(Icons.Default.Info, contentDescription = "GPA Info", tint = SchoolPrimary)
+                        }
+                        IconButton(onClick = { /* Download Full Transcript */ }) {
+                            Icon(Icons.Default.Download, contentDescription = "Download", tint = Color.Black)
                         }
                     }
                 }
 
-                // Cumulative Stats
-                item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TranscriptStatCard(Modifier.weight(1f), "Cum. GPA", "%.2f".format(transcript.cumulativeGpa), SchoolPrimary)
-                        TranscriptStatCard(Modifier.weight(1f), "Weighted GPA", "%.2f".format(transcript.cumulativeWeightedGpa), Color(0xFF2E7D32))
-                    }
-                }
-
-                item {
-                    Text(text = "Academic History", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
-                }
-
-                // Semester breakdown
-                items(transcript.semesters) { semester ->
-                    SemesterBreakdownCard(
-                        SemesterTranscript(
-                            academicYear = semester.academicYear,
-                            semester = semester.semester,
-                            coursesCount = semester.courses.size,
-                            gpa = semester.gpa,
-                            weightedGpa = semester.gpa,
-                            creditHours = semester.courses.sumOf { it.credits },
-                            isReleased = semester.isReleased,
-                            courses = semester.courses.map { 
-                                TranscriptCourse(it.courseCode, it.courseName, it.credits, 0f, it.grade, 20f, 30f, 50f)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Student Header
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = SchoolPrimary),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(20.dp)) {
+                                Text(text = transcript.studentName, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                                Text(text = "Student ID: ${transcript.studentId}", color = Color.White.copy(alpha = 0.8f), fontSize = 14.sp)
                             }
+                        }
+                    }
+
+                    // Cumulative Stats
+                    item {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TranscriptStatCard(Modifier.weight(1f), "Cum. GPA", "%.2f".format(transcript.cumulativeGpa), SchoolPrimary)
+                            TranscriptStatCard(Modifier.weight(1f), "Weighted GPA", "%.2f".format(transcript.cumulativeWeightedGpa), Color(0xFF2E7D32))
+                        }
+                    }
+
+                    item {
+                        Text(text = "Academic History", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+                    }
+
+                    // Semester breakdown
+                    items(transcript.semesters) { semester ->
+                        SemesterBreakdownCard(
+                            SemesterTranscript(
+                                academicYear = semester.academicYear,
+                                semester = semester.semester,
+                                coursesCount = semester.courses.size,
+                                gpa = semester.gpa,
+                                weightedGpa = semester.gpa,
+                                creditHours = semester.courses.sumOf { it.credits },
+                                isReleased = semester.isReleased,
+                                courses = semester.courses.map { 
+                                    TranscriptCourse(it.courseCode, it.courseName, it.credits, 0f, it.grade, 20f, 30f, 50f)
+                                }
+                            )
                         )
-                    )
-                }
-                
-                item {
-                    Spacer(modifier = Modifier.height(32.dp))
+                    }
+                    
+                    item {
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
                 }
             }
         }

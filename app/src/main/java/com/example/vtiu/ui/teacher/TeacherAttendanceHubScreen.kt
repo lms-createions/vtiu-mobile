@@ -24,49 +24,63 @@ fun TeacherAttendanceHubScreen(
     onMarkAttendanceClick: () -> Unit,
     onViewAnalyticsClick: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Manage Attendance", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Attendance Control",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            
-            HubActionCard(
-                title = "Mark Today's Attendance",
-                description = "Register student presence for the current session",
-                icon = Icons.Default.HowToReg,
-                color = Color(0xFF43A047),
-                onClick = onMarkAttendanceClick
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Manage Attendance",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
 
-            HubActionCard(
-                title = "Attendance Analytics",
-                description = "View history, statistics and absent reports",
-                icon = Icons.Default.Analytics,
-                color = TeacherPrimary,
-                onClick = onViewAnalyticsClick
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Attendance Control",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                
+                HubActionCard(
+                    title = "Mark Today's Attendance",
+                    description = "Register student presence for the current session",
+                    icon = Icons.Default.HowToReg,
+                    color = Color(0xFF43A047),
+                    onClick = onMarkAttendanceClick
+                )
+
+                HubActionCard(
+                    title = "Attendance Analytics",
+                    description = "View history, statistics and absent reports",
+                    icon = Icons.Default.Analytics,
+                    color = TeacherPrimary,
+                    onClick = onViewAnalyticsClick
+                )
+            }
         }
     }
 }

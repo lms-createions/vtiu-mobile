@@ -46,41 +46,55 @@ fun VClassAssignmentsScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("My Assignments", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VClassPrimary, titleContentColor = Color.White)
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .background(Color(0xFFF4F4F4)),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F4F4))
         ) {
-            item {
-                AssignmentStats(assignments)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "My Assignments",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
             }
 
-            items(assignments) { assignment ->
-                AssignmentCard(
-                    assignment = assignment,
-                    onDownloadClick = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Downloading: ${assignment.filename}...")
-                        }
-                    },
-                    onSubmitClick = { onSubmitClick(assignment.id) }
-                )
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    AssignmentStats(assignments)
+                }
+
+                items(assignments) { assignment ->
+                    AssignmentCard(
+                        assignment = assignment,
+                        onDownloadClick = {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Downloading: ${assignment.filename}...")
+                            }
+                        },
+                        onSubmitClick = { onSubmitClick(assignment.id) }
+                    )
+                }
             }
         }
     }

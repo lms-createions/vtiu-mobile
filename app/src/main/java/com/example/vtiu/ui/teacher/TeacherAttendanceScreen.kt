@@ -76,16 +76,38 @@ fun TeacherAttendanceScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Mark Attendance", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = padding.calculateTopPadding())
+                .background(Color(0xFFF4F6F8))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
                     }
-                },
-                actions = {
+                    Text(
+                        text = "Mark Attendance",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+                
+                Row {
                     if (existingAttendance.isNotEmpty()) {
                         IconButton(
                             onClick = {
@@ -125,17 +147,9 @@ fun TeacherAttendanceScreen(
                             Icon(Icons.Default.Save, contentDescription = "Save", tint = TeacherPrimary)
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .background(Color(0xFFF4F6F8))
-        ) {
+                }
+            }
+
             // Header Info - Clickable for Date Picker
             Card(
                 modifier = Modifier

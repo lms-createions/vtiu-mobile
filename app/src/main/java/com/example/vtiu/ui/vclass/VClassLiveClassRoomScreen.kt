@@ -44,7 +44,6 @@ fun VClassLiveClassRoomScreen(
     val meeting = VClassMeeting(meetingId, "Session", "Course", "Teacher", "", "", null, true, false)
     var isApproved by remember { mutableStateOf(!meeting.requiresApproval) }
     
-    // Agora Setup
     val agoraManager = remember { AgoraManager(context) }
     var hostUid by remember { mutableIntStateOf(0) }
     var hasPermissions by remember { mutableStateOf(false) }
@@ -58,13 +57,11 @@ fun VClassLiveClassRoomScreen(
         }
     }
 
-    // In a real app, you'd get the hostUid from the RTC event handler
-    // For development, we'll simulate the host joining
     LaunchedEffect(isApproved) {
         if (isApproved) {
             permissionLauncher.launch(arrayOf(android.Manifest.permission.RECORD_AUDIO))
             delay(2000)
-            hostUid = 123 // Simulated teacher UID
+            hostUid = 123
         }
     }
 
@@ -75,7 +72,6 @@ fun VClassLiveClassRoomScreen(
         }
     }
 
-    // Simulation: Auto-approve after 5 seconds if waiting
     if (meeting.requiresApproval && !isApproved) {
         LaunchedEffect(Unit) {
             delay(5000)
@@ -96,7 +92,7 @@ fun VClassLiveClassRoomScreen(
 fun WaitingRoom(meeting: com.example.vtiu.data.model.VClassMeeting, onLeaveClick: () -> Unit) {
     Scaffold(
         containerColor = Color(0xFF0F1720),
-        contentWindowInsets = WindowInsets(0, 0, 0, 0) // Force truly full screen
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Column(
             modifier = Modifier
@@ -146,30 +142,7 @@ fun ActiveTeachingRoom(
 
     Scaffold(
         containerColor = Color.Black,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0), // Use same logic as Quiz screen
-        topBar = {
-            if (!isFullScreen) {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Text(meeting.title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                            Text("Live • ${meeting.teacherName}", fontSize = 12.sp, color = Color(0xFF00C950))
-                        }
-                    },
-                    actions = {
-                        Button(
-                            onClick = onLeaveClick,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                            contentPadding = PaddingValues(horizontal = 12.dp),
-                            modifier = Modifier.height(32.dp).padding(end = 8.dp)
-                        ) {
-                            Text("Leave", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black)
-                )
-            }
-        }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Box(
             modifier = Modifier
@@ -178,7 +151,39 @@ fun ActiveTeachingRoom(
                 .background(Color.Black)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                // Teacher Video / Content Area
+                if (!isFullScreen) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 4.dp, vertical = 0.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = onLeaveClick) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                    contentDescription = "Leave",
+                                    tint = Color.White
+                                )
+                            }
+                            Column {
+                                Text(meeting.title, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                Text("Live • ${meeting.teacherName}", fontSize = 12.sp, color = Color(0xFF00C950))
+                            }
+                        }
+                        
+                        Button(
+                            onClick = onLeaveClick,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                            contentPadding = PaddingValues(horizontal = 12.dp),
+                            modifier = Modifier.height(32.dp).padding(end = 8.dp)
+                        ) {
+                            Text("Leave", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -196,7 +201,6 @@ fun ActiveTeachingRoom(
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
-                        // Simulation of Teacher Teaching
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(Icons.Default.Person, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(64.dp))
                             Text(
@@ -207,7 +211,6 @@ fun ActiveTeachingRoom(
                         }
                     }
                     
-                    // Floating Course Code
                     Surface(
                         color = Color.Red.copy(alpha = 0.8f),
                         shape = RoundedCornerShape(4.dp),
@@ -222,7 +225,6 @@ fun ActiveTeachingRoom(
                         )
                     }
 
-                    // Full Screen Toggle
                     IconButton(
                         onClick = { isFullScreen = !isFullScreen },
                         modifier = Modifier
@@ -239,7 +241,6 @@ fun ActiveTeachingRoom(
                 }
 
                 if (!isFullScreen) {
-                    // Interactive Tabs (Chat, Participants, etc.)
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -278,7 +279,6 @@ fun ActiveTeachingRoom(
                             }
                         }
 
-                        // Chat Input - Modern Floating Style
                         Surface(
                             shadowElevation = 12.dp,
                             tonalElevation = 2.dp,
@@ -287,7 +287,7 @@ fun ActiveTeachingRoom(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .imePadding()
-                                .navigationBarsPadding() // Smartly sits on top of system navigation
+                                .navigationBarsPadding()
                         ) {
                             Row(
                                 modifier = Modifier
@@ -331,7 +331,6 @@ fun ActiveTeachingRoom(
                 }
             }
             
-            // Full Screen Overlay for Student
             if (isFullScreen) {
                 Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.TopStart) {
                     IconButton(

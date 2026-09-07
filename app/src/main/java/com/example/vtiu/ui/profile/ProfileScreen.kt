@@ -42,22 +42,7 @@ fun ProfileScreen(
         }
     }
     
-    // In a real app, we'd have a separate profile state
-    // For now we'll use the user name and ID
-    
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("My Profile", fontWeight = FontWeight.SemiBold, fontSize = 20.sp) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         val profile = viewModel.profile.value
         if (profile == null) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
@@ -67,146 +52,173 @@ fun ProfileScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(top = padding.calculateTopPadding())
+                    .background(Color(0xFFF4F6F8))
             ) {
-                // TOP PROFILE CARD
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 0.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                    Text(
+                        text = "My Profile",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // TOP PROFILE CARD
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        // Circular Profile Placeholder
-                        if (!profile.profilePictureUrl.isNullOrBlank()) {
-                            val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
-                            coil.compose.AsyncImage(
-                                model = "$staticUrl${profile.profilePictureUrl}",
-                                contentDescription = "Profile Picture",
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(CircleShape),
-                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                            )
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(CircleShape)
-                                    .background(SchoolPrimary.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(60.dp),
-                                    tint = SchoolPrimary
+                        Row(
+                            modifier = Modifier.padding(20.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Circular Profile Placeholder
+                            if (!profile.profilePictureUrl.isNullOrBlank()) {
+                                val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
+                                coil.compose.AsyncImage(
+                                    model = "$staticUrl${profile.profilePictureUrl}",
+                                    contentDescription = "Profile Picture",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .clip(CircleShape),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .clip(CircleShape)
+                                        .background(SchoolPrimary.copy(alpha = 0.1f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(60.dp),
+                                        tint = SchoolPrimary
+                                    )
+                                }
+                            }
+                            
+                            Spacer(modifier = Modifier.width(20.dp))
+                            
+                            Column {
+                                Text(
+                                    text = profile.name,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2C3E50)
+                                )
+                                Row(modifier = Modifier.padding(vertical = 4.dp)) {
+                                    BadgeItem(profile.programme ?: "N/A")
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    BadgeItem("Level ${profile.level ?: "N/A"}")
+                                }
+                                Text(
+                                    text = profile.email ?: "No Email",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                                Text(
+                                    text = "ID: ${profile.userId}",
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
                                 )
                             }
                         }
-                        
-                        Spacer(modifier = Modifier.width(20.dp))
-                        
-                        Column {
-                            Text(
-                                text = profile.name,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF2C3E50)
-                            )
-                            Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                                BadgeItem(profile.programme ?: "N/A")
-                                Spacer(modifier = Modifier.width(8.dp))
-                                BadgeItem("Level ${profile.level ?: "N/A"}")
-                            }
-                            Text(
-                                text = profile.email ?: "No Email",
-                                fontSize = 14.sp,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = "ID: ${profile.userId}",
-                                fontSize = 12.sp,
-                                color = Color.Gray
-                            )
-                        }
                     }
-                }
 
-                // PERSONAL INFORMATION
-                ProfileSection(
-                    title = "Personal Information",
-                    icon = Icons.Default.Person,
-                    items = listOf(
-                        Pair("Username", profile.username),
-                        Pair("Role", profile.role.capitalize()),
-                        Pair("Date of Birth", profile.dob ?: "N/A"),
-                        Pair("Gender", profile.gender ?: "N/A"),
-                        Pair("Nationality", profile.nationality ?: "N/A"),
-                        Pair("Religion", profile.religion ?: "N/A")
+                    // PERSONAL INFORMATION
+                    ProfileSection(
+                        title = "Personal Information",
+                        icon = Icons.Default.Person,
+                        items = listOf(
+                            Pair("Username", profile.username),
+                            Pair("Role", profile.role.capitalize()),
+                            Pair("Date of Birth", profile.dob ?: "N/A"),
+                            Pair("Gender", profile.gender ?: "N/A"),
+                            Pair("Nationality", profile.nationality ?: "N/A"),
+                            Pair("Religion", profile.religion ?: "N/A")
+                        )
                     )
-                )
 
-                // ACADEMIC INFORMATION
-                ProfileSection(
-                    title = "Academic Information",
-                    icon = Icons.Default.School,
-                    items = listOf(
-                        Pair("Programme", profile.programme ?: "N/A"),
-                        Pair("Level", profile.level?.toString() ?: "N/A"),
-                        Pair("Index No", profile.indexNumber ?: "N/A"),
-                        Pair("Academic Year", profile.academicYear ?: "N/A"),
-                        Pair("Semester", profile.semester ?: "N/A"),
-                        Pair("Status", profile.academicStatus ?: "Active")
+                    // ACADEMIC INFORMATION
+                    ProfileSection(
+                        title = "Academic Information",
+                        icon = Icons.Default.School,
+                        items = listOf(
+                            Pair("Programme", profile.programme ?: "N/A"),
+                            Pair("Level", profile.level?.toString() ?: "N/A"),
+                            Pair("Index No", profile.indexNumber ?: "N/A"),
+                            Pair("Academic Year", profile.academicYear ?: "N/A"),
+                            Pair("Semester", profile.semester ?: "N/A"),
+                            Pair("Status", profile.academicStatus ?: "Active")
+                        )
                     )
-                )
 
-                // CONTACT INFORMATION
-                ProfileSection(
-                    title = "Contact Information",
-                    icon = Icons.Default.Phone,
-                    items = listOf(
-                        Pair("Email", profile.email ?: "N/A"),
-                        Pair("Phone", profile.phone ?: "N/A"),
-                        Pair("Address", profile.address ?: "N/A")
+                    // CONTACT INFORMATION
+                    ProfileSection(
+                        title = "Contact Information",
+                        icon = Icons.Default.Phone,
+                        items = listOf(
+                            Pair("Email", profile.email ?: "N/A"),
+                            Pair("Phone", profile.phone ?: "N/A"),
+                            Pair("Address", profile.address ?: "N/A")
+                        )
                     )
-                )
 
-                // ACTIONS
-                Button(
-                    onClick = onIdCardClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SchoolPrimary)
-                ) {
-                    Icon(Icons.Default.Badge, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("View Digital ID Card")
+                    // ACTIONS
+                    Button(
+                        onClick = onIdCardClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = SchoolPrimary)
+                    ) {
+                        Icon(Icons.Default.Badge, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("View Digital ID Card")
+                    }
+
+                    OutlinedButton(
+                        onClick = onLogoutClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Logout from Portal")
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
-
-                OutlinedButton(
-                    onClick = onLogoutClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Logout from Portal")
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }

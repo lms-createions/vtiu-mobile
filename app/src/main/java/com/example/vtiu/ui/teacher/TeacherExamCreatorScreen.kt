@@ -68,28 +68,37 @@ fun TeacherExamCreatorScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Create New Exam", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        if (currentStep > 1) currentStep-- else onBackClick()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
         ) {
-            // Progress Indicator (4 steps for Exam)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = {
+                    if (currentStep > 1) currentStep-- else onBackClick()
+                }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Create New Exam",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+
             ExamStepProgressBar(currentStep = currentStep)
 
             Box(modifier = Modifier.weight(1f)) {
@@ -147,7 +156,7 @@ fun TeacherExamCreatorScreen(
                             questionCount = questions.size,
                             mode = assignmentMode,
                             onPublish = {
-                                val startDateTime = "${SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(java.util.Date())}T10:00:00" // Hardcoded time for demo or need time picker
+                                val startDateTime = "${SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(java.util.Date())}T10:00:00" 
                                 val request = com.example.vtiu.data.model.api.ExamCreateRequest(
                                     title = title,
                                     courseName = selectedCourse,
@@ -222,7 +231,6 @@ fun ExamSetupStep(
         .filter { it.programme == programme && it.level == level }
         .map { it.courseName }
 
-    // Auto-select first available if current selection is invalid
     LaunchedEffect(availableProgrammes) {
         if (programme.isEmpty() || !availableProgrammes.contains(programme)) {
             if (availableProgrammes.isNotEmpty()) onProgrammeChange(availableProgrammes.first())
@@ -311,6 +319,7 @@ fun ExamSetupStep(
                 Text("Next: Security Settings", fontWeight = FontWeight.Bold)
             }
         }
+        item { Spacer(modifier = Modifier.height(32.dp)) }
     }
 }
 
@@ -405,6 +414,7 @@ fun ExamSecurityStep(
         ) {
             Text("Continue to Questions", fontWeight = FontWeight.Bold)
         }
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
