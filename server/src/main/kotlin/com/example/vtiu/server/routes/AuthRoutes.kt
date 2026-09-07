@@ -20,17 +20,18 @@ fun Route.authRoutes() {
                 val request = call.receive<LoginRequest>()
                 
                 val user = transaction {
-                    // Check if user exists with provided userId, username, password and role
-                    // Trimming to handle accidental whitespaces
+                    // Find user by userId and role first
                     val query = Users.select { 
-                        (Users.userId eq request.userId.trim()) and 
-                        (Users.username eq request.username.trim()) and
-                        (Users.passwordHash eq request.password) and
-                        (Users.role eq request.role) 
+                        (Users.userId eq request.userId.trim()) and (Users.role eq request.role) 
                     }
                     
                     val userRow = query.singleOrNull()
-                    if (userRow != null) {
+                    
+                    // Verify Username and Password match the record found
+                    if (userRow != null && 
+                        userRow[Users.username].trim().equals(request.username.trim(), ignoreCase = true) &&
+                        userRow[Users.passwordHash] == request.password) {
+                        
                         val rawProfilePic = userRow[Users.profilePicture]
                         val profilePicPath = if (rawProfilePic.isNullOrBlank() || rawProfilePic == "default.png") {
                             "/static/uploads/profile_pictures/default_avatar.png"
