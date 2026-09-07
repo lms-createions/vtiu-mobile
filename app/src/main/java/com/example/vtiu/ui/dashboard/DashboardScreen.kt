@@ -92,7 +92,7 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             // 1. Header Section
-            item(span = { GridItemSpan(2) }) {
+            item(span = { GridItemSpan(3) }) {
                 HeaderSection(
                     userName = userName, 
                     profilePicUrl = profile?.profilePictureUrl, 
@@ -102,12 +102,12 @@ fun DashboardScreen(
             }
 
             // 2. Banner Card
-            item(span = { GridItemSpan(2) }) {
+            item(span = { GridItemSpan(3) }) {
                 BannerCard()
             }
 
             // 3. Section Title
-            item(span = { GridItemSpan(2) }) {
+            item(span = { GridItemSpan(3) }) {
                 SectionTitle(academicYear = profile?.academicYear ?: "2024/2025")
             }
 
@@ -117,7 +117,7 @@ fun DashboardScreen(
             }
             
             // Padding at the bottom
-            item(span = { GridItemSpan(2) }) {
+            item(span = { GridItemSpan(3) }) {
                 Spacer(modifier = Modifier.height(80.dp))
             }
         }
@@ -127,7 +127,6 @@ fun DashboardScreen(
 @Composable
 fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick: () -> Unit, onMenuClick: () -> Unit) {
     val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
-    val firstName = userName.split(" ").firstOrNull() ?: userName
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -169,7 +168,7 @@ fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick:
             Column {
                 Text(text = "Welcome,", fontSize = 14.sp, color = Color.Gray)
                 Text(
-                    text = firstName,
+                    text = userName,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -190,38 +189,39 @@ fun BannerCard() {
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF00C950))
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(24.dp)) { // Increased padding from 20.dp
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Student dashboard",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.White.copy(alpha = 0.8f)
+                    text = "Student portal", // Updated text slightly
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White.copy(alpha = 0.9f)
                 )
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.8f),
-                    modifier = Modifier.size(20.dp)
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Stay on top of your studies",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
+                text = "Track your academic progress in real-time", // More descriptive text
+                fontSize = 22.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.White,
+                lineHeight = 28.sp
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Access your courses, results, timetable and more in one place.",
-                fontSize = 14.sp,
-                lineHeight = 20.sp,
-                color = Color.White.copy(alpha = 0.8f)
+                text = "Access your courses, results, digital ID and virtual classrooms anywhere, anytime.",
+                fontSize = 15.sp,
+                lineHeight = 22.sp,
+                color = Color.White.copy(alpha = 0.85f)
             )
         }
     }
