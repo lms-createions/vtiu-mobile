@@ -18,7 +18,10 @@ fun Route.vClassRoutes() {
         get("/vclass/materials/{courseId}") {
             val courseId = call.parameters["courseId"]?.toIntOrNull() ?: 0
             val materials = transaction {
-                CourseMaterials.select { CourseMaterials.courseId eq courseId }.map {
+                // Find course name first since course_id column is missing in materials table
+                val courseName = Courses.select { Courses.id eq courseId }.singleOrNull()?.get(Courses.name) ?: ""
+                
+                CourseMaterials.select { CourseMaterials.courseName eq courseName }.map {
                     MaterialApi(
                         id = it[CourseMaterials.id],
                         title = it[CourseMaterials.title],

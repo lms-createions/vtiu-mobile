@@ -403,7 +403,6 @@ object CourseMaterials : Table("course_material") {
     val title = varchar("title", 120)
     val programmeName = varchar("programme_name", 100)
     val programmeLevel = varchar("programme_level", 50)
-    val courseId = integer("course_id").references(Courses.id).nullable()
     val courseName = varchar("course_name", 100)
     val filename = varchar("filename", 200)
     val originalName = varchar("original_name", 200)

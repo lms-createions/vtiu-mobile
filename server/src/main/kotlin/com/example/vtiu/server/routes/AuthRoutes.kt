@@ -21,9 +21,10 @@ fun Route.authRoutes() {
                 
                 val user = transaction {
                     // Check if user exists with provided userId, username, password and role
+                    // Trimming to handle accidental whitespaces
                     val query = Users.select { 
-                        (Users.userId eq request.userId) and 
-                        (Users.username eq request.username) and
+                        (Users.userId eq request.userId.trim()) and 
+                        (Users.username eq request.username.trim()) and
                         (Users.passwordHash eq request.password) and
                         (Users.role eq request.role) 
                     }
@@ -51,7 +52,7 @@ fun Route.authRoutes() {
                 if (user != null) {
                     call.respond(LoginResponse(success = true, user = user))
                 } else {
-                    call.respond(HttpStatusCode.Unauthorized, LoginResponse(success = false, message = "Invalid credentials"))
+                    call.respond(HttpStatusCode.Unauthorized, LoginResponse(success = false, message = "Invalid credentials. Please verify your Username, ID, and Password."))
                 }
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, LoginResponse(success = false, message = "Bad Request: ${e.message}"))
