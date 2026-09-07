@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,12 +30,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun TeacherAttendanceAnalyticsScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     courseId: Int,
     viewModel: TeacherViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
 ) {
     val analyticsApi by viewModel.attendanceAnalytics
-    val userId = sessionManager.getUserId() ?: ""
 
     LaunchedEffect(courseId) {
         viewModel.loadAttendanceAnalytics(courseId)
@@ -75,12 +76,17 @@ fun TeacherAttendanceAnalyticsScreen(
                     )
                 }
                 
-                IconButton(onClick = {
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Generating CSV Report...")
+                Row {
+                    IconButton(onClick = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Generating CSV Report...")
+                        }
+                    }) {
+                        Icon(Icons.Default.Download, contentDescription = "Export", tint = Color.Black)
                     }
-                }) {
-                    Icon(Icons.Default.Download, contentDescription = "Export", tint = Color.Black)
+                    IconButton(onClick = onMenuClick) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                    }
                 }
             }
 

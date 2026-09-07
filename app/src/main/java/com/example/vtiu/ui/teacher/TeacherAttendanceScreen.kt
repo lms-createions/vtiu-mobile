@@ -7,10 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +27,7 @@ import java.util.*
 @Composable
 fun TeacherAttendanceScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     courseId: Int = 1, // Mock course ID for now
     viewModel: TeacherViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
@@ -146,6 +144,9 @@ fun TeacherAttendanceScreen(
                         } else {
                             Icon(Icons.Default.Save, contentDescription = "Save", tint = TeacherPrimary)
                         }
+                    }
+                    IconButton(onClick = onMenuClick) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
                     }
                 }
             }

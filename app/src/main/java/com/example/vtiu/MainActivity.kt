@@ -61,45 +61,8 @@ import com.example.vtiu.ui.profile.ProfileScreen
 import com.example.vtiu.ui.results.ResultsScreen
 import com.example.vtiu.ui.results.TranscriptScreen
 import com.example.vtiu.ui.timetable.TimetableScreen
-import com.example.vtiu.ui.teacher.TeacherAssessmentSchemeScreen
-import com.example.vtiu.ui.teacher.TeacherClassPerformanceScreen
-import com.example.vtiu.ui.teacher.TeacherAttendanceAnalyticsScreen
-import com.example.vtiu.ui.teacher.TeacherAttendanceHubScreen
-import com.example.vtiu.ui.teacher.TeacherAttendanceScreen
-import com.example.vtiu.ui.teacher.TeacherAppointmentHubScreen
-import com.example.vtiu.ui.teacher.TeacherAppointmentRequestsScreen
-import com.example.vtiu.ui.teacher.TeacherAssignmentFileManagerScreen
-import com.example.vtiu.ui.teacher.TeacherClassesScreen
-import com.example.vtiu.ui.teacher.TeacherDashboardScreen
-import com.example.vtiu.ui.teacher.TeacherProfileScreen
-import com.example.vtiu.ui.teacher.TeacherExamCreatorScreen
-import com.example.vtiu.ui.teacher.TeacherExamHubScreen
-import com.example.vtiu.ui.teacher.TeacherExamSubmissionsScreen
-import com.example.vtiu.ui.teacher.TeacherGradeSubmissionsScreen
-import com.example.vtiu.ui.teacher.TeacherManageExamsScreen
-import com.example.vtiu.ui.teacher.TeacherManageQuizzesScreen
-import com.example.vtiu.ui.teacher.TeacherLiveHubScreen
-import com.example.vtiu.ui.teacher.TeacherLiveRoomScreen
-import com.example.vtiu.ui.teacher.TeacherCreateLiveScreen
-import com.example.vtiu.ui.teacher.TeacherManageSlotsScreen
-import com.example.vtiu.ui.teacher.TeacherMaterialsHubScreen
-import com.example.vtiu.ui.teacher.TeacherManageMaterialsScreen
-import com.example.vtiu.ui.teacher.TeacherMaterialsUploaderScreen
-import com.example.vtiu.ui.teacher.TeacherQuizCreatorScreen
-import com.example.vtiu.ui.teacher.TeacherQuizHubScreen
-import com.example.vtiu.ui.teacher.TeacherQuizSubmissionsScreen
-import com.example.vtiu.ui.vclass.VClassAssignmentsScreen
-import com.example.vtiu.ui.vclass.VClassDashboardScreen
-import com.example.vtiu.ui.vclass.VClassJoinMeetingScreen
-import com.example.vtiu.ui.vclass.VClassLiveClassRoomScreen
-import com.example.vtiu.ui.vclass.VClassLiveScreen
-import com.example.vtiu.ui.vclass.VClassMaterialsScreen
-import com.example.vtiu.ui.vclass.VClassPdfViewerScreen
-import com.example.vtiu.ui.vclass.VClassVideoPlayerScreen
-import com.example.vtiu.ui.vclass.VClassQuizInstructionsScreen
-import com.example.vtiu.ui.vclass.VClassQuizResultScreen
-import com.example.vtiu.ui.vclass.VClassSubmitAssignmentScreen
-import com.example.vtiu.ui.vclass.VClassTakeQuizScreen
+import com.example.vtiu.ui.teacher.*
+import com.example.vtiu.ui.vclass.*
 import com.example.vtiu.ui.theme.SchoolPrimary
 import com.example.vtiu.ui.theme.VTIUTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -255,9 +218,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                         onNotificationClick = {
                             navController.navigate(Screen.Notifications.route)
                         },
-                        onMenuClick = {
-                            scope.launch { drawerState.open() }
-                        },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -276,15 +237,14 @@ fun VtiuApp(sessionManager: SessionManager) {
                                 popUpTo(0) { inclusive = true }
                             }
                         },
-                        onMenuClick = {
-                            scope.launch { drawerState.open() }
-                        },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.TeacherClasses.route) {
                     TeacherClassesScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onClassClick = { courseId -> 
                             navController.navigate(Screen.TeacherAttendanceHub.createRoute(courseId))
                         },
@@ -294,6 +254,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherProfile.route) {
                     TeacherProfileScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onLogoutClick = {
                             sessionManager.logout()
                             navController.navigate(Screen.PortalSelection.route) {
@@ -310,6 +271,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     val courseId = backStackEntry.arguments?.getInt("courseId") ?: 0
                     TeacherAttendanceHubScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onMarkAttendanceClick = { navController.navigate(Screen.TeacherAttendance.createRoute(courseId)) },
                         onViewAnalyticsClick = { navController.navigate(Screen.TeacherAttendanceAnalytics.createRoute(courseId)) }
                     )
@@ -321,6 +283,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     val courseId = backStackEntry.arguments?.getInt("courseId") ?: 0
                     TeacherAttendanceScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         courseId = courseId,
                         sessionManager = sessionManager
                     )
@@ -332,6 +295,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     val courseId = backStackEntry.arguments?.getInt("courseId") ?: 0
                     TeacherAttendanceAnalyticsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         courseId = courseId,
                         sessionManager = sessionManager
                     )
@@ -339,30 +303,35 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherGrading.route) {
                     TeacherGradeSubmissionsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.TeacherAssessmentScheme.route) {
                     TeacherAssessmentSchemeScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.TeacherClassPerformance.route) {
                     TeacherClassPerformanceScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.TeacherAssignmentFileManager.route) {
                     TeacherAssignmentFileManagerScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.TeacherAppointmentHub.route) {
                     TeacherAppointmentHubScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onManageSlotsClick = { navController.navigate(Screen.TeacherManageSlots.route) },
                         onViewRequestsClick = { navController.navigate(Screen.TeacherAppointmentRequests.route) }
                     )
@@ -370,18 +339,21 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherManageSlots.route) {
                     TeacherManageSlotsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.TeacherAppointmentRequests.route) {
                     TeacherAppointmentRequestsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.TeacherQuizHub.route) {
                     TeacherQuizHubScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onCreateQuizClick = { navController.navigate(Screen.TeacherCreateQuiz.createRoute()) },
                         onManageQuizzesClick = { navController.navigate(Screen.TeacherManageQuizzes.route) },
                         onViewSubmissionsClick = { navController.navigate(Screen.TeacherQuizSubmissions.route) }
@@ -390,6 +362,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherManageQuizzes.route) {
                     TeacherManageQuizzesScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onEditQuizClick = { quizId -> 
                             navController.navigate(Screen.TeacherCreateQuiz.createRoute(quizId))
                         },
@@ -399,6 +372,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherQuizSubmissions.route) {
                     TeacherQuizSubmissionsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -415,6 +389,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     TeacherQuizCreatorScreen(
                         quizId = quizId,
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onQuizPublished = {
                             navController.popBackStack(Screen.TeacherQuizHub.route, false)
                         },
@@ -424,6 +399,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherExamHub.route) {
                     TeacherExamHubScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onCreateExamClick = { navController.navigate(Screen.TeacherCreateExam.route) },
                         onManageExamsClick = { navController.navigate(Screen.TeacherManageExams.route) },
                         onViewSubmissionsClick = { navController.navigate(Screen.TeacherExamSubmissions.route) }
@@ -432,6 +408,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherManageExams.route) {
                     TeacherManageExamsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onEditExamClick = { /* Edit */ },
                         sessionManager = sessionManager
                     )
@@ -439,12 +416,14 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherExamSubmissions.route) {
                     TeacherExamSubmissionsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.TeacherLiveHub.route) {
                     TeacherLiveHubScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onCreateLiveClick = { navController.navigate(Screen.TeacherCreateLive.route) },
                         onHostClick = { id -> navController.navigate(Screen.TeacherLiveRoom.createRoute(id)) },
                         sessionManager = sessionManager
@@ -453,6 +432,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherCreateLive.route) {
                     TeacherCreateLiveScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onScheduleSuccess = {
                             navController.popBackStack(Screen.TeacherLiveHub.route, false)
                         },
@@ -466,6 +446,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherMaterialsHub.route) {
                     TeacherMaterialsHubScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onUploadClick = { navController.navigate(Screen.TeacherMaterialsUploader.route) },
                         onManageClick = { navController.navigate(Screen.TeacherManageMaterials.route) }
                     )
@@ -473,12 +454,14 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherManageMaterials.route) {
                     TeacherManageMaterialsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.TeacherMaterialsUploader.route) {
                     TeacherMaterialsUploaderScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onUploadSuccess = {
                             navController.popBackStack(Screen.TeacherDashboard.route, false)
                         },
@@ -488,6 +471,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.TeacherCreateExam.route) {
                     TeacherExamCreatorScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         onExamPublished = {
                             navController.popBackStack(Screen.TeacherExamHub.route, false)
                         },
@@ -497,12 +481,14 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.Courses.route) {
                     CourseListScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.CourseRegistration.route) {
                     CourseRegistrationScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -510,36 +496,42 @@ fun VtiuApp(sessionManager: SessionManager) {
                     ResultsScreen(
                         onBackClick = { navController.popBackStack() },
                         onViewTranscriptClick = { navController.navigate(Screen.Transcript.route) },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.Transcript.route) {
                     TranscriptScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.Assessments.route) {
                     AssessmentsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.AcademicCalendar.route) {
                     AcademicCalendarScreen(
-                        onBackClick = { navController.popBackStack() }
+                        onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } }
                     )
                 }
                 composable(Screen.BookAppointment.route) {
                     AppointmentBookingScreen(
                         onBackClick = { navController.popBackStack() },
                         onViewMyAppointments = { navController.navigate(Screen.MyAppointments.route) },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.MyAppointments.route) {
                     MyAppointmentsScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -547,6 +539,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     ExamListScreen(
                         onBackClick = { navController.popBackStack() },
                         onExamClick = { id -> navController.navigate(Screen.ExamInstructions.createRoute(id)) },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -558,7 +551,8 @@ fun VtiuApp(sessionManager: SessionManager) {
                     ExamInstructionsScreen(
                         examId = id,
                         onBackClick = { navController.popBackStack() },
-                        onStartExamClick = { examId -> navController.navigate(Screen.TakeExam.createRoute(examId)) }
+                        onStartExamClick = { examId -> navController.navigate(Screen.TakeExam.createRoute(examId)) },
+                        onMenuClick = { scope.launch { drawerState.open() } }
                     )
                 }
                 composable(
@@ -579,6 +573,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                 composable(Screen.Timetable.route) {
                     TimetableScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -586,18 +581,21 @@ fun VtiuApp(sessionManager: SessionManager) {
                     FeesScreen(
                         onBackClick = { navController.popBackStack() },
                         onPayNowClick = { navController.navigate(Screen.PayFees.route) },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.PayFees.route) {
                     PayFeesScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.Notifications.route) {
                     NotificationScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -608,6 +606,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                         onAssignmentsClick = { navController.navigate(Screen.VClassAssignments.route) },
                         onLiveClick = { navController.navigate(Screen.VClassLive.route) },
                         onQuizClick = { quizId -> navController.navigate(Screen.QuizInstructions.createRoute(quizId)) },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -619,7 +618,8 @@ fun VtiuApp(sessionManager: SessionManager) {
                     VClassQuizInstructionsScreen(
                         quizId = quizId,
                         onBackClick = { navController.popBackStack() },
-                        onStartQuizClick = { id -> navController.navigate(Screen.TakeQuiz.createRoute(id)) }
+                        onStartQuizClick = { id -> navController.navigate(Screen.TakeQuiz.createRoute(id)) },
+                        onMenuClick = { scope.launch { drawerState.open() } }
                     )
                 }
                 composable(
@@ -662,6 +662,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     VClassMaterialsScreen(
                         onBackClick = { navController.popBackStack() },
                         onPreviewClick = { id -> navController.navigate(Screen.VClassPdfViewer.createRoute(id)) },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -680,6 +681,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                         onBackClick = { navController.popBackStack() },
                         onJoinClick = { id -> navController.navigate(Screen.JoinMeeting.createRoute(id)) },
                         onRecordingClick = { id -> navController.navigate(Screen.VClassPlayer.createRoute(id)) },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -720,6 +722,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     VClassAssignmentsScreen(
                         onBackClick = { navController.popBackStack() },
                         onSubmitClick = { id -> navController.navigate(Screen.SubmitAssignment.createRoute(id)) },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -734,6 +737,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                         onSubmitSuccess = {
                             navController.popBackStack()
                         },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
@@ -747,12 +751,14 @@ fun VtiuApp(sessionManager: SessionManager) {
                                 popUpTo(0) { inclusive = true }
                             }
                         },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }
                 composable(Screen.IdCard.route) {
                     IdCardScreen(
                         onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
                     )
                 }

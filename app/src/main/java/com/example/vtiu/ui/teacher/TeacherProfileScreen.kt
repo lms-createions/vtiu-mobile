@@ -27,6 +27,7 @@ import com.example.vtiu.ui.theme.TeacherPrimary
 @Composable
 fun TeacherProfileScreen(
     onBackClick: () -> Unit,
+    onMenuClick: () -> Unit,
     onLogoutClick: () -> Unit,
     viewModel: TeacherViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
@@ -77,8 +78,14 @@ fun TeacherProfileScreen(
                             color = Color.Black
                         )
                     }
-                    IconButton(onClick = { /* Edit Profile Simulation */ }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Black)
+                    
+                    Row {
+                        IconButton(onClick = { /* Edit Profile Simulation */ }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Black)
+                        }
+                        IconButton(onClick = onMenuClick) {
+                            Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                        }
                     }
                 }
 
