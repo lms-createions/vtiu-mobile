@@ -195,12 +195,38 @@ fun Route.studentRoutes() {
             val userId = call.parameters["userId"] ?: ""
             val transcript = transaction {
                 val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction null
+                val studentId = userRow[Users.id]
+                
+                val allGrades = (StudentCourseGrades innerJoin Courses).select {
+                    StudentCourseGrades.studentId eq studentId
+                }.groupBy({ row -> row[StudentCourseGrades.academicYear] to row[StudentCourseGrades.semester] }) { row ->
+                    TranscriptCourseApi(
+                        code = row[Courses.code],
+                        name = row[Courses.name],
+                        credits = row[Courses.creditHours],
+                        score = row[StudentCourseGrades.finalScore],
+                        grade = row[StudentCourseGrades.gradeLetter]
+                    )
+                }
+
+                val semesters = allGrades.map { (period, courses) ->
+                    TranscriptSemesterApi(
+                        academicYear = period.first,
+                        semester = period.second,
+                        gpa = 4.0f, // Placeholder
+                        isReleased = true,
+                        courses = courses
+                    )
+                }
+
                 TranscriptApi(
                     studentId = userId,
                     studentName = "${userRow[Users.firstName]} ${userRow[Users.lastName]}",
                     gpa = 4.0f,
-                    totalCredits = 0,
-                    courses = emptyList()
+                    cumulativeGpa = 4.0f,
+                    weightedGpa = 4.0f,
+                    totalCredits = semesters.sumOf { it.courses.sumOf { c -> c.credits } },
+                    semesters = semesters
                 )
             }
             if (transcript != null) call.respond(transcript) else call.respond(HttpStatusCode.NotFound)

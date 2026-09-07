@@ -262,28 +262,40 @@ data class ExamOptionApi(
 
 @Serializable
 data class TranscriptApi(
-    @SerialName("student_name") val studentName: String,
     @SerialName("student_id") val studentId: String,
-    @SerialName("cumulative_gpa") val cumulativeGpa: Float,
-    @SerialName("cumulative_weighted_gpa") val cumulativeWeightedGpa: Float,
-    val semesters: List<SemesterTranscriptApi>
+    @SerialName("student_name") val studentName: String,
+    @SerialName("academic_year") val academicYear: String? = null,
+    val semester: String? = null,
+    @SerialName("is_released") val isReleased: Boolean = true,
+    val gpa: Float,
+    @SerialName("weighted_gpa") val weightedGpa: Float? = null,
+    @SerialName("cumulative_gpa") val cumulativeGpa: Float? = null,
+    @SerialName("total_credits") val totalCredits: Int,
+    @SerialName("total_credits_attempted") val totalCreditsAttempted: Int? = null,
+    @SerialName("total_credits_earned") val totalCreditsEarned: Int? = null,
+    val courses: List<TranscriptCourseApi> = emptyList(),
+    val semesters: List<TranscriptSemesterApi> = emptyList()
 )
 
 @Serializable
-data class SemesterTranscriptApi(
+data class TranscriptSemesterApi(
     @SerialName("academic_year") val academicYear: String,
     val semester: String,
     val gpa: Float,
-    @SerialName("is_released") val isReleased: Boolean,
+    @SerialName("is_released") val isReleased: Boolean = true,
     val courses: List<TranscriptCourseApi>
 )
 
 @Serializable
 data class TranscriptCourseApi(
-    @SerialName("course_name") val courseName: String,
-    @SerialName("course_code") val courseCode: String,
+    val code: String,
+    val name: String,
     val credits: Int,
-    val grade: String
+    val score: Float? = null,
+    val grade: String? = null,
+    @SerialName("quiz_score") val quizScore: Float? = null,
+    @SerialName("assignment_score") val assignmentScore: Float? = null,
+    @SerialName("exam_score") val examScore: Float? = null
 )
 
 @Serializable

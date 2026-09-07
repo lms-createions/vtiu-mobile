@@ -469,5 +469,6 @@ data class TranscriptSemesterApi(
     @SerialName("academic_year") val academicYear: String,
     val semester: String,
     val gpa: Float,
+    @SerialName("is_released") val isReleased: Boolean = true,
     val courses: List<TranscriptCourseApi>
 )

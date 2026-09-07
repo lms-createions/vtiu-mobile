@@ -110,13 +110,19 @@ fun TranscriptScreen(
                     // Cumulative Stats
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TranscriptStatCard(Modifier.weight(1f), "Cum. GPA", "%.2f".format(transcript.cumulativeGpa), SchoolPrimary)
-                            TranscriptStatCard(Modifier.weight(1f), "Weighted GPA", "%.2f".format(transcript.cumulativeWeightedGpa), Color(0xFF2E7D32))
+                            TranscriptStatCard(Modifier.weight(1f), "Cum. GPA", "%.2f".format(transcript.cumulativeGpa ?: 0.0f), SchoolPrimary)
+                            TranscriptStatCard(Modifier.weight(1f), "Weighted GPA", "%.2f".format(transcript.weightedGpa ?: 0.0f), Color(0xFF2E7D32))
                         }
                     }
 
                     item {
                         Text(text = "Academic History", fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+                    }
+
+                    if (transcript.semesters.isEmpty()) {
+                        item {
+                            Text(text = "No history available yet.", color = Color.Gray, modifier = Modifier.padding(16.dp))
+                        }
                     }
 
                     // Semester breakdown
@@ -131,7 +137,7 @@ fun TranscriptScreen(
                                 creditHours = semester.courses.sumOf { it.credits },
                                 isReleased = semester.isReleased,
                                 courses = semester.courses.map { 
-                                    TranscriptCourse(it.courseCode, it.courseName, it.credits, 0f, it.grade, 20f, 30f, 50f)
+                                    TranscriptCourse(it.code, it.name, it.credits, it.score ?: 0f, it.grade, 20f, 30f, 50f)
                                 }
                             )
                         )
