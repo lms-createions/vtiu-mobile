@@ -54,25 +54,35 @@ fun CourseRegistrationScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = { Text("Course Registration", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .background(Color(0xFFF4F6F8))
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
+                }
+                Text(
+                    text = "Course Registration",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+            
             if (step == 1) {
                 SemesterSelectionStep(
                     selectedSemester = selectedSemester,
@@ -123,36 +133,27 @@ fun SemesterSelectionStep(
     onYearChange: (String) -> Unit,
     onProceed: () -> Unit
 ) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    Column(modifier = Modifier.padding(20.dp)) {
+        Text(text = "Select Academic Session", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(text = "Semester", fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
+        DropdownSelector(options = listOf("First", "Second"), selected = selectedSemester, onSelect = onSemesterChange)
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(text = "Academic Year", fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
+        DropdownSelector(options = listOf("2023/2024", "2024/2025"), selected = selectedYear, onSelect = onYearChange)
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Button(
+            onClick = onProceed,
+            modifier = Modifier.fillMaxWidth().height(48.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = SchoolPrimary)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(text = "Select Academic Session", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(text = "Semester", fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
-                DropdownSelector(options = listOf("First", "Second"), selected = selectedSemester, onSelect = onSemesterChange)
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(text = "Academic Year", fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
-                DropdownSelector(options = listOf("2023/2024", "2024/2025"), selected = selectedYear, onSelect = onYearChange)
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                Button(
-                    onClick = onProceed,
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SchoolPrimary)
-                ) {
-                    Text("Proceed to Course Selection")
-                }
-            }
+            Text("Proceed to Course Selection")
         }
     }
 }
@@ -179,7 +180,8 @@ fun CourseSelectionStep(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column {
                     mandatoryCourses.forEach { course ->
@@ -197,7 +199,8 @@ fun CourseSelectionStep(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Column {
                         optionalCourses.forEach { course ->
