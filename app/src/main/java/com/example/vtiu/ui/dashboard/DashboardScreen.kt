@@ -39,6 +39,7 @@ data class DashboardTile(
 fun DashboardScreen(
     onTileClick: (String) -> Unit,
     onNotificationClick: () -> Unit,
+    onMenuClick: () -> Unit,
     sessionManager: com.example.vtiu.data.local.SessionManager,
     viewModel: StudentViewModel = hiltViewModel()
 ) {
@@ -89,7 +90,12 @@ fun DashboardScreen(
         ) {
             // 1. Header Section
             item(span = { GridItemSpan(2) }) {
-                HeaderSection(userName = userName, profilePicUrl = profile?.profilePictureUrl, onNotificationClick = onNotificationClick)
+                HeaderSection(
+                    userName = userName, 
+                    profilePicUrl = profile?.profilePictureUrl, 
+                    onNotificationClick = onNotificationClick,
+                    onMenuClick = onMenuClick
+                )
             }
 
             // 2. Banner Card
@@ -116,7 +122,7 @@ fun DashboardScreen(
 }
 
 @Composable
-fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick: () -> Unit) {
+fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick: () -> Unit, onMenuClick: () -> Unit) {
     val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
     Row(
         modifier = Modifier
@@ -126,6 +132,10 @@ fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick:
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onMenuClick) {
+                Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
+            }
+            Spacer(modifier = Modifier.width(4.dp))
             if (!profilePicUrl.isNullOrBlank()) {
                 coil.compose.AsyncImage(
                     model = "$staticUrl$profilePicUrl",

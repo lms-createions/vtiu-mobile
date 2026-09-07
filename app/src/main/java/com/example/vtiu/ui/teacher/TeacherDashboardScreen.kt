@@ -43,6 +43,7 @@ data class TeacherActionTile(
 fun TeacherDashboardScreen(
     onActionClick: (String) -> Unit,
     onLogoutClick: () -> Unit,
+    onMenuClick: () -> Unit,
     viewModel: TeacherViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager // We should probably inject this via DI but for now we'll pass it if possible
 ) {
@@ -86,7 +87,13 @@ fun TeacherDashboardScreen(
 
     Scaffold(
         topBar = {
-            TeacherDashboardHeader(teacherName, viewModel.profile.value?.department ?: "Teacher", viewModel.profile.value?.profilePictureUrl, onLogoutClick)
+            TeacherDashboardHeader(
+                name = teacherName, 
+                dept = viewModel.profile.value?.department ?: "Teacher", 
+                profilePicUrl = viewModel.profile.value?.profilePictureUrl, 
+                onLogoutClick = onLogoutClick,
+                onMenuClick = onMenuClick
+            )
         }
     ) { padding ->
         LazyColumn(
@@ -165,7 +172,7 @@ fun TeacherDashboardScreen(
 }
 
 @Composable
-fun TeacherDashboardHeader(name: String, dept: String, profilePicUrl: String?, onLogoutClick: () -> Unit) {
+fun TeacherDashboardHeader(name: String, dept: String, profilePicUrl: String?, onLogoutClick: () -> Unit, onMenuClick: () -> Unit) {
     val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
     Surface(
         color = TeacherPrimary,
@@ -178,6 +185,12 @@ fun TeacherDashboardHeader(name: String, dept: String, profilePicUrl: String?, o
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(onClick = onMenuClick, modifier = Modifier.size(32.dp)) {
+                Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.White, modifier = Modifier.size(20.dp))
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
             if (!profilePicUrl.isNullOrBlank()) {
                 coil.compose.AsyncImage(
                     model = "$staticUrl$profilePicUrl",
