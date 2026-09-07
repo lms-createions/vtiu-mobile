@@ -20,9 +20,12 @@ fun Route.authRoutes() {
                 val request = call.receive<LoginRequest>()
                 
                 val user = transaction {
-                    // Check if user exists with provided userId and role
+                    // Check if user exists with provided userId, username, password and role
                     val query = Users.select { 
-                        (Users.userId eq request.userId) and (Users.role eq request.role) 
+                        (Users.userId eq request.userId) and 
+                        (Users.username eq request.username) and
+                        (Users.passwordHash eq request.password) and
+                        (Users.role eq request.role) 
                     }
                     
                     val userRow = query.singleOrNull()
