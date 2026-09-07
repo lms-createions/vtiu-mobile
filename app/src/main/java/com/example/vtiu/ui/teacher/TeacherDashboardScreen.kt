@@ -174,6 +174,7 @@ fun TeacherDashboardScreen(
 @Composable
 fun TeacherDashboardHeader(name: String, dept: String, profilePicUrl: String?, onLogoutClick: () -> Unit, onMenuClick: () -> Unit) {
     val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
+    val firstName = name.split(" ").firstOrNull() ?: name
     Surface(
         color = TeacherPrimary,
         modifier = Modifier.fillMaxWidth()
@@ -208,7 +209,7 @@ fun TeacherDashboardHeader(name: String, dept: String, profilePicUrl: String?, o
                         .background(Color.White.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = name.take(1), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(text = firstName.take(1), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
             }
             
@@ -216,7 +217,7 @@ fun TeacherDashboardHeader(name: String, dept: String, profilePicUrl: String?, o
             
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                 Text(
-                    text = "Hello, $name", 
+                    text = "Welcome, $firstName", 
                     fontSize = 16.sp, // Restored large font size
                     fontWeight = FontWeight.Bold, 
                     color = Color.White,

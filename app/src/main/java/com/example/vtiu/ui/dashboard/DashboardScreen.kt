@@ -124,6 +124,7 @@ fun DashboardScreen(
 @Composable
 fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick: () -> Unit, onMenuClick: () -> Unit) {
     val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
+    val firstName = userName.split(" ").firstOrNull() ?: userName
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -163,9 +164,9 @@ fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick:
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column {
-                Text(text = "Good morning", fontSize = 14.sp, color = Color.Gray)
+                Text(text = "Welcome,", fontSize = 14.sp, color = Color.Gray)
                 Text(
-                    text = "Welcome back, $userName",
+                    text = firstName,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
