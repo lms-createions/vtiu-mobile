@@ -266,30 +266,44 @@ fun StatCard(modifier: Modifier, label: String, value: String, icon: ImageVector
 
 @Composable
 fun ActionCard(action: TeacherActionTile, modifier: Modifier, onClick: () -> Unit) {
-    Card(
-        modifier = modifier
-            .height(100.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        onClick = onClick
+    Column(
+        modifier = modifier.padding(horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            verticalArrangement = Arrangement.Center
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            onClick = onClick
         ) {
             Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(action.color.copy(alpha = 0.1f)),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = action.icon, contentDescription = null, tint = action.color, modifier = Modifier.size(20.dp))
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(action.color.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(imageVector = action.icon, contentDescription = null, tint = action.color, modifier = Modifier.size(24.dp))
+                }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = action.title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = action.title,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+        )
     }
 }
 

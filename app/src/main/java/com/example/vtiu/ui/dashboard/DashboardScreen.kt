@@ -2,6 +2,7 @@ package com.example.vtiu.ui.dashboard
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -20,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -84,7 +87,7 @@ fun DashboardScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(3), // Changed to 3 columns for a cleaner icon-based look
             contentPadding = PaddingValues(16.dp),
             modifier = Modifier.fillMaxSize()
         ) {
@@ -253,43 +256,52 @@ fun SectionTitle(academicYear: String) {
 
 @Composable
 fun DashboardCard(tile: DashboardTile, onClick: () -> Unit) {
-    Card(
+    Column(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .height(130.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        onClick = onClick
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceBetween
+                .fillMaxWidth()
+                .height(60.dp), // Significantly reduced height
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(tile.color.copy(alpha = 0.1f)),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = tile.icon,
-                    contentDescription = null,
-                    tint = tile.color,
-                    modifier = Modifier.size(20.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(tile.color.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = tile.icon,
+                        contentDescription = null,
+                        tint = tile.color,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
-            Text(
-                text = tile.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                modifier = Modifier.fillMaxWidth()
-            )
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = tile.title,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp, // Maintained font size
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = Color.Black
+        )
     }
 }
