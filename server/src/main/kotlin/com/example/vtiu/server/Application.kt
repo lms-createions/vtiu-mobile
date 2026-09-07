@@ -10,17 +10,25 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.http.*
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.example.vtiu.server.db.DatabaseFactory
 import com.example.vtiu.server.routes.*
 
 fun main() {
-    DatabaseFactory.init()
     embeddedServer(Netty, port = System.getenv("PORT")?.toInt() ?: 8080, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
 fun Application.module() {
+    // Initialize Database in the background to prevent blocking server startup
+    launch {
+        try {
+            DatabaseFactory.init()
+        } catch (e: Exception) {
+            log.error("Failed to initialize database: ${e.message}")
+        }
+    }
     install(ContentNegotiation) {
         json(Json {
             prettyPrint = true
