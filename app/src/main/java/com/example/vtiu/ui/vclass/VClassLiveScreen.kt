@@ -133,6 +133,7 @@ fun VClassLiveScreen(
                 items(recordings) { recording ->
                     RecordingItem(
                         title = recording.title,
+                        date = recording.recordedAt,
                         onPlayClick = { onRecordingClick(recording.id) }
                     )
                 }
@@ -321,7 +322,7 @@ fun CountdownTimer(startTime: Date) {
 }
 
 @Composable
-fun RecordingItem(title: String, onPlayClick: () -> Unit = {}) {
+fun RecordingItem(title: String, date: String, onPlayClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -347,7 +348,7 @@ fun RecordingItem(title: String, onPlayClick: () -> Unit = {}) {
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = title, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text(text = "Recorded on 2024-08-25", fontSize = 11.sp, color = Color.Gray)
+                Text(text = "Recorded on $date", fontSize = 11.sp, color = Color.Gray)
             }
         }
     }

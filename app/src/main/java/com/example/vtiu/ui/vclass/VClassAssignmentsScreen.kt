@@ -111,7 +111,7 @@ fun VClassAssignmentsScreen(
 
 @Composable
 fun AssignmentStats(assignments: List<VClassAssignment>) {
-    val today = "2024-08-27" // Mock today
+    val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
     val upcoming = assignments.count { it.dueDate > today }
     val dueToday = assignments.count { it.dueDate == today }
     val overdue = assignments.count { it.dueDate < today }
@@ -152,7 +152,7 @@ fun AssignmentCard(
     onDownloadClick: () -> Unit,
     onSubmitClick: () -> Unit
 ) {
-    val today = "2024-08-27"
+    val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
     val status = when {
         assignment.dueDate > today -> "Upcoming" to Color(0xFF2E7D32)
         assignment.dueDate == today -> "Due Today" to Color(0xFFFBC02D)

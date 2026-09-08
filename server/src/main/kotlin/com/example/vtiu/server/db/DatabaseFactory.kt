@@ -48,9 +48,10 @@ object DatabaseFactory {
                 // Seed SchoolSettings if empty
                 if (SchoolSettings.selectAll().empty()) {
                     println("DatabaseFactory: Seeding default SchoolSettings...")
+                    val currentYear = java.time.LocalDate.now().year.toString()
                     SchoolSettings.insert {
                         it[schoolName] = "VTIU"
-                        it[currentAcademicYear] = "2026"
+                        it[currentAcademicYear] = currentYear
                         it[currentSemester] = "First"
                         it[paystackMode] = "test"
                         it[updatedAt] = java.time.LocalDateTime.now().toKotlinLocalDateTime()

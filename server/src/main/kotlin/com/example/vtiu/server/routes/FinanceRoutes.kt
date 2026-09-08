@@ -186,7 +186,7 @@ private fun processSuccessfulPayment(data: PaystackVerifyData) {
     transaction {
         val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction
         val settings = SchoolSettings.selectAll().singleOrNull()
-        val currentYear = settings?.get(SchoolSettings.currentAcademicYear) ?: "2026"
+        val currentYear = settings?.get(SchoolSettings.currentAcademicYear) ?: java.time.LocalDate.now().year.toString()
         val currentSem = settings?.get(SchoolSettings.currentSemester) ?: "First"
         
         StudentFeeTransactions.insert {
