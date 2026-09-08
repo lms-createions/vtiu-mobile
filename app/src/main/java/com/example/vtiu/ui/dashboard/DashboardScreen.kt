@@ -87,7 +87,7 @@ fun DashboardScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         LazyVerticalGrid(
-            columns = GridCells.Fixed(3), // Changed to 3 columns for a cleaner icon-based look
+            columns = GridCells.Fixed(3),
             contentPadding = PaddingValues(16.dp),
             modifier = Modifier.fillMaxSize()
         ) {
@@ -189,14 +189,14 @@ fun BannerCard() {
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF00C950))
     ) {
-        Column(modifier = Modifier.padding(24.dp)) { // Increased padding from 20.dp
+        Column(modifier = Modifier.padding(24.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Student portal", // Updated text slightly
+                    text = "Student portal",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White.copy(alpha = 0.9f)
@@ -210,7 +210,7 @@ fun BannerCard() {
             }
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Track your academic progress in real-time", // More descriptive text
+                text = "Track your academic progress in real-time",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
@@ -267,7 +267,7 @@ fun DashboardCard(tile: DashboardTile, onClick: () -> Unit) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp), // Significantly reduced height
+                .height(60.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -296,7 +296,7 @@ fun DashboardCard(tile: DashboardTile, onClick: () -> Unit) {
         Text(
             text = tile.title,
             fontWeight = FontWeight.Bold,
-            fontSize = 14.sp, // Maintained font size
+            fontSize = 14.sp,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             maxLines = 1,
