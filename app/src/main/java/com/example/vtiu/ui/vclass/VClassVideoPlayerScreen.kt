@@ -144,7 +144,7 @@ fun VClassVideoPlayerScreen(
                 }
 
                 items(otherRecordings) { item ->
-                    RecordingItem(title = item.title)
+                    RecordingItem(title = item.title, date = item.recordedAt)
                 }
             }
         }
