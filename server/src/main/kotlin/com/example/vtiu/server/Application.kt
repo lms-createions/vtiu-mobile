@@ -13,7 +13,6 @@ import io.ktor.http.*
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
-import io.ktor.serialization.kotlinx.json.json as clientJson
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.example.vtiu.server.db.DatabaseFactory
@@ -21,7 +20,7 @@ import com.example.vtiu.server.routes.*
 
 val paystackClient = HttpClient(CIO) {
     install(ClientContentNegotiation) {
-        clientJson(Json {
+        json(Json {
             ignoreUnknownKeys = true
             prettyPrint = true
         })
