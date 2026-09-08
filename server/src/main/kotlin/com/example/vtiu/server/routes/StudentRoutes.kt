@@ -255,13 +255,14 @@ fun Route.studentRoutes() {
             if (transcript != null) call.respond(transcript) else call.respond(HttpStatusCode.NotFound)
         }
 
-        // --- Fees & Transactions ---
         get("/fees/balance/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val balance = transaction {
+                println("Fees: Checking balance for $userId")
                 var studentRow = StudentFeeBalances.select { StudentFeeBalances.studentId eq userId }.singleOrNull()
                 
                 if (studentRow == null) {
+                    println("Fees: No balance record found for $userId. Attempting to initialize...")
                     // Try to initialize balance from ProgrammeFeeStructures
                     val profile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull()
                     if (profile != null) {
@@ -269,7 +270,16 @@ fun Route.studentRoutes() {
                         val lvl = profile[StudentProfiles.programmeLevel].toString()
                         val format = profile[StudentProfiles.studyFormat]
                         val year = profile[StudentProfiles.academicYear] ?: ""
-                        val sem = profile[StudentProfiles.semester] ?: ""
+                        val rawSem = profile[StudentProfiles.semester] ?: ""
+                        
+                        // Map "1" to "First" and "2" to "Second" for consistency with fee structure table
+                        val sem = when(rawSem) {
+                            "1" -> "First"
+                            "2" -> "Second"
+                            else -> rawSem
+                        }
+                        
+                        println("Fees: Searching for structure: Prog=$prog, Lvl=$lvl, Format=$format, Year=$year, Sem=$sem")
                         
                         val structure = ProgrammeFeeStructures.select { 
                             (ProgrammeFeeStructures.programmeName eq prog) and 
@@ -280,6 +290,7 @@ fun Route.studentRoutes() {
                         }.singleOrNull()
                         
                         if (structure != null) {
+                            println("Fees: Found structure! Amount=${structure[ProgrammeFeeStructures.amount]}")
                             StudentFeeBalances.insert {
                                 it[StudentFeeBalances.studentId] = userId
                                 it[StudentFeeBalances.feeStructureId] = structure[ProgrammeFeeStructures.id]
@@ -296,7 +307,11 @@ fun Route.studentRoutes() {
                             }
                             // Re-fetch
                             studentRow = StudentFeeBalances.select { StudentFeeBalances.studentId eq userId }.singleOrNull()
+                        } else {
+                            println("Fees: FAILED to find a matching fee structure for student profile.")
                         }
+                    } else {
+                        println("Fees: FAILED to find student profile for $userId")
                     }
                 }
 
@@ -306,7 +321,10 @@ fun Route.studentRoutes() {
                         paid = studentRow[StudentFeeBalances.amountPaid].toDouble(),
                         total = studentRow[StudentFeeBalances.amountDue].toDouble()
                     )
-                } else FeeBalanceApi(0.0, 0.0, 0.0)
+                } else {
+                    println("Fees: Returning 0.00 because no balance could be determined.")
+                    FeeBalanceApi(0.0, 0.0, 0.0)
+                }
             }
             call.respond(balance)
         }
