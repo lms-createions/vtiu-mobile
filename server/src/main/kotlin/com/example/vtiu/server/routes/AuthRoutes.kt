@@ -20,6 +20,7 @@ fun Route.authRoutes() {
                 val request = call.receive<LoginRequest>()
                 
                 val user = transaction {
+                    println("Login attempt: ID=${request.userId}, Username=${request.username}, Role=${request.role}")
                     // Find user by userId and role first
                     val query = Users.select { 
                         (Users.userId eq request.userId.trim()) and (Users.role eq request.role) 
@@ -27,11 +28,20 @@ fun Route.authRoutes() {
                     
                     val userRow = query.singleOrNull()
                     
+                    if (userRow == null) {
+                        println("Login failed: User not found with ID ${request.userId} and Role ${request.role}")
+                        return@transaction null
+                    }
+
+                    val dbUsername = userRow[Users.username].trim()
+                    val reqUsername = request.username.trim()
+                    val dbPass = userRow[Users.passwordHash]
+
+                    println("Comparing Username: DB='$dbUsername' vs REQ='$reqUsername'")
+
                     // Verify Username and Password match the record found
-                    if (userRow != null && 
-                        userRow[Users.username].trim().equals(request.username.trim(), ignoreCase = true) &&
-                        userRow[Users.passwordHash] == request.password) {
-                        
+                    if (dbUsername.equals(reqUsername, ignoreCase = true) && dbPass == request.password) {
+                        println("Login successful for ${userRow[Users.userId]}")
                         val rawProfilePic = userRow[Users.profilePicture]
                         val profilePicPath = if (rawProfilePic.isNullOrBlank() || rawProfilePic == "default.png") {
                             "/static/uploads/profile_pictures/default_avatar.png"
