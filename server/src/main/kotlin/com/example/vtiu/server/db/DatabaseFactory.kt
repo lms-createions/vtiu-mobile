@@ -4,7 +4,10 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlinx.datetime.toKotlinLocalDateTime
 import java.net.URI
 
 object DatabaseFactory {
@@ -41,6 +44,18 @@ object DatabaseFactory {
                     SchoolSettings, ProgrammeFeeStructures
                 )
                 println("DatabaseFactory: SchemaUtils.create finished successfully.")
+
+                // Seed SchoolSettings if empty
+                if (SchoolSettings.selectAll().empty()) {
+                    println("DatabaseFactory: Seeding default SchoolSettings...")
+                    SchoolSettings.insert {
+                        it[schoolName] = "VTIU"
+                        it[currentAcademicYear] = "2026"
+                        it[currentSemester] = "First"
+                        it[paystackMode] = "test"
+                        it[updatedAt] = java.time.LocalDateTime.now().toKotlinLocalDateTime()
+                    }
+                }
             }
             println("--- DATABASE INITIALIZATION COMPLETE ---")
         } catch (e: Exception) {

@@ -185,6 +185,9 @@ private fun processSuccessfulPayment(data: PaystackVerifyData) {
     
     transaction {
         val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction
+        val settings = SchoolSettings.selectAll().singleOrNull()
+        val currentYear = settings?.get(SchoolSettings.currentAcademicYear) ?: "2026"
+        val currentSem = settings?.get(SchoolSettings.currentSemester) ?: "First"
         
         StudentFeeTransactions.insert {
             it[studentId] = userRow[Users.id]
@@ -192,8 +195,8 @@ private fun processSuccessfulPayment(data: PaystackVerifyData) {
             it[description] = "Online Payment - Paystack (${data.reference})"
             it[timestamp] = LocalDateTime.now().toKotlinLocalDateTime()
             it[isApproved] = true
-            it[academicYear] = "2024/2025"
-            it[semester] = "First"
+            it[academicYear] = currentYear
+            it[semester] = currentSem
         }
 
         StudentFeeBalances.update({ StudentFeeBalances.studentId eq userId }) {

@@ -47,7 +47,6 @@ fun PayFeesScreen(
         }
     }
 
-    var selectedYear by remember { mutableStateOf("2024/2025") }
     var selectedSemester by remember { mutableStateOf("First") }
     
     val totalFee = feeApi?.amountDue?.toFloat() ?: 0f
@@ -56,13 +55,12 @@ fun PayFeesScreen(
     val progress = if (totalFee > 0) currentPaid / totalFee else 0f
     
     var amountToPay by remember { mutableStateOf("") }
-    var selectedMethod by remember { mutableStateOf("Paystack (Online)") }
     var description by remember { mutableStateOf("") }
     var isSubmitting by remember { mutableStateOf(false) }
     
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val studentLevel = profileApi?.level ?: 100
+    val selectedYear = profileApi?.academicYear ?: ""
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -86,7 +84,7 @@ fun PayFeesScreen(
                     }
                     Text(
                         text = "Submit Payment",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
@@ -106,16 +104,26 @@ fun PayFeesScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // 1. Session Info (Read-only for year, selectable for semester)
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
-                        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(modifier = Modifier.weight(1f)) {
-                                DropdownSelector(options = listOf("2023/2024", "2024/2025"), selected = selectedYear, onSelect = { selectedYear = it })
-                            }
+                        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedTextField(
+                                value = selectedYear,
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Academic Year") },
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent
+                                )
+                            )
                             Box(modifier = Modifier.weight(1f)) {
                                 DropdownSelector(options = listOf("First", "Second"), selected = selectedSemester, onSelect = { selectedSemester = it })
                             }
@@ -123,6 +131,7 @@ fun PayFeesScreen(
                     }
                 }
 
+                // 2. Summary
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -146,6 +155,7 @@ fun PayFeesScreen(
                     }
                 }
 
+                // 3. Paystack Secure Checkout
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -169,7 +179,7 @@ fun PayFeesScreen(
                                 value = description,
                                 onValueChange = { description = it },
                                 label = { Text("Payment Description") },
-                                placeholder = { Text("e.g. Fees for Level $studentLevel") },
+                                placeholder = { Text("e.g. Fees for Semester $selectedSemester") },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
                             )
@@ -184,7 +194,7 @@ fun PayFeesScreen(
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                                enabled = amountToPay.isNotBlank() && !isSubmitting,
+                                enabled = amountToPay.isNotBlank() && !isSubmitting && selectedYear.isNotEmpty(),
                                 shape = RoundedCornerShape(12.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C950))
                             ) {

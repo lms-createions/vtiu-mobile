@@ -185,7 +185,7 @@ fun ResultsHeader(year: String, semester: String) {
             shape = CircleShape
         ) {
             Text(
-                text = year.split("/")[0],
+                text = year,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,

@@ -34,17 +34,19 @@ fun CourseRegistrationScreen(
 ) {
     var step by remember { mutableIntStateOf(1) }
     var selectedSemester by remember { mutableStateOf("First") }
-    var selectedYear by remember { mutableStateOf("2024/2025") }
     
     val userId = sessionManager.getUserId() ?: ""
     val availableCourses by viewModel.availableRegistration
+    val profile by viewModel.profile
 
     LaunchedEffect(userId) {
         if (userId.isNotEmpty()) {
+            viewModel.loadStudentData(userId)
             viewModel.loadAvailableRegistration(userId)
         }
     }
     
+    val selectedYear = profile?.academicYear ?: ""
     val mandatoryCourses = availableCourses.filter { it.isMandatory && it.semester == selectedSemester }
     val optionalCourses = availableCourses.filter { !it.isMandatory && it.semester == selectedSemester }
     
@@ -72,23 +74,23 @@ fun CourseRegistrationScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Back",
-                            tint = Color.Black
-                        )
+                    IconButton(onClick = onMenuClick) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
                     }
                     Text(
                         text = "Course Registration",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
                 }
                 
-                IconButton(onClick = onMenuClick) {
-                    Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
                 }
             }
             
@@ -97,7 +99,6 @@ fun CourseRegistrationScreen(
                     selectedSemester = selectedSemester,
                     onSemesterChange = { selectedSemester = it },
                     selectedYear = selectedYear,
-                    onYearChange = { selectedYear = it },
                     onProceed = { step = 2 }
                 )
             } else {
@@ -139,7 +140,6 @@ fun SemesterSelectionStep(
     selectedSemester: String,
     onSemesterChange: (String) -> Unit,
     selectedYear: String,
-    onYearChange: (String) -> Unit,
     onProceed: () -> Unit
 ) {
     Column(modifier = Modifier.padding(20.dp)) {
@@ -152,7 +152,18 @@ fun SemesterSelectionStep(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(text = "Academic Year", fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
-        DropdownSelector(options = listOf("2023/2024", "2024/2025"), selected = selectedYear, onSelect = onYearChange)
+        OutlinedTextField(
+            value = selectedYear,
+            onValueChange = {},
+            readOnly = true,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
+            ),
+            placeholder = { Text("Loading...") }
+        )
         
         Spacer(modifier = Modifier.height(24.dp))
         
@@ -160,7 +171,8 @@ fun SemesterSelectionStep(
             onClick = onProceed,
             modifier = Modifier.fillMaxWidth().height(48.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = SchoolPrimary)
+            colors = ButtonDefaults.buttonColors(containerColor = SchoolPrimary),
+            enabled = selectedYear.isNotEmpty()
         ) {
             Text("Proceed to Course Selection")
         }
@@ -194,7 +206,7 @@ fun CourseSelectionStep(
                 Column {
                     mandatoryCourses.forEach { course ->
                         CourseRow(course = course, isMandatory = true)
-                        if (course != mandatoryCourses.last()) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color.LightGray.copy(alpha = 0.3f))
+                        if (course != mandatoryCourses.lastOrNull()) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color.LightGray.copy(alpha = 0.3f))
                     }
                 }
             }
@@ -233,7 +245,7 @@ fun CourseSelectionStep(
                                     Text(text = "${course.code} • ${course.credits} Credits", fontSize = 12.sp, color = Color.Gray)
                                 }
                             }
-                            if (course != optionalCourses.last()) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color.LightGray.copy(alpha = 0.3f))
+                            if (course != optionalCourses.lastOrNull()) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color.LightGray.copy(alpha = 0.3f))
                         }
                     }
                 }
@@ -278,6 +290,7 @@ fun CourseSelectionStep(
                 }
             }
         }
+        item { Spacer(modifier = Modifier.height(32.dp)) }
     }
 }
 

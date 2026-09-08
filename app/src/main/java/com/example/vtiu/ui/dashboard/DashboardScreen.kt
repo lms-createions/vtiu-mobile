@@ -108,7 +108,7 @@ fun DashboardScreen(
 
             // 3. Section Title
             item(span = { GridItemSpan(3) }) {
-                SectionTitle(academicYear = profile?.academicYear ?: "2024/2025")
+                SectionTitle(academicYear = profile?.academicYear ?: "")
             }
 
             // 4. Grid Tiles

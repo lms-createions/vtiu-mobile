@@ -35,6 +35,7 @@ fun CourseListScreen(
     sessionManager: com.example.vtiu.data.local.SessionManager
 ) {
     val coursesApi by viewModel.courses
+    val profile by viewModel.profile
     val userId = sessionManager.getUserId() ?: ""
 
     LaunchedEffect(userId) {
@@ -82,7 +83,7 @@ fun CourseListScreen(
                 contentPadding = PaddingValues(24.dp)
             ) {
                 item {
-                    AcademicOverviewHeader()
+                    AcademicOverviewHeader(profile?.academicYear ?: "")
                 }
 
                 if (coursesApi.isEmpty()) {
@@ -111,7 +112,7 @@ fun CourseListScreen(
 }
 
 @Composable
-fun AcademicOverviewHeader() {
+fun AcademicOverviewHeader(academicYear: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -123,16 +124,18 @@ fun AcademicOverviewHeader() {
             Text(text = "Academic overview", fontSize = 14.sp, color = Color.Gray)
             Text(text = "Current courses", fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
-        Surface(
-            color = Color(0xFFF4F4F5),
-            shape = CircleShape
-        ) {
-            Text(
-                text = "2024 / 25",
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium
-            )
+        if (academicYear.isNotEmpty()) {
+            Surface(
+                color = Color(0xFFF4F4F5),
+                shape = CircleShape
+            ) {
+                Text(
+                    text = academicYear,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
