@@ -33,6 +33,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 fun PayFeesScreen(
     onBackClick: () -> Unit,
     onMenuClick: () -> Unit,
+    onInitiatePaystack: (String, String) -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
 ) {
@@ -55,9 +56,8 @@ fun PayFeesScreen(
     val progress = if (totalFee > 0) currentPaid / totalFee else 0f
     
     var amountToPay by remember { mutableStateOf("") }
-    var selectedMethod by remember { mutableStateOf("Mobile Money") }
+    var selectedMethod by remember { mutableStateOf("Paystack (Online)") }
     var description by remember { mutableStateOf("") }
-    var selectedProofFile by remember { mutableStateOf<String?>(null) }
     var isSubmitting by remember { mutableStateOf(false) }
     
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,12 +81,8 @@ fun PayFeesScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Back",
-                            tint = Color.Black
-                        )
+                    IconButton(onClick = onMenuClick) {
+                        Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
                     }
                     Text(
                         text = "Submit Payment",
@@ -96,8 +92,12 @@ fun PayFeesScreen(
                     )
                 }
                 
-                IconButton(onClick = onMenuClick) {
-                    Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu", tint = Color.Black)
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Back",
+                        tint = Color.Black
+                    )
                 }
             }
 
@@ -126,7 +126,7 @@ fun PayFeesScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -142,35 +142,6 @@ fun PayFeesScreen(
                                 color = Color(0xFF2E7D32),
                                 trackColor = Color(0xFFE8F5E9)
                             )
-                            Text(
-                                text = "%.1f%% Paid".format(progress * 100),
-                                fontSize = 11.sp,
-                                color = Color.Gray,
-                                modifier = Modifier.align(Alignment.End).padding(top = 4.dp)
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    val noticeColor = if (studentLevel == 100) Color(0xFFFFF3E0) else Color(0xFFE3F2FD)
-                    val iconColor = if (studentLevel == 100) Color(0xFFE65100) else Color(0xFF1976D2)
-                    Surface(
-                        color = noticeColor,
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Info, contentDescription = null, tint = iconColor)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = if (studentLevel == 100) 
-                                    "Level 100: Full payment is required. Installments are not allowed."
-                                    else "Continuing Student: You can pay in full or in installments.",
-                                fontSize = 12.sp,
-                                color = iconColor,
-                                lineHeight = 16.sp
-                            )
                         }
                     }
                 }
@@ -182,84 +153,63 @@ fun PayFeesScreen(
                         colors = CardDefaults.cardColors(containerColor = Color.White)
                     ) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                            Text("Payment Details", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text("Paystack Secure Checkout", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                             
                             OutlinedTextField(
                                 value = amountToPay,
                                 onValueChange = { amountToPay = it },
-                                label = { Text("Amount (GHS)") },
+                                label = { Text("Amount to Pay (GHS)") },
                                 modifier = Modifier.fillMaxWidth(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                 shape = RoundedCornerShape(12.dp),
                                 prefix = { Text("GHS ") }
                             )
 
-                            DropdownSelector(
-                                options = listOf("Mobile Money", "Bank Transfer", "Cash"),
-                                selected = selectedMethod,
-                                onSelect = { selectedMethod = it }
-                            )
-
                             OutlinedTextField(
                                 value = description,
                                 onValueChange = { description = it },
-                                label = { Text("Description") },
-                                placeholder = { Text("e.g. Full payment or Installment 1") },
+                                label = { Text("Payment Description") },
+                                placeholder = { Text("e.g. Fees for Level $studentLevel") },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
                             )
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(120.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFFF8F9FA))
-                                    .border(1.dp, Color.LightGray, RoundedCornerShape(12.dp))
-                                    .clickable { selectedProofFile = "payment_receipt_${System.currentTimeMillis() / 1000}.jpg" },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (selectedProofFile == null) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(Icons.Default.CloudUpload, contentDescription = null, tint = Color.Gray)
-                                        Text("Upload Proof of Payment", fontSize = 13.sp, color = Color.Gray)
-                                    }
-                                } else {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF2E7D32))
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(selectedProofFile!!, fontSize = 13.sp, color = SchoolPrimary)
-                                    }
-                                }
-                            }
 
                             Button(
                                 onClick = {
                                     isSubmitting = true
                                     val amount = amountToPay.toDoubleOrNull() ?: 0.0
-                                    viewModel.payFees(userId, amount, description) {
+                                    viewModel.initializePayment(userId, amount, profileApi?.email ?: "") { url, ref ->
                                         isSubmitting = false
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar("Payment submitted for approval")
-                                        }
-                                        onBackClick()
+                                        onInitiatePaystack(url, ref)
                                     }
                                 },
-                                modifier = Modifier.fillMaxWidth().height(50.dp),
-                                enabled = amountToPay.isNotBlank() && selectedProofFile != null && !isSubmitting,
+                                modifier = Modifier.fillMaxWidth().height(56.dp),
+                                enabled = amountToPay.isNotBlank() && !isSubmitting,
                                 shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C950))
                             ) {
                                 if (isSubmitting) {
                                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
                                 } else {
-                                    Text("Submit Payment", fontWeight = FontWeight.Bold)
+                                    Icon(Icons.Default.Security, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text("Pay with Paystack", fontWeight = FontWeight.Bold)
                                 }
                             }
                         }
                     }
                 }
-                item { Spacer(modifier = Modifier.height(32.dp)) }
+                
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Text(
+                        text = "Secured by Paystack. Supports Mobile Money, Visa, and Mastercard.",
+                        fontSize = 11.sp,
+                        color = Color.Gray,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }

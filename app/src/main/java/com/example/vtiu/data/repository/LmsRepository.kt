@@ -643,4 +643,26 @@ class LmsRepository @Inject constructor(
             false
         }
     }
+
+    // --- Paystack Integration ---
+    suspend fun initializePaystack(userId: String, amount: Double, email: String): PaystackInitializeResponse? {
+        return try {
+            val response: HttpResponse = client.post("$baseUrl/api/finance/paystack/initialize") {
+                contentType(ContentType.Application.Json)
+                setBody(mapOf("user_id" to userId, "amount" to amount.toString(), "email" to email))
+            }
+            if (response.status == HttpStatusCode.OK) response.body<PaystackInitializeResponse>() else null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun verifyPaystack(reference: String): PaystackVerifyResponse? {
+        return try {
+            val response: HttpResponse = client.get("$baseUrl/api/finance/paystack/verify/$reference")
+            if (response.status == HttpStatusCode.OK) response.body<PaystackVerifyResponse>() else null
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

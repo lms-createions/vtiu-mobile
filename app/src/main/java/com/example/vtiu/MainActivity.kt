@@ -54,6 +54,7 @@ import com.example.vtiu.ui.exams.ExamListScreen
 import com.example.vtiu.ui.exams.ExamTakeScreen
 import com.example.vtiu.ui.fees.FeesScreen
 import com.example.vtiu.ui.fees.PayFeesScreen
+import com.example.vtiu.ui.fees.PaystackPaymentScreen
 import com.example.vtiu.ui.notifications.NotificationScreen
 import com.example.vtiu.ui.navigation.Screen
 import com.example.vtiu.ui.profile.IdCardScreen
@@ -589,7 +590,28 @@ fun VtiuApp(sessionManager: SessionManager) {
                     PayFeesScreen(
                         onBackClick = { navController.popBackStack() },
                         onMenuClick = { scope.launch { drawerState.open() } },
+                        onInitiatePaystack = { url, ref ->
+                            navController.navigate(Screen.PaystackCheckout.createRoute(url, ref))
+                        },
                         sessionManager = sessionManager
+                    )
+                }
+                composable(
+                    route = Screen.PaystackCheckout.route,
+                    arguments = listOf(
+                        navArgument("url") { type = NavType.StringType },
+                        navArgument("reference") { type = NavType.StringType }
+                    )
+                ) { backStackEntry ->
+                    val url = java.net.URLDecoder.decode(backStackEntry.arguments?.getString("url") ?: "", "UTF-8")
+                    val ref = backStackEntry.arguments?.getString("reference") ?: ""
+                    PaystackPaymentScreen(
+                        url = url,
+                        reference = ref,
+                        onBackClick = { navController.popBackStack() },
+                        onSuccess = {
+                            navController.popBackStack(Screen.Fees.route, false)
+                        }
                     )
                 }
                 composable(Screen.Notifications.route) {

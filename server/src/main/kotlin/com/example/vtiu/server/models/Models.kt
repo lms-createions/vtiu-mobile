@@ -472,3 +472,42 @@ data class TranscriptSemesterApi(
     @SerialName("is_released") val isReleased: Boolean = true,
     val courses: List<TranscriptCourseApi>
 )
+
+// Paystack Models
+@Serializable
+data class PaystackInitializeRequest(
+    val email: String,
+    val amount: String, // Amount in Kobo
+    val reference: String,
+    @SerialName("callback_url") val callbackUrl: String? = null,
+    val metadata: Map<String, String> = emptyMap()
+)
+
+@Serializable
+data class PaystackInitializeResponse(
+    val status: Boolean,
+    val message: String,
+    val data: PaystackData? = null
+)
+
+@Serializable
+data class PaystackData(
+    @SerialName("authorization_url") val authorizationUrl: String,
+    @SerialName("access_code") val accessCode: String,
+    val reference: String
+)
+
+@Serializable
+data class PaystackVerifyResponse(
+    val status: Boolean,
+    val message: String,
+    val data: PaystackVerifyData? = null
+)
+
+@Serializable
+data class PaystackVerifyData(
+    val status: String,
+    val reference: String,
+    val amount: Long,
+    val metadata: Map<String, String>? = null
+)

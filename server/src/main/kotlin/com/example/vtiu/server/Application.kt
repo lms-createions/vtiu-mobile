@@ -10,10 +10,23 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.http.*
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
+import io.ktor.serialization.kotlinx.json.json as clientJson
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.example.vtiu.server.db.DatabaseFactory
 import com.example.vtiu.server.routes.*
+
+val paystackClient = HttpClient(CIO) {
+    install(ClientContentNegotiation) {
+        clientJson(Json {
+            ignoreUnknownKeys = true
+            prettyPrint = true
+        })
+    }
+}
 
 fun main() {
     embeddedServer(Netty, port = System.getenv("PORT")?.toInt() ?: 8080, host = "0.0.0.0", module = Application::module)
@@ -26,7 +39,7 @@ fun Application.module() {
         try {
             DatabaseFactory.init()
         } catch (e: Exception) {
-            log.error("Failed to initialize database: ${e.message}")
+            println("Failed to initialize database: ${e.message}")
         }
     }
     install(ContentNegotiation) {

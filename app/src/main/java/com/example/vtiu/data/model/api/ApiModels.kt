@@ -482,3 +482,33 @@ data class StudentAssessmentApi(
     val date: String,
     val feedback: String? = null
 )
+
+// --- Paystack Models ---
+@Serializable
+data class PaystackInitializeResponse(
+    val status: Boolean,
+    val message: String,
+    val data: PaystackData? = null
+)
+
+@Serializable
+data class PaystackData(
+    @SerialName("authorization_url") val authorizationUrl: String,
+    @SerialName("access_code") val accessCode: String,
+    val reference: String
+)
+
+@Serializable
+data class PaystackVerifyResponse(
+    val status: Boolean,
+    val message: String,
+    val data: PaystackVerifyData? = null
+)
+
+@Serializable
+data class PaystackVerifyData(
+    val status: String,
+    val reference: String,
+    val amount: Long,
+    val metadata: Map<String, String>? = null
+)

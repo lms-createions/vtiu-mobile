@@ -93,4 +93,7 @@ sealed class Screen(val route: String) {
     object TakeExam : Screen("take_exam/{examId}") {
         fun createRoute(examId: Int) = "take_exam/$examId"
     }
+    object PaystackCheckout : Screen("paystack_checkout/{url}/{reference}") {
+        fun createRoute(url: String, reference: String) = "paystack_checkout/${java.net.URLEncoder.encode(url, "UTF-8")}/$reference"
+    }
 }

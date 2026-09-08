@@ -429,6 +429,14 @@ object SchoolSettings : Table("school_settings") {
     val schoolName = varchar("school_name", 255)
     val currentAcademicYear = varchar("current_academic_year", 20)
     val currentSemester = varchar("current_semester", 20)
+    
+    // Paystack Settings
+    val paystackMode = varchar("paystack_mode", 10).default("test") // "test" or "live"
+    val paystackTestPublicKey = varchar("paystack_test_public_key", 100).default("")
+    val paystackTestSecretKey = varchar("paystack_test_secret_key", 100).default("")
+    val paystackLivePublicKey = varchar("paystack_live_public_key", 100).default("")
+    val paystackLiveSecretKey = varchar("paystack_live_secret_key", 100).default("")
+
     val updatedAt = datetime("updated_at")
 
     override val primaryKey = PrimaryKey(id)

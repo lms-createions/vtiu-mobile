@@ -184,4 +184,28 @@ class StudentViewModel @Inject constructor(
             }
         }
     }
+
+    // --- Paystack Integration ---
+    fun initializePayment(userId: String, amount: Double, email: String, onUrlReady: (String, String) -> Unit) {
+        viewModelScope.launch {
+            val response = repository.initializePaystack(userId, amount, email)
+            if (response != null && response.status && response.data != null) {
+                onUrlReady(response.data.authorizationUrl, response.data.reference)
+            }
+        }
+    }
+
+    fun verifyPayment(reference: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            val response = repository.verifyPaystack(reference)
+            if (response != null && response.data?.status == "success") {
+                onSuccess()
+                // Refresh balance
+                _profile.value?.userId?.let { uid ->
+                    _feeBalance.value = repository.getFeeBalance(uid)
+                    _feeTransactions.value = repository.getFeeTransactions(uid)
+                }
+            }
+        }
+    }
 }
