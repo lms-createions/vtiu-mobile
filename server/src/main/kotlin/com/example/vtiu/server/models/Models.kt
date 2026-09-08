@@ -465,6 +465,21 @@ data class AcademicSummaryApi(
 )
 
 @Serializable
+data class StudentFullResultApi(
+    @SerialName("course_name") val courseName: String,
+    @SerialName("course_code") val courseCode: String,
+    val score: Float,
+    val max: Float,
+    val grade: String,
+    val credits: Int,
+    val gp: Float,
+    @SerialName("quiz_weight") val quizWeight: Float,
+    @SerialName("assignment_weight") val assignmentWeight: Float,
+    @SerialName("exam_weight") val examWeight: Float,
+    val remark: String
+)
+
+@Serializable
 data class TranscriptSemesterApi(
     @SerialName("academic_year") val academicYear: String,
     val semester: String,

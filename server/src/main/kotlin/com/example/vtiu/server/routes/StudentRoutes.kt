@@ -187,8 +187,31 @@ fun Route.studentRoutes() {
         }
 
         get("/student/results/full/{userId}") {
-            // Simplified: return empty list for now
-            call.respond(emptyList<String>())
+            val userId = call.parameters["userId"] ?: ""
+            val results = transaction {
+                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<StudentFullResultApi>()
+                val studentId = userRow[Users.id]
+                
+                (StudentCourseGrades innerJoin Courses).select { StudentCourseGrades.studentId eq studentId }.map { row ->
+                    val courseId = row[Courses.id]
+                    val scheme = CourseAssessmentSchemes.select { CourseAssessmentSchemes.courseId eq courseId }.singleOrNull()
+                    
+                    StudentFullResultApi(
+                        courseName = row[Courses.name],
+                        courseCode = row[Courses.code],
+                        score = row[StudentCourseGrades.finalScore] ?: 0f,
+                        max = 100f,
+                        grade = row[StudentCourseGrades.gradeLetter] ?: "N/A",
+                        credits = row[Courses.creditHours],
+                        gp = row[StudentCourseGrades.gradePoint] ?: 0f,
+                        quizWeight = scheme?.get(CourseAssessmentSchemes.quizWeight) ?: 10f,
+                        assignmentWeight = scheme?.get(CourseAssessmentSchemes.assignmentWeight) ?: 30f,
+                        examWeight = scheme?.get(CourseAssessmentSchemes.examWeight) ?: 60f,
+                        remark = row[StudentCourseGrades.passFail] ?: "N/A"
+                    )
+                }
+            }
+            call.respond(results)
         }
 
         get("/student/transcript/{userId}") {
@@ -236,7 +259,47 @@ fun Route.studentRoutes() {
         get("/fees/balance/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val balance = transaction {
-                val studentRow = StudentFeeBalances.select { StudentFeeBalances.studentId eq userId }.singleOrNull()
+                var studentRow = StudentFeeBalances.select { StudentFeeBalances.studentId eq userId }.singleOrNull()
+                
+                if (studentRow == null) {
+                    // Try to initialize balance from ProgrammeFeeStructures
+                    val profile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull()
+                    if (profile != null) {
+                        val prog = profile[StudentProfiles.currentProgramme]
+                        val lvl = profile[StudentProfiles.programmeLevel].toString()
+                        val format = profile[StudentProfiles.studyFormat]
+                        val year = profile[StudentProfiles.academicYear] ?: ""
+                        val sem = profile[StudentProfiles.semester] ?: ""
+                        
+                        val structure = ProgrammeFeeStructures.select { 
+                            (ProgrammeFeeStructures.programmeName eq prog) and 
+                            (ProgrammeFeeStructures.programmeLevel eq lvl) and
+                            (ProgrammeFeeStructures.studyFormat eq format) and
+                            (ProgrammeFeeStructures.academicYear eq year) and
+                            (ProgrammeFeeStructures.semester eq sem)
+                        }.singleOrNull()
+                        
+                        if (structure != null) {
+                            StudentFeeBalances.insert {
+                                it[StudentFeeBalances.studentId] = userId
+                                it[StudentFeeBalances.feeStructureId] = structure[ProgrammeFeeStructures.id]
+                                it[StudentFeeBalances.programmeName] = prog
+                                it[StudentFeeBalances.programmeLevel] = lvl
+                                it[StudentFeeBalances.studyFormat] = format
+                                it[StudentFeeBalances.academicYear] = year
+                                it[StudentFeeBalances.semester] = sem
+                                it[StudentFeeBalances.amountDue] = structure[ProgrammeFeeStructures.amount]
+                                it[StudentFeeBalances.amountPaid] = 0.0f
+                                it[StudentFeeBalances.isPaid] = false
+                                it[StudentFeeBalances.createdAt] = LocalDateTime.now().toKotlinLocalDateTime()
+                                it[StudentFeeBalances.updatedAt] = LocalDateTime.now().toKotlinLocalDateTime()
+                            }
+                            // Re-fetch
+                            studentRow = StudentFeeBalances.select { StudentFeeBalances.studentId eq userId }.singleOrNull()
+                        }
+                    }
+                }
+
                 if (studentRow != null) {
                     FeeBalanceApi(
                         balance = (studentRow[StudentFeeBalances.amountDue] - studentRow[StudentFeeBalances.amountPaid]).toDouble(),
