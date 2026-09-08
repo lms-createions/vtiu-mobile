@@ -34,14 +34,19 @@ fun Route.authRoutes() {
                     }
 
                     val dbUsername = userRow[Users.username].trim()
+                    val dbUserId = userRow[Users.userId].trim()
                     val reqUsername = request.username.trim()
                     val dbPass = userRow[Users.passwordHash]
 
-                    println("Comparing Username: DB='$dbUsername' vs REQ='$reqUsername'")
+                    println("Comparing: DB_User='$dbUsername', DB_ID='$dbUserId' vs REQ_User='$reqUsername'")
 
-                    // Verify Username and Password match the record found
-                    if (dbUsername.equals(reqUsername, ignoreCase = true) && dbPass == request.password) {
-                        println("Login successful for ${userRow[Users.userId]}")
+                    // Verify Username (Email) OR User ID matches the provided username field
+                    // AND verify the password matches
+                    val usernameMatches = dbUsername.equals(reqUsername, ignoreCase = true) || 
+                                          dbUserId.equals(reqUsername, ignoreCase = true)
+
+                    if (usernameMatches && dbPass == request.password) {
+                        println("Login successful for $dbUserId")
                         val rawProfilePic = userRow[Users.profilePicture]
                         val profilePicPath = if (rawProfilePic.isNullOrBlank() || rawProfilePic == "default.png") {
                             "/static/uploads/profile_pictures/default_avatar.png"
