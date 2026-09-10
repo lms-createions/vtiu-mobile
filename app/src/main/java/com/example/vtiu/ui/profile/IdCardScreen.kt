@@ -1,5 +1,7 @@
 package com.example.vtiu.ui.profile
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,6 +42,7 @@ fun IdCardScreen(
 ) {
     val profileApi by viewModel.profile
     val userId = sessionManager.getUserId() ?: ""
+    val context = LocalContext.current
 
     LaunchedEffect(userId) {
         if (userId.isNotEmpty()) {
@@ -116,8 +120,14 @@ fun IdCardScreen(
                         ) {
                             Button(
                                 onClick = {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar("Opening ID Card PDF...")
+                                    val idCardUrl = "https://vtiu-lms-production.up.railway.app/static/uploads/id_cards/id_card_${userId}.pdf"
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(idCardUrl))
+                                    try {
+                                        context.startActivity(intent)
+                                    } catch (e: Exception) {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("Could not open PDF. Please install a PDF viewer.")
+                                        }
                                     }
                                 },
                                 modifier = Modifier.weight(1f),
