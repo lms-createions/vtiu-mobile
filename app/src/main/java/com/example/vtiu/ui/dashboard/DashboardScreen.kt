@@ -1,6 +1,7 @@
 package com.example.vtiu.ui.dashboard
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,6 +32,7 @@ import com.example.vtiu.ui.theme.SchoolPrimary
 import androidx.compose.runtime.*
 import android.widget.Toast
 import android.app.Activity
+import com.example.vtiu.R
 
 data class DashboardTile(
     val title: String,
@@ -153,14 +156,13 @@ fun HeaderSection(userName: String, profilePicUrl: String?, onNotificationClick:
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF00C950)),
+                        .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.School,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                    Image(
+                        painter = painterResource(id = R.drawable.school_logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }

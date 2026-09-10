@@ -2,6 +2,7 @@ package com.example.vtiu.ui.profile
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -198,11 +200,14 @@ fun IdCardFront(profile: com.example.vtiu.data.model.api.UserProfileData) {
                     modifier = Modifier
                         .size(54.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(Color.White)
-                        .padding(4.dp),
+                        .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.School, contentDescription = null, tint = cardBg, modifier = Modifier.size(36.dp))
+                    Image(
+                        painter = painterResource(id = com.example.vtiu.R.drawable.school_logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
                 
                 Spacer(modifier = Modifier.width(16.dp))

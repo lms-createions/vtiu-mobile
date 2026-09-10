@@ -1,5 +1,6 @@
 package com.example.vtiu.ui.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.vtiu.ui.theme.SchoolPrimary
 import com.example.vtiu.ui.theme.VClassPrimary
+import com.example.vtiu.R
 
 data class PortalTile(
     val title: String,
@@ -79,15 +82,19 @@ fun PortalSelectionScreen(
             // Logo & Title
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
-                    color = Color.White.copy(alpha = 0.1f),
+                    color = Color.White,
                     shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.size(56.dp)
+                    modifier = Modifier.size(64.dp)
                 ) {
-                    Icon(Icons.Default.Dashboard, contentDescription = null, tint = Color.White, modifier = Modifier.padding(12.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.school_logo),
+                        contentDescription = "Logo",
+                        modifier = Modifier.padding(4.dp)
+                    )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text(text = "MyLMS", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black)
+                    Text(text = "VTIU", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black)
                     Text(text = "Unified Learning Portal", color = Color.White.copy(alpha = 0.7f), fontSize = 12.sp)
                 }
             }
@@ -122,7 +129,7 @@ fun PortalSelectionScreen(
             Spacer(modifier = Modifier.height(48.dp))
             
             Text(
-                text = "Need help? support@example.com",
+                text = "Need help? admissions@vtiu.edu.gh",
                 color = Color.White.copy(alpha = 0.5f),
                 fontSize = 12.sp
             )

@@ -1,5 +1,6 @@
 package com.example.vtiu.ui.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -24,6 +26,7 @@ import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vtiu.ui.teacher.TeacherViewModel
 import com.example.vtiu.ui.theme.TeacherPrimary
+import com.example.vtiu.R
 
 @Composable
 fun TeacherLoginScreen(
@@ -79,16 +82,15 @@ fun TeacherLoginScreen(
             // Header Section
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(100.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(TeacherPrimary),
+                    .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(32.dp)
+                Image(
+                    painter = painterResource(id = R.drawable.school_logo),
+                    contentDescription = "Logo",
+                    modifier = Modifier.fillMaxSize()
                 )
             }
 
