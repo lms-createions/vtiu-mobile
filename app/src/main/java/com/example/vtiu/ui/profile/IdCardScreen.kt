@@ -1,6 +1,10 @@
 package com.example.vtiu.ui.profile
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -92,7 +97,13 @@ fun IdCardScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     item {
-                        IdCardVisual(profile)
+                        Text(
+                            text = "Tap the card to flip",
+                            fontSize = 12.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        FlippableIdCard(profile)
                     }
 
                     item {
@@ -133,11 +144,45 @@ fun IdCardScreen(
 }
 
 @Composable
-fun IdCardVisual(profile: com.example.vtiu.data.model.api.UserProfileData) {
-    Card(
+fun FlippableIdCard(profile: com.example.vtiu.data.model.api.UserProfileData) {
+    var rotated by remember { mutableStateOf(false) }
+
+    val rotation by animateFloatAsState(
+        targetValue = if (rotated) 180f else 0f,
+        animationSpec = tween(durationMillis = 600),
+        label = "cardFlip"
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.58f),
+            .aspectRatio(1.58f)
+            .clickable { rotated = !rotated }
+            .graphicsLayer {
+                rotationY = rotation
+                cameraDistance = 12f * density
+            }
+    ) {
+        if (rotation <= 90f) {
+            IdCardFront(profile)
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        rotationY = 180f
+                    }
+            ) {
+                IdCardBack(profile)
+            }
+        }
+    }
+}
+
+@Composable
+fun IdCardFront(profile: com.example.vtiu.data.model.api.UserProfileData) {
+    Card(
+        modifier = Modifier.fillMaxSize(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -189,6 +234,95 @@ fun IdCardVisual(profile: com.example.vtiu.data.model.api.UserProfileData) {
 }
 
 @Composable
+fun IdCardBack(profile: com.example.vtiu.data.model.api.UserProfileData) {
+    Card(
+        modifier = Modifier.fillMaxSize(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "VIRTUAL TECHNICAL INSTITUTE UNIVERSITY",
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = SchoolPrimary,
+                textAlign = TextAlign.Center
+            )
+            
+            Text(
+                text = "This card is the property of VTIU. If found, please return to the nearest police station or to the University administration office.",
+                fontSize = 9.sp,
+                textAlign = TextAlign.Center,
+                lineHeight = 12.sp,
+                color = Color.DarkGray
+            )
+
+            HorizontalDivider(color = Color.LightGray.copy(alpha = 0.5f))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(text = "Valid Until", fontSize = 8.sp, color = Color.Gray)
+                    Text(text = "31st August 2027", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                }
+                
+                // Mock Barcode
+                Box(
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(30.dp)
+                        .background(Color.White)
+                        .border(1.dp, Color.Black)
+                ) {
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        repeat(20) { index ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(if (index % 3 == 0) 4.dp else 2.dp)
+                                    .background(if (index % 2 == 0) Color.Black else Color.White)
+                            )
+                        }
+                    }
+                }
+            }
+            
+            Text(
+                text = profile.userId,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(modifier = Modifier.width(80.dp).height(1.dp).background(Color.Gray))
+                    Text(text = "Registrar", fontSize = 8.sp, color = Color.Gray)
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(modifier = Modifier.width(80.dp).height(1.dp).background(Color.Gray))
+                    Text(text = "Student Holder", fontSize = 8.sp, color = Color.Gray)
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun VisualIdRow(label: String, value: String) {
     Row {
         Text(text = "$label: ", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
@@ -210,6 +344,7 @@ fun CardInfoSection(profile: com.example.vtiu.data.model.api.UserProfileData) {
             InfoRow("Full Name", profile.name)
             InfoRow("Student ID", profile.userId)
             InfoRow("Programme", profile.programme ?: "N/A")
+            InfoRow("Expiry Date", "31st August 2027")
         }
     }
 }
