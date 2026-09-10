@@ -15,15 +15,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.vtiu.ui.dashboard.StudentViewModel
 import com.example.vtiu.ui.theme.SchoolPrimary
 import kotlinx.coroutines.launch
@@ -79,7 +84,7 @@ fun IdCardScreen(
                             )
                         }
                         Text(
-                            text = "ID Card",
+                            text = "Digital ID",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
@@ -98,7 +103,7 @@ fun IdCardScreen(
                 ) {
                     item {
                         Text(
-                            text = "Tap the card to flip",
+                            text = "Tap to flip ID Card",
                             fontSize = 12.sp,
                             color = Color.Gray,
                             modifier = Modifier.padding(bottom = 16.dp)
@@ -116,7 +121,7 @@ fun IdCardScreen(
                             Button(
                                 onClick = {
                                     scope.launch {
-                                        snackbarHostState.showSnackbar("Downloading ID Card PDF...")
+                                        snackbarHostState.showSnackbar("Generating High-Res ID PDF...")
                                     }
                                 },
                                 modifier = Modifier.weight(1f),
@@ -191,7 +196,7 @@ fun IdCardFront(profile: com.example.vtiu.data.model.api.UserProfileData) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.25f)
+                    .weight(0.22f)
                     .background(SchoolPrimary),
                 contentAlignment = Alignment.Center
             ) {
@@ -201,18 +206,18 @@ fun IdCardFront(profile: com.example.vtiu.data.model.api.UserProfileData) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.75f)
+                    .weight(0.78f)
                     .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier.size(90.dp).clip(RoundedCornerShape(8.dp)).background(Color.LightGray), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.size(100.dp).clip(RoundedCornerShape(8.dp)).background(Color.LightGray), contentAlignment = Alignment.Center) {
                     if (!profile.profilePictureUrl.isNullOrBlank()) {
                         val staticUrl = com.example.vtiu.di.NetworkModule.STATIC_URL
-                        coil.compose.AsyncImage(
+                        AsyncImage(
                             model = "$staticUrl${profile.profilePictureUrl}",
                             contentDescription = "Profile Picture",
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            contentScale = ContentScale.Crop
                         )
                     } else {
                         Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(60.dp), tint = Color.White)
@@ -227,6 +232,7 @@ fun IdCardFront(profile: com.example.vtiu.data.model.api.UserProfileData) {
                     Spacer(modifier = Modifier.height(8.dp))
                     VisualIdRow("ID NO", profile.userId)
                     VisualIdRow("LEVEL", profile.level?.toString() ?: "N/A")
+                    VisualIdRow("YEAR", profile.academicYear ?: "2026")
                 }
             }
         }
@@ -239,83 +245,148 @@ fun IdCardBack(profile: com.example.vtiu.data.model.api.UserProfileData) {
         modifier = Modifier.fillMaxSize(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAF5)), // Slight off-white background
+        border = androidx.compose.foundation.BorderStroke(0.5.dp, Color.LightGray.copy(alpha = 0.5f))
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "VIRTUAL TECHNICAL INSTITUTE UNIVERSITY",
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                color = SchoolPrimary,
-                textAlign = TextAlign.Center
-            )
-            
-            Text(
-                text = "This card is the property of VTIU. If found, please return to the nearest police station or to the University administration office.",
-                fontSize = 9.sp,
-                textAlign = TextAlign.Center,
-                lineHeight = 12.sp,
-                color = Color.DarkGray
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Background Logo Watermark (Mock)
+            Icon(
+                imageVector = Icons.Default.School,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(140.dp)
+                    .align(Alignment.Center)
+                    .alpha(0.05f),
+                tint = SchoolPrimary
             )
 
-            HorizontalDivider(color = Color.LightGray.copy(alpha = 0.5f))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp)
             ) {
-                Column {
-                    Text(text = "Valid Until", fontSize = 8.sp, color = Color.Gray)
-                    Text(text = "31st August 2027", fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                }
-                
-                // Mock Barcode
-                Box(
-                    modifier = Modifier
-                        .width(120.dp)
-                        .height(30.dp)
-                        .background(Color.White)
-                        .border(1.dp, Color.Black)
+                // Top Row: Serial, Chip, Flag
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Row(modifier = Modifier.fillMaxSize()) {
-                        repeat(20) { index ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .width(if (index % 3 == 0) 4.dp else 2.dp)
-                                    .background(if (index % 2 == 0) Color.Black else Color.White)
-                            )
+                    Text(text = "21500086", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                    
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(imageVector = Icons.Default.Contactless, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.Gray)
+                    }
+                    
+                    // Ghana Flag Mock
+                    Box(modifier = Modifier.width(36.dp).height(24.dp).border(0.5.dp, Color.LightGray)) {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Box(modifier = Modifier.weight(1f).fillMaxWidth().background(Color(0xFFFF0000)))
+                            Box(modifier = Modifier.weight(1f).fillMaxWidth().background(Color(0xFFFCD116)))
+                            Box(modifier = Modifier.weight(1f).fillMaxWidth().background(Color(0xFF006B3F)))
                         }
                     }
                 }
-            }
-            
-            Text(
-                text = profile.userId,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.Black
-            )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(modifier = Modifier.width(80.dp).height(1.dp).background(Color.Gray))
-                    Text(text = "Registrar", fontSize = 8.sp, color = Color.Gray)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Middle Section: Terms and National Logo
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(0.7f)) {
+                        Text(
+                            text = "THIS CARD IS THE PROPERTY OF VTIU AND THE GOVERNMENT OF THE REPUBLIC OF GHANA. IF FOUND, PLEASE RETURN TO THE NEAREST POLICE STATION OR VTIU OFFICE.",
+                            fontSize = 7.sp,
+                            lineHeight = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                        
+                        Spacer(modifier = Modifier.height(10.dp))
+                        
+                        Text(
+                            text = "GHA-${profile.userId}-8",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.Black
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        // Signature Area
+                        Box(modifier = Modifier.fillMaxWidth().height(40.dp).border(0.5.dp, Color.Gray.copy(alpha = 0.5f))) {
+                            Text(
+                                text = "Signature / Signature",
+                                fontSize = 7.sp,
+                                modifier = Modifier.padding(4.dp),
+                                color = Color.Gray
+                            )
+                            // Mock Signature
+                            Text(
+                                text = profile.name.split(" ").firstOrNull() ?: "Student",
+                                modifier = Modifier.align(Alignment.Center),
+                                fontSize = 18.sp,
+                                fontFamily = FontFamily.Cursive,
+                                color = Color.DarkGray
+                            )
+                        }
+                        
+                        Text(
+                            text = "Authority of Issuance / Autorité de délivrance",
+                            fontSize = 7.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                        Text(
+                            text = "VTIU ADMINISTRATION AUTHORITY",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color.Black
+                        )
+                    }
+
+                    // Right Side: Eagle Graphic (Mock)
+                    Box(modifier = Modifier.weight(0.3f), contentAlignment = Alignment.CenterEnd) {
+                        Icon(
+                            imageVector = Icons.Default.Public, // Placeholder for Eagle/Coat of Arms
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = Color(0xFFB8860B)
+                        )
+                    }
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(modifier = Modifier.width(80.dp).height(1.dp).background(Color.Gray))
-                    Text(text = "Student Holder", fontSize = 8.sp, color = Color.Gray)
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Bottom: MRZ Code
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White.copy(alpha = 0.5f))
+                        .padding(vertical = 4.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    val mrzName = profile.name.replace(" ", "<<").uppercase()
+                    Text(
+                        text = "I<GHA${profile.userId}<<<<<<<<<<<<<<<<<<",
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = "9306238M2905165GHA<<<<<<<<<<<<<<2",
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    )
+                    Text(
+                        text = "$mrzName<<<<<<<<<<<<<<<<<<<<<<<",
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
+                        maxLines = 1
+                    )
                 }
             }
         }
@@ -339,12 +410,12 @@ fun CardInfoSection(profile: com.example.vtiu.data.model.api.UserProfileData) {
         border = CardDefaults.outlinedCardBorder()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Card Information", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(text = "Identity Details", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-            InfoRow("Full Name", profile.name)
-            InfoRow("Student ID", profile.userId)
-            InfoRow("Programme", profile.programme ?: "N/A")
+            InfoRow("Ghana Card ID Equivalent", "GHA-${profile.userId}-8")
+            InfoRow("Status", "Valid & Active")
             InfoRow("Expiry Date", "31st August 2027")
+            InfoRow("Issuing Authority", "VTIU National Registry")
         }
     }
 }
