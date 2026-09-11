@@ -1,6 +1,10 @@
 package com.example.vtiu.data.repository
 
 import com.example.vtiu.data.model.api.*
+import com.example.vtiu.data.local.room.dao.ProfileDao
+import com.example.vtiu.data.local.room.dao.TimetableDao
+import com.example.vtiu.data.local.room.dao.CourseDao
+import com.example.vtiu.data.mapper.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -13,7 +17,10 @@ import javax.inject.Singleton
 @Singleton
 class LmsRepository @Inject constructor(
     private val client: HttpClient,
-    private val baseUrl: String
+    private val baseUrl: String,
+    private val profileDao: ProfileDao,
+    private val timetableDao: TimetableDao,
+    private val courseDao: CourseDao
 ) {
     suspend fun testConnection(): String {
         return try {
@@ -43,9 +50,18 @@ class LmsRepository @Inject constructor(
 
     suspend fun getProfile(role: String, userId: String): ProfileResponse {
         return try {
-            client.get("$baseUrl/api/profile/$role/$userId").body()
+            val response: ProfileResponse = client.get("$baseUrl/api/profile/$role/$userId").body()
+            if (response.success && response.profile != null) {
+                profileDao.saveProfile(response.profile.toEntity())
+            }
+            response
         } catch (e: Exception) {
-            ProfileResponse(success = false, message = e.message)
+            val cachedProfile = profileDao.getProfile(userId)
+            if (cachedProfile != null) {
+                ProfileResponse(success = true, profile = cachedProfile.toDomain())
+            } else {
+                ProfileResponse(success = false, message = e.message)
+            }
         }
     }
 
@@ -59,9 +75,14 @@ class LmsRepository @Inject constructor(
 
     suspend fun getStudentCourses(userId: String): List<StudentCourseApi> {
         return try {
-            client.get("$baseUrl/api/student/courses/$userId").body()
+            val response: List<StudentCourseApi> = client.get("$baseUrl/api/student/courses/$userId").body()
+            if (response.isNotEmpty()) {
+                courseDao.deleteCourses(userId)
+                courseDao.saveCourses(response.map { it.toEntity(userId) })
+            }
+            response
         } catch (e: Exception) {
-            emptyList()
+            courseDao.getCourses(userId).map { it.toApi() }
         }
     }
 
@@ -184,9 +205,14 @@ class LmsRepository @Inject constructor(
 
     suspend fun getStudentTimetable(userId: String): List<TimetableEntryApi> {
         return try {
-            client.get("$baseUrl/api/student/timetable/$userId").body()
+            val response: List<TimetableEntryApi> = client.get("$baseUrl/api/student/timetable/$userId").body()
+            if (response.isNotEmpty()) {
+                timetableDao.deleteTimetable(userId)
+                timetableDao.saveTimetable(response.map { it.toEntity(userId) })
+            }
+            response
         } catch (e: Exception) {
-            emptyList()
+            timetableDao.getTimetable(userId).map { it.toApi() }
         }
     }
 

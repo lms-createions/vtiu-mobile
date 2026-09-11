@@ -67,6 +67,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.coil.compose)
 
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
     // Media
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)

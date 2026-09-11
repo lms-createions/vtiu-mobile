@@ -9,6 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.toKotlinLocalDateTime
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 
@@ -37,18 +38,20 @@ fun Route.teacherRoutes() {
                 val teacherRow = TeacherProfiles.select { TeacherProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<AssignmentSubmissionApi>()
                 val teacherId = teacherRow[TeacherProfiles.id]
                 
-                (AssignmentSubmissions innerJoin Assignments).select { Assignments.courseId inList (
+                (AssignmentSubmissions innerJoin Assignments innerJoin Users).select { Assignments.courseId inList (
                     TeacherCourseAssignments.select { TeacherCourseAssignments.teacherId eq teacherId }.map { it[TeacherCourseAssignments.courseId] }
                 ) }.map {
+                    val scoreVal = it[AssignmentSubmissions.score]
                     AssignmentSubmissionApi(
                         id = it[AssignmentSubmissions.id],
-                        studentName = "Student Name", // Simplified
-                        studentId = "ID",
+                        studentName = "${it[Users.firstName]} ${it[Users.lastName]}",
+                        studentId = it[Users.userId],
                         assignmentTitle = it[Assignments.title],
                         submittedAt = it[AssignmentSubmissions.submittedAt].toString(),
                         filename = it[AssignmentSubmissions.filename],
-                        score = it[AssignmentSubmissions.score],
-                        feedback = it[AssignmentSubmissions.feedback]
+                        score = scoreVal,
+                        feedback = it[AssignmentSubmissions.feedback],
+                        status = if (scoreVal != null) "Graded" else "Pending"
                     )
                 }
             }
@@ -114,13 +117,26 @@ fun Route.teacherRoutes() {
         post("/mark") {
             val request = call.receive<MarkAttendanceRequest>()
             val success = transaction {
-                AttendanceRecords.insert {
-                    it[studentId] = request.studentId
-                    it[courseId] = request.courseId
-                    it[date] = request.date
-                    it[isPresent] = request.isPresent
-                    // Missing teacherId in request, would need it in a real app
-                }.insertedCount > 0
+                val teacherRow = TeacherProfiles.select { TeacherProfiles.userId eq request.teacherId }.singleOrNull() ?: return@transaction false
+                val teacherIntId = teacherRow[TeacherProfiles.id]
+                
+                request.records.forEach { record ->
+                    // Use update or insert pattern: delete existing for that day/student/course first to avoid duplicates
+                    AttendanceRecords.deleteWhere { 
+                        (AttendanceRecords.studentId eq record.studentId) and 
+                        (AttendanceRecords.courseId eq request.courseId) and 
+                        (AttendanceRecords.date eq request.date)
+                    }
+                    
+                    AttendanceRecords.insert {
+                        it[AttendanceRecords.studentId] = record.studentId
+                        it[AttendanceRecords.teacherId] = teacherIntId
+                        it[AttendanceRecords.courseId] = request.courseId
+                        it[AttendanceRecords.date] = request.date
+                        it[AttendanceRecords.isPresent] = record.isPresent
+                    }
+                }
+                true
             }
             if (success) call.respond(HttpStatusCode.OK) else call.respond(HttpStatusCode.BadRequest)
         }

@@ -113,20 +113,19 @@ data class VClassAssignmentApi(
 
 // Teacher Request/Response Models
 @Serializable
-data class MarkAttendanceRequest(
+data class AttendanceRecordApi(
+    val id: Int? = null,
     @SerialName("student_id") val studentId: String,
-    @SerialName("course_id") val courseId: Int,
-    val date: String,
+    @SerialName("student_name") val studentName: String? = null,
     @SerialName("is_present") val isPresent: Boolean
 )
 
 @Serializable
-data class AttendanceRecordApi(
-    val id: Int,
-    @SerialName("student_name") val studentName: String,
-    @SerialName("student_id") val studentId: String,
+data class MarkAttendanceRequest(
+    @SerialName("course_id") val courseId: Int,
+    @SerialName("teacher_id") val teacherId: String,
     val date: String,
-    @SerialName("is_present") val isPresent: Boolean
+    val records: List<AttendanceRecordApi>
 )
 
 @Serializable
@@ -153,7 +152,8 @@ data class AssignmentSubmissionApi(
     @SerialName("submitted_at") val submittedAt: String,
     val filename: String,
     val score: Float? = null,
-    val feedback: String? = null
+    val feedback: String? = null,
+    val status: String = "Pending"
 )
 
 @Serializable
