@@ -375,6 +375,7 @@ object Meetings : Table("meetings") {
     val scheduledEnd = datetime("scheduled_end").nullable()
     val joinUrl = varchar("join_url", 500).nullable()
     val startUrl = varchar("start_url", 500).nullable()
+    val whiteboardRoomUuid = varchar("whiteboard_room_uuid", 50).nullable()
     val createdAt = datetime("created_at")
 
     override val primaryKey = PrimaryKey(id)

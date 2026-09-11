@@ -217,31 +217,48 @@ fun Route.vClassRoutes() {
         get("/vclass/whiteboard/{meetingId}") {
             val meetingId = call.parameters["meetingId"]?.toIntOrNull() ?: 0
             
-            // 1. Get Whiteboard Settings
-            val settings = transaction { SchoolSettings.selectAll().singleOrNull() }
-            if (settings == null || settings[SchoolSettings.agoraWhiteboardId].isBlank()) {
+            // 1. Get Whiteboard Settings and check if roomUuid already exists
+            val (appId, sdkToken, existingUuid) = transaction {
+                val settings = SchoolSettings.selectAll().singleOrNull() ?: return@transaction Triple("", "", null)
+                val meeting = Meetings.select { Meetings.id eq meetingId }.singleOrNull()
+                Triple(
+                    settings[SchoolSettings.agoraWhiteboardId],
+                    settings[SchoolSettings.agoraWhiteboardToken],
+                    meeting?.get(Meetings.whiteboardRoomUuid)
+                )
+            }
+
+            if (appId.isBlank()) {
                 return@get call.respond(HttpStatusCode.PreconditionFailed, "Whiteboard App ID missing")
             }
-            
-            val appId = settings[SchoolSettings.agoraWhiteboardId]
-            val sdkToken = settings[SchoolSettings.agoraWhiteboardToken]
 
             try {
-                // Step A: Create a Room
-                val createResponse = paystackClient.post("https://api.netless.link/v1/rooms") {
-                    header("token", sdkToken)
-                    contentType(ContentType.Application.Json)
-                    setBody(NetlessRoomRequest())
+                var roomUuid = existingUuid
+
+                // Step A: Create a Room only if it doesn't exist
+                if (roomUuid == null) {
+                    val createResponse = paystackClient.post("https://api.netless.link/v1/rooms") {
+                        header("token", sdkToken)
+                        contentType(ContentType.Application.Json)
+                        setBody(NetlessRoomRequest())
+                    }
+                    
+                    if (createResponse.status != HttpStatusCode.Created && createResponse.status != HttpStatusCode.OK) {
+                        val error = createResponse.body<String>()
+                        return@get call.respond(HttpStatusCode.InternalServerError, "Netless Room Creation Failed: $error")
+                    }
+                    
+                    roomUuid = createResponse.body<NetlessRoomResponse>().uuid
+                    
+                    // Save the new UUID to the database
+                    transaction {
+                        Meetings.update({ Meetings.id eq meetingId }) {
+                            it[whiteboardRoomUuid] = roomUuid
+                        }
+                    }
                 }
                 
-                if (createResponse.status != HttpStatusCode.Created && createResponse.status != HttpStatusCode.OK) {
-                    val error = createResponse.body<String>()
-                    return@get call.respond(HttpStatusCode.InternalServerError, "Netless Room Creation Failed: $error")
-                }
-                
-                val roomUuid = createResponse.body<NetlessRoomResponse>().uuid
-                
-                // Step B: Generate a Room Token
+                // Step B: Generate a Room Token for the (new or existing) UUID
                 val tokenResponse = paystackClient.post("https://api.netless.link/v1/tokens/rooms/$roomUuid") {
                     header("token", sdkToken)
                     contentType(ContentType.Application.Json)
