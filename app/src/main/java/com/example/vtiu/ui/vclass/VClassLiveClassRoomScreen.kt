@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vtiu.ui.dashboard.StudentViewModel
+import com.example.vtiu.ui.chat.ChatViewModel
 import com.example.vtiu.data.model.VClassMeeting
 import com.example.vtiu.data.remote.AgoraManager
 import com.example.vtiu.data.remote.WhiteboardManager
@@ -41,7 +43,8 @@ fun VClassLiveClassRoomScreen(
     meetingId: Int,
     userId: String,
     onLeaveClick: () -> Unit,
-    viewModel: StudentViewModel = hiltViewModel()
+    viewModel: StudentViewModel = hiltViewModel(),
+    chatViewModel: ChatViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val meeting = VClassMeeting(meetingId, "Session", "Course", "Teacher", "", "", null, true, false)
@@ -55,18 +58,12 @@ fun VClassLiveClassRoomScreen(
     val whiteboardRoom by viewModel.whiteboardRoom
     val agoraTokenResponse by viewModel.agoraToken
 
+    val chatRoomId = "meeting_$meetingId"
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { perms ->
         hasPermissions = perms.values.all { it }
-        if (hasPermissions && agoraTokenResponse != null) {
-            agoraManager.joinChannel(
-                channelName = meeting.courseName, 
-                uid = userId.toIntOrNull() ?: 0,
-                token = agoraTokenResponse!!.token,
-                role = Constants.CLIENT_ROLE_AUDIENCE
-            )
-        }
     }
 
     LaunchedEffect(agoraTokenResponse, hasPermissions) {
@@ -83,6 +80,7 @@ fun VClassLiveClassRoomScreen(
     LaunchedEffect(Unit) {
         viewModel.loadWhiteboardRoom(meetingId)
         viewModel.loadAgoraToken(meeting.courseName, userId)
+        chatViewModel.connect(userId, chatRoomId)
     }
 
     LaunchedEffect(isApproved) {
@@ -101,6 +99,7 @@ fun VClassLiveClassRoomScreen(
             agoraManager.leaveChannel()
             agoraManager.release()
             whiteboardManager.release()
+            chatViewModel.disconnect()
         }
     }
 
@@ -115,7 +114,7 @@ fun VClassLiveClassRoomScreen(
         if (!approved) {
             WaitingRoom(meeting, onLeaveClick)
         } else {
-            ActiveTeachingRoom(meeting, hostUid, agoraManager, whiteboardManager, viewModel, onLeaveClick)
+            ActiveTeachingRoom(meeting, hostUid, agoraManager, whiteboardManager, userId, viewModel, chatViewModel, chatRoomId, onLeaveClick)
         }
     }
 }
@@ -167,14 +166,24 @@ fun ActiveTeachingRoom(
     hostUid: Int,
     agoraManager: AgoraManager,
     whiteboardManager: WhiteboardManager,
+    currentUserId: String,
     viewModel: StudentViewModel,
+    chatViewModel: ChatViewModel,
+    chatRoomId: String,
     onLeaveClick: () -> Unit
 ) {
     var messageText by remember { mutableStateOf("") }
-    val messages = remember { mutableStateListOf("Hello everyone!", "Welcome to today's session on ${meeting.courseName}.") }
+    val messages = chatViewModel.messages
     var isFullScreen by remember { mutableStateOf(false) }
     var showWhiteboard by remember { mutableStateOf(false) }
     val whiteboardRoom by viewModel.whiteboardRoom
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
+    }
 
     Scaffold(
         containerColor = Color.Black,
@@ -209,22 +218,24 @@ fun ActiveTeachingRoom(
                             }
                         }
                         
-                        Button(
-                            onClick = { showWhiteboard = !showWhiteboard },
-                            colors = ButtonDefaults.buttonColors(containerColor = VClassPrimary),
-                            contentPadding = PaddingValues(horizontal = 12.dp),
-                            modifier = Modifier.height(32.dp).padding(end = 8.dp)
-                        ) {
-                            Text(if (showWhiteboard) "Show Video" else "Show Board", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Button(
+                                onClick = { showWhiteboard = !showWhiteboard },
+                                colors = ButtonDefaults.buttonColors(containerColor = VClassPrimary),
+                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                modifier = Modifier.height(32.dp).padding(end = 8.dp)
+                            ) {
+                                Text(if (showWhiteboard) "Show Video" else "Show Board", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
 
-                        Button(
-                            onClick = onLeaveClick,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                            contentPadding = PaddingValues(horizontal = 12.dp),
-                            modifier = Modifier.height(32.dp).padding(end = 8.dp)
-                        ) {
-                            Text("Leave", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Button(
+                                onClick = onLeaveClick,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                modifier = Modifier.height(32.dp).padding(end = 8.dp)
+                            ) {
+                                Text("Leave", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
@@ -308,7 +319,7 @@ fun ActiveTeachingRoom(
                             .background(Color.White)
                     ) {
                         Text(
-                            text = "Live Chat",
+                            text = "Live Class Chat",
                             modifier = Modifier.padding(16.dp),
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
@@ -316,6 +327,7 @@ fun ActiveTeachingRoom(
                         
                         LazyColumn(
                             modifier = Modifier.weight(1f),
+                            state = listState,
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
@@ -332,8 +344,8 @@ fun ActiveTeachingRoom(
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column {
-                                        Text(text = "Student", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                                        Text(text = msg, fontSize = 14.sp)
+                                        Text(text = msg.senderName ?: "User", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                        Text(text = msg.message, fontSize = 14.sp)
                                     }
                                 }
                             }
@@ -373,7 +385,7 @@ fun ActiveTeachingRoom(
                                 IconButton(
                                     onClick = { 
                                         if (messageText.isNotBlank()) {
-                                            messages.add(messageText)
+                                            chatViewModel.sendMessage(currentUserId, messageText, chatRoomId)
                                             messageText = ""
                                         }
                                     },

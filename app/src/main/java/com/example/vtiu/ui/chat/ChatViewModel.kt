@@ -35,11 +35,11 @@ class ChatViewModel @Inject constructor(
 
     private var session: DefaultClientWebSocketSession? = null
 
-    fun connect(userId: String) {
+    fun connect(userId: String, receiverId: String = "global") {
         viewModelScope.launch {
             try {
                 // 1. Fetch History
-                val history = repository.getChatHistory("global")
+                val history = repository.getChatHistory(receiverId)
                 _messages.clear()
                 _messages.addAll(history)
 
@@ -55,12 +55,15 @@ class ChatViewModel @Inject constructor(
                 ) {
                     session = this
                     _isConnected.value = true
-                    println("Chat: WebSocket connected to $wsHost")
+                    println("Chat: WebSocket connected to $wsHost for room $receiverId")
                     
                     for (frame in incoming) {
                         if (frame is Frame.Text) {
                             val msg = Json.decodeFromString<ChatMessageApi>(frame.readText())
-                            _messages.add(msg)
+                            // Only add if it belongs to this room or is from/to us
+                            if (msg.receiverId == receiverId || msg.receiverId == "global") {
+                                _messages.add(msg)
+                            }
                         }
                     }
                 }
@@ -72,13 +75,13 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun sendMessage(senderId: String, text: String) {
+    fun sendMessage(senderId: String, text: String, receiverId: String = "global") {
         if (text.isBlank()) return
         viewModelScope.launch {
             try {
                 val msg = ChatMessageApi(
                     senderId = senderId,
-                    receiverId = "global",
+                    receiverId = receiverId,
                     message = text
                 )
                 val json = Json.encodeToString(msg)
@@ -89,10 +92,15 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
+    fun disconnect() {
         viewModelScope.launch {
             session?.close()
+            _isConnected.value = false
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        disconnect()
     }
 }
