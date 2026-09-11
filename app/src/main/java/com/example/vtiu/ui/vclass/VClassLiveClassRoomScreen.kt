@@ -39,6 +39,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun VClassLiveClassRoomScreen(
     meetingId: Int,
+    userId: String,
     onLeaveClick: () -> Unit,
     viewModel: StudentViewModel = hiltViewModel()
 ) {
@@ -52,18 +53,36 @@ fun VClassLiveClassRoomScreen(
     var hasPermissions by remember { mutableStateOf(false) }
     
     val whiteboardRoom by viewModel.whiteboardRoom
+    val agoraTokenResponse by viewModel.agoraToken
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { perms ->
         hasPermissions = perms.values.all { it }
-        if (hasPermissions) {
-            agoraManager.joinChannel(meeting.courseName, role = Constants.CLIENT_ROLE_AUDIENCE)
+        if (hasPermissions && agoraTokenResponse != null) {
+            agoraManager.joinChannel(
+                channelName = meeting.courseName, 
+                uid = userId.toIntOrNull() ?: 0,
+                token = agoraTokenResponse!!.token,
+                role = Constants.CLIENT_ROLE_AUDIENCE
+            )
+        }
+    }
+
+    LaunchedEffect(agoraTokenResponse, hasPermissions) {
+        if (hasPermissions && agoraTokenResponse != null) {
+            agoraManager.joinChannel(
+                channelName = meeting.courseName,
+                uid = userId.toIntOrNull() ?: 0,
+                token = agoraTokenResponse!!.token.ifEmpty { null },
+                role = Constants.CLIENT_ROLE_AUDIENCE
+            )
         }
     }
 
     LaunchedEffect(Unit) {
         viewModel.loadWhiteboardRoom(meetingId)
+        viewModel.loadAgoraToken(meeting.courseName, userId)
     }
 
     LaunchedEffect(isApproved) {

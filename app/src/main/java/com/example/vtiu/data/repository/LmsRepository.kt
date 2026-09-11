@@ -707,4 +707,12 @@ class LmsRepository @Inject constructor(
             null
         }
     }
+
+    suspend fun getAgoraToken(channelName: String, userId: String): AgoraTokenResponse? {
+        return try {
+            client.get("$baseUrl/api/vclass/agora/token/$channelName/$userId").body<AgoraTokenResponse>()
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

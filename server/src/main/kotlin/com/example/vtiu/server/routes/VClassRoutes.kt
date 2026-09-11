@@ -3,6 +3,7 @@ package com.example.vtiu.server.routes
 import com.example.vtiu.server.models.*
 import com.example.vtiu.server.db.*
 import com.example.vtiu.server.paystackClient
+import com.example.vtiu.server.utils.AgoraTokenBuilder
 import io.ktor.client.request.*
 import io.ktor.client.call.*
 import io.ktor.http.*
@@ -275,6 +276,38 @@ fun Route.vClassRoutes() {
                 
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Whiteboard Error: ${e.message}")
+            }
+        }
+
+        get("/agora/token/{channelName}/{userId}") {
+            val channelName = call.parameters["channelName"] ?: ""
+            val userId = call.parameters["userId"] ?: "0"
+            
+            val settings = transaction { SchoolSettings.selectAll().singleOrNull() }
+            if (settings == null || settings[SchoolSettings.agoraAppId].isBlank()) {
+                return@get call.respond(HttpStatusCode.PreconditionFailed, "Agora not configured")
+            }
+
+            val appId = settings[SchoolSettings.agoraAppId]
+            val appCert = settings[SchoolSettings.agoraAppCertificate]
+
+            // If no certificate is set, we are in testing mode
+            if (appCert.isBlank()) {
+                return@get call.respond(AgoraTokenResponse(token = "", appId = appId))
+            }
+
+            try {
+                val token = AgoraTokenBuilder.buildToken(
+                    appId = appId,
+                    appCertificate = appCert,
+                    channelName = channelName,
+                    uid = userId.toIntOrNull() ?: 0,
+                    role = AgoraTokenBuilder.Role.BROADCASTER, // Standard for classroom
+                    privilegeExpireTime = 3600 // 1 hour
+                )
+                call.respond(AgoraTokenResponse(token = token, appId = appId))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Token Error: ${e.message}")
             }
         }
 

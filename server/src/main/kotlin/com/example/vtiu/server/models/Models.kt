@@ -545,3 +545,9 @@ data class WhiteboardRoomResponse(
     val roomUuid: String,
     val roomToken: String
 )
+
+@Serializable
+data class AgoraTokenResponse(
+    val token: String,
+    val appId: String
+)

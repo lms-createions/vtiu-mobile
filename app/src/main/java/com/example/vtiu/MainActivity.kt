@@ -750,6 +750,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     val id = backStackEntry.arguments?.getInt("meetingId") ?: 0
                     VClassLiveClassRoomScreen(
                         meetingId = id,
+                        userId = sessionManager.getUserId() ?: "",
                         onLeaveClick = { navController.popBackStack() }
                     )
                 }
