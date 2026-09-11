@@ -12,6 +12,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 fun Route.teacherRoutes() {
     route("/api/teacher") {
@@ -110,6 +111,35 @@ fun Route.teacherRoutes() {
                 }
             }
             call.respond(entries)
+        }
+
+        get("/meetings/{userId}") {
+            val userId = call.parameters["userId"] ?: ""
+            val meetings = transaction {
+                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<VClassMeetingApi>()
+                val internalId = userRow[Users.id]
+                
+                (Meetings innerJoin Courses).select { Meetings.hostId eq internalId }.map {
+                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    val startStr = it[Meetings.scheduledStart]?.let { dt -> 
+                        LocalDateTime.of(dt.year, dt.monthNumber, dt.dayOfMonth, dt.hour, dt.minute, dt.second).format(formatter)
+                    } ?: ""
+                    val endStr = it[Meetings.scheduledEnd]?.let { dt -> 
+                        LocalDateTime.of(dt.year, dt.monthNumber, dt.dayOfMonth, dt.hour, dt.minute, dt.second).format(formatter)
+                    } ?: ""
+
+                    VClassMeetingApi(
+                        id = it[Meetings.id],
+                        title = it[Meetings.title],
+                        courseName = it[Courses.name],
+                        teacherName = "${userRow[Users.firstName]} ${userRow[Users.lastName]}",
+                        start = startStr,
+                        end = endStr,
+                        isLive = true
+                    )
+                }
+            }
+            call.respond(meetings)
         }
     }
 
