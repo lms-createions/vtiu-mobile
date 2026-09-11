@@ -131,7 +131,7 @@ object Courses : Table("course") {
     override val primaryKey = PrimaryKey(id)
 }
 
-object Assignments : Table("assignments") {
+object Assignments : Table("assignment") {
     val id = integer("id").autoIncrement()
     val courseName = varchar("course_name", 100)
     val courseId = integer("course_id").references(Courses.id)
@@ -166,7 +166,7 @@ object Quizzes : Table("quiz") {
     override val primaryKey = PrimaryKey(id)
 }
 
-object Exams : Table("exams") {
+object Exams : Table("exam") {
     val id = integer("id").autoIncrement()
     val courseId = integer("course_id").references(Courses.id)
     val title = varchar("title", 255)
@@ -364,7 +364,7 @@ object AssignmentSubmissions : Table("assignment_submissions") {
     override val primaryKey = PrimaryKey(id)
 }
 
-object Meetings : Table("meetings") {
+object Meetings : Table("meeting") {
     val id = integer("id").autoIncrement()
     val title = varchar("title", 200)
     val description = text("description").nullable()

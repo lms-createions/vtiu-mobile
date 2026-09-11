@@ -115,11 +115,13 @@ fun Route.teacherRoutes() {
 
         get("/meetings/{userId}") {
             val userId = call.parameters["userId"] ?: ""
+            println("VClass: Teacher fetching meetings for $userId")
             val meetings = transaction {
                 val userRow = Users.selectAll().where { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<VClassMeetingApi>()
                 val internalId = userRow[Users.id]
                 
-                (Meetings innerJoin Courses).selectAll().where { Meetings.hostId eq internalId }.map {
+                // Use leftJoin in case some meetings aren't strictly tied to the course table records yet
+                (Meetings leftJoin Courses).selectAll().where { Meetings.hostId eq internalId }.map {
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                     val startStr = it[Meetings.scheduledStart]?.let { dt -> 
                         LocalDateTime.of(dt.year, dt.monthNumber, dt.dayOfMonth, dt.hour, dt.minute, dt.second).format(formatter)
@@ -131,7 +133,7 @@ fun Route.teacherRoutes() {
                     VClassMeetingApi(
                         id = it[Meetings.id],
                         title = it[Meetings.title],
-                        courseName = it[Courses.name],
+                        courseName = it.getOrNull(Courses.name) ?: "General Session",
                         teacherName = "${userRow[Users.firstName]} ${userRow[Users.lastName]}",
                         start = startStr,
                         end = endStr,
@@ -139,6 +141,7 @@ fun Route.teacherRoutes() {
                     )
                 }
             }
+            println("VClass: Found ${meetings.size} meetings for host $userId")
             call.respond(meetings)
         }
     }

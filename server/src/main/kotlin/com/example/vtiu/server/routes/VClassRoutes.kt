@@ -326,7 +326,7 @@ fun Route.vClassRoutes() {
                 val level = studentProfile[StudentProfiles.programmeLevel].toString()
                 println("VClass: Student profile found. Prog=$programme, Level=$level")
 
-                val query = (Meetings innerJoin Courses).selectAll().where { 
+                val query = (Meetings leftJoin Courses).selectAll().where { 
                     (Courses.programmeName.lowerCase() eq programme.lowercase()) and 
                     (Courses.programmeLevel.lowerCase() eq level.lowercase())
                 }
