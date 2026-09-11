@@ -55,8 +55,8 @@ object DatabaseFactory {
                         it[currentSemester] = "First"
                         it[paystackMode] = "test"
                         it[agoraAppId] = "c79f6fe95bad487cafec43820f0200cb"
-                        it[agoraWhiteboardId] = "" // Need to be set in admin
-                        it[agoraWhiteboardToken] = "" // Need to be set in admin
+                        it[agoraWhiteboardId] = System.getenv("WHITEBOARD_APP_IDENTIFIER") ?: ""
+                        it[agoraWhiteboardToken] = System.getenv("WHITEBOARD_SDK_TOKEN") ?: ""
                         it[updatedAt] = java.time.LocalDateTime.now().toKotlinLocalDateTime()
                     }
                 }

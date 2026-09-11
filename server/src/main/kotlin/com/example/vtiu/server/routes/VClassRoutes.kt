@@ -2,15 +2,28 @@ package com.example.vtiu.server.routes
 
 import com.example.vtiu.server.models.*
 import com.example.vtiu.server.db.*
+import com.example.vtiu.server.paystackClient
+import io.ktor.client.request.*
+import io.ktor.client.call.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.toKotlinLocalDateTime
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
+
+@Serializable
+data class NetlessRoomRequest(val isRecord: Boolean = false, val limit: Int = 0)
+
+@Serializable
+data class NetlessRoomResponse(val uuid: String)
+
+@Serializable
+data class NetlessTokenRequest(val lifespan: Long = 3600000, val role: String = "admin")
 
 fun Route.vClassRoutes() {
     route("/api") {
@@ -203,19 +216,49 @@ fun Route.vClassRoutes() {
         // --- Whiteboard ---
         get("/vclass/whiteboard/{meetingId}") {
             val meetingId = call.parameters["meetingId"]?.toIntOrNull() ?: 0
-            val response = transaction {
-                val settings = SchoolSettings.selectAll().singleOrNull() ?: return@transaction null
-                val meeting = Meetings.select { Meetings.id eq meetingId }.singleOrNull() ?: return@transaction null
-                
-                // For a production app, we would call Netless REST API here to create a room if not exists
-                // For now, return placeholders or settings if configured
-                WhiteboardRoomResponse(
-                    appId = settings[SchoolSettings.agoraWhiteboardId],
-                    roomUuid = "MOCK_UUID_${meetingId}",
-                    roomToken = "MOCK_TOKEN_${meetingId}"
-                )
+            
+            // 1. Get Whiteboard Settings
+            val settings = transaction { SchoolSettings.selectAll().singleOrNull() }
+            if (settings == null || settings[SchoolSettings.agoraWhiteboardId].isBlank()) {
+                return@get call.respond(HttpStatusCode.PreconditionFailed, "Whiteboard App ID missing")
             }
-            if (response != null) call.respond(response) else call.respond(HttpStatusCode.NotFound)
+            
+            val appId = settings[SchoolSettings.agoraWhiteboardId]
+            val sdkToken = settings[SchoolSettings.agoraWhiteboardToken]
+
+            try {
+                // Step A: Create a Room
+                val createResponse = paystackClient.post("https://api.netless.link/v1/rooms") {
+                    header("token", sdkToken)
+                    contentType(ContentType.Application.Json)
+                    setBody(NetlessRoomRequest())
+                }
+                
+                if (createResponse.status != HttpStatusCode.Created && createResponse.status != HttpStatusCode.OK) {
+                    val error = createResponse.body<String>()
+                    return@get call.respond(HttpStatusCode.InternalServerError, "Netless Room Creation Failed: $error")
+                }
+                
+                val roomUuid = createResponse.body<NetlessRoomResponse>().uuid
+                
+                // Step B: Generate a Room Token
+                val tokenResponse = paystackClient.post("https://api.netless.link/v1/tokens/rooms/$roomUuid") {
+                    header("token", sdkToken)
+                    contentType(ContentType.Application.Json)
+                    setBody(NetlessTokenRequest())
+                }
+                
+                val roomToken = tokenResponse.body<String>().replace("\"", "") // Simple string return
+                
+                call.respond(WhiteboardRoomResponse(
+                    appId = appId,
+                    roomUuid = roomUuid,
+                    roomToken = roomToken
+                ))
+                
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Whiteboard Error: ${e.message}")
+            }
         }
 
         // --- Student Dashboard Views ---
