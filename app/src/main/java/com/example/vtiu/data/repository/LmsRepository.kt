@@ -699,4 +699,12 @@ class LmsRepository @Inject constructor(
             emptyList()
         }
     }
+
+    suspend fun getWhiteboardRoom(meetingId: Int): WhiteboardRoomResponse? {
+        return try {
+            client.get("$baseUrl/api/vclass/whiteboard/$meetingId").body()
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

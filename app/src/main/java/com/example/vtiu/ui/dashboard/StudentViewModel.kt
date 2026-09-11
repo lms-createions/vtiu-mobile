@@ -75,6 +75,9 @@ class StudentViewModel @Inject constructor(
     private val _feeTransactions = mutableStateOf<List<FeeTransactionApi>>(emptyList())
     val feeTransactions: State<List<FeeTransactionApi>> = _feeTransactions
 
+    private val _whiteboardRoom = mutableStateOf<WhiteboardRoomResponse?>(null)
+    val whiteboardRoom: State<WhiteboardRoomResponse?> = _whiteboardRoom
+
     fun loadStudentData(userId: String) {
         viewModelScope.launch {
             val response = repository.getProfile("student", userId)
@@ -206,6 +209,12 @@ class StudentViewModel @Inject constructor(
                     _feeTransactions.value = repository.getFeeTransactions(uid)
                 }
             }
+        }
+    }
+
+    fun loadWhiteboardRoom(meetingId: Int) {
+        viewModelScope.launch {
+            _whiteboardRoom.value = repository.getWhiteboardRoom(meetingId)
         }
     }
 }

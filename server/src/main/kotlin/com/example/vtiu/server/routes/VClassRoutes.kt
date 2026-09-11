@@ -200,6 +200,24 @@ fun Route.vClassRoutes() {
             if (exam != null) call.respond(exam) else call.respond(HttpStatusCode.NotFound)
         }
 
+        // --- Whiteboard ---
+        get("/vclass/whiteboard/{meetingId}") {
+            val meetingId = call.parameters["meetingId"]?.toIntOrNull() ?: 0
+            val response = transaction {
+                val settings = SchoolSettings.selectAll().singleOrNull() ?: return@transaction null
+                val meeting = Meetings.select { Meetings.id eq meetingId }.singleOrNull() ?: return@transaction null
+                
+                // For a production app, we would call Netless REST API here to create a room if not exists
+                // For now, return placeholders or settings if configured
+                WhiteboardRoomResponse(
+                    appId = settings[SchoolSettings.agoraWhiteboardId],
+                    roomUuid = "MOCK_UUID_${meetingId}",
+                    roomToken = "MOCK_TOKEN_${meetingId}"
+                )
+            }
+            if (response != null) call.respond(response) else call.respond(HttpStatusCode.NotFound)
+        }
+
         // --- Student Dashboard Views ---
         get("/student/vclass/meetings/{userId}") {
             val userId = call.parameters["userId"] ?: ""

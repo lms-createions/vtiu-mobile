@@ -36,6 +36,8 @@ object Admins : Table("admin") {
     // Agora Settings
     val agoraAppId = varchar("agora_app_id", 100).default("c79f6fe95bad487cafec43820f0200cb")
     val agoraAppCertificate = varchar("agora_app_certificate", 100).default("")
+    val agoraWhiteboardId = varchar("agora_whiteboard_id", 100).default("") // Identifier for Netless
+    val agoraWhiteboardToken = varchar("agora_whiteboard_token", 255).default("") // SDK Token for Netless
 
     val updatedAt = datetime("updated_at")
     val lastLogin = datetime("last_login").nullable()
@@ -213,6 +215,8 @@ object StudentFeeBalances : Table("student_fee_balance") {
     // Agora Settings
     val agoraAppId = varchar("agora_app_id", 100).default("c79f6fe95bad487cafec43820f0200cb")
     val agoraAppCertificate = varchar("agora_app_certificate", 100).default("")
+    val agoraWhiteboardId = varchar("agora_whiteboard_id", 100).default("") // Identifier for Netless
+    val agoraWhiteboardToken = varchar("agora_whiteboard_token", 255).default("") // SDK Token for Netless
 
     val updatedAt = datetime("updated_at")
 
@@ -448,6 +452,8 @@ object SchoolSettings : Table("school_settings") {
     // Agora Settings
     val agoraAppId = varchar("agora_app_id", 100).default("c79f6fe95bad487cafec43820f0200cb")
     val agoraAppCertificate = varchar("agora_app_certificate", 100).default("")
+    val agoraWhiteboardId = varchar("agora_whiteboard_id", 100).default("") // Identifier for Netless
+    val agoraWhiteboardToken = varchar("agora_whiteboard_token", 255).default("") // SDK Token for Netless
 
     val updatedAt = datetime("updated_at")
 

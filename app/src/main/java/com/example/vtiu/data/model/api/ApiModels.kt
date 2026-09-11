@@ -524,3 +524,10 @@ data class ChatMessageApi(
     val timestamp: String? = null,
     @SerialName("is_read") val isRead: Boolean = false
 )
+
+@Serializable
+data class WhiteboardRoomResponse(
+    val appId: String,
+    val roomUuid: String,
+    val roomToken: String
+)

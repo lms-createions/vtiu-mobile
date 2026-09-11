@@ -30,7 +30,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vtiu.ui.dashboard.StudentViewModel
 import com.example.vtiu.data.model.VClassMeeting
 import com.example.vtiu.data.remote.AgoraManager
+import com.example.vtiu.data.remote.WhiteboardManager
 import com.example.vtiu.ui.theme.VClassPrimary
+import io.agora.board.fast.FastboardView
 import io.agora.rtc2.Constants
 import kotlinx.coroutines.delay
 
@@ -45,8 +47,11 @@ fun VClassLiveClassRoomScreen(
     var isApproved by remember { mutableStateOf(!meeting.requiresApproval) }
     
     val agoraManager = remember { AgoraManager(context) }
+    val whiteboardManager = remember { WhiteboardManager(context) }
     var hostUid by remember { mutableIntStateOf(0) }
     var hasPermissions by remember { mutableStateOf(false) }
+    
+    val whiteboardRoom by viewModel.whiteboardRoom
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -57,9 +62,16 @@ fun VClassLiveClassRoomScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.loadWhiteboardRoom(meetingId)
+    }
+
     LaunchedEffect(isApproved) {
         if (isApproved) {
-            permissionLauncher.launch(arrayOf(android.Manifest.permission.RECORD_AUDIO))
+            permissionLauncher.launch(arrayOf(
+                android.Manifest.permission.RECORD_AUDIO,
+                android.Manifest.permission.CAMERA
+            ))
             delay(2000)
             hostUid = 123
         }
@@ -69,6 +81,7 @@ fun VClassLiveClassRoomScreen(
         onDispose {
             agoraManager.leaveChannel()
             agoraManager.release()
+            whiteboardManager.release()
         }
     }
 
@@ -83,7 +96,7 @@ fun VClassLiveClassRoomScreen(
         if (!approved) {
             WaitingRoom(meeting, onLeaveClick)
         } else {
-            ActiveTeachingRoom(meeting, hostUid, agoraManager, onLeaveClick)
+            ActiveTeachingRoom(meeting, hostUid, agoraManager, whiteboardManager, viewModel, onLeaveClick)
         }
     }
 }
@@ -134,11 +147,15 @@ fun ActiveTeachingRoom(
     meeting: com.example.vtiu.data.model.VClassMeeting, 
     hostUid: Int,
     agoraManager: AgoraManager,
+    whiteboardManager: WhiteboardManager,
+    viewModel: StudentViewModel,
     onLeaveClick: () -> Unit
 ) {
     var messageText by remember { mutableStateOf("") }
     val messages = remember { mutableStateListOf("Hello everyone!", "Welcome to today's session on ${meeting.courseName}.") }
     var isFullScreen by remember { mutableStateOf(false) }
+    var showWhiteboard by remember { mutableStateOf(false) }
+    val whiteboardRoom by viewModel.whiteboardRoom
 
     Scaffold(
         containerColor = Color.Black,
@@ -174,6 +191,15 @@ fun ActiveTeachingRoom(
                         }
                         
                         Button(
+                            onClick = { showWhiteboard = !showWhiteboard },
+                            colors = ButtonDefaults.buttonColors(containerColor = VClassPrimary),
+                            contentPadding = PaddingValues(horizontal = 12.dp),
+                            modifier = Modifier.height(32.dp).padding(end = 8.dp)
+                        ) {
+                            Text(if (showWhiteboard) "Show Video" else "Show Board", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+
+                        Button(
                             onClick = onLeaveClick,
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                             contentPadding = PaddingValues(horizontal = 12.dp),
@@ -191,7 +217,22 @@ fun ActiveTeachingRoom(
                         .background(Color.DarkGray),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (hostUid != 0) {
+                    if (showWhiteboard && whiteboardRoom != null) {
+                        AndroidView(
+                            factory = { ctx ->
+                                FastboardView(ctx).apply {
+                                    whiteboardManager.setupWhiteboard(
+                                        this,
+                                        whiteboardRoom!!.appId,
+                                        whiteboardRoom!!.roomUuid,
+                                        whiteboardRoom!!.roomToken,
+                                        "student_${System.currentTimeMillis()}" // Unique UID for whiteboard
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else if (hostUid != 0) {
                         AndroidView(
                             factory = { ctx ->
                                 SurfaceView(ctx).apply {
