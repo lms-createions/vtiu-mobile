@@ -54,6 +54,7 @@ object DatabaseFactory {
                         it[currentAcademicYear] = currentYear
                         it[currentSemester] = "First"
                         it[paystackMode] = "test"
+                        it[agoraAppId] = "c79f6fe95bad487cafec43820f0200cb"
                         it[updatedAt] = java.time.LocalDateTime.now().toKotlinLocalDateTime()
                     }
                 }

@@ -33,6 +33,10 @@ object Admins : Table("admin") {
     val canExportData = bool("can_export_data").default(false)
 
     val createdAt = datetime("created_at")
+    // Agora Settings
+    val agoraAppId = varchar("agora_app_id", 100).default("c79f6fe95bad487cafec43820f0200cb")
+    val agoraAppCertificate = varchar("agora_app_certificate", 100).default("")
+
     val updatedAt = datetime("updated_at")
     val lastLogin = datetime("last_login").nullable()
     val dateAppointed = datetime("date_appointed").nullable()
@@ -206,6 +210,10 @@ object StudentFeeBalances : Table("student_fee_balance") {
     val isPaid = bool("is_paid").default(false)
     val paidOn = datetime("paid_on").nullable()
     val createdAt = datetime("created_at")
+    // Agora Settings
+    val agoraAppId = varchar("agora_app_id", 100).default("c79f6fe95bad487cafec43820f0200cb")
+    val agoraAppCertificate = varchar("agora_app_certificate", 100).default("")
+
     val updatedAt = datetime("updated_at")
 
     override val primaryKey = PrimaryKey(id)
@@ -436,6 +444,10 @@ object SchoolSettings : Table("school_settings") {
     val paystackTestSecretKey = varchar("paystack_test_secret_key", 100).default("")
     val paystackLivePublicKey = varchar("paystack_live_public_key", 100).default("")
     val paystackLiveSecretKey = varchar("paystack_live_secret_key", 100).default("")
+
+    // Agora Settings
+    val agoraAppId = varchar("agora_app_id", 100).default("c79f6fe95bad487cafec43820f0200cb")
+    val agoraAppCertificate = varchar("agora_app_certificate", 100).default("")
 
     val updatedAt = datetime("updated_at")
 

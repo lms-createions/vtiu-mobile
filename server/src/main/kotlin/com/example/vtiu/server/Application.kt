@@ -16,8 +16,10 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import com.example.vtiu.server.db.DatabaseFactory
+import com.example.vtiu.server.db.*
 import com.example.vtiu.server.routes.*
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.selectAll
 
 val paystackClient = HttpClient(CIO) {
     install(ClientContentNegotiation) {
@@ -86,5 +88,14 @@ fun Application.module() {
         financeRoutes()
         appointmentRoutes()
         chatRoutes()
+        
+        get("/api/settings/agora") {
+            val settings = transaction { SchoolSettings.selectAll().singleOrNull() }
+            if (settings != null) {
+                call.respond(mapOf("appId" to settings[SchoolSettings.agoraAppId]))
+            } else {
+                call.respond(mapOf("appId" to "c79f6fe95bad487cafec43820f0200cb"))
+            }
+        }
     }
 }
