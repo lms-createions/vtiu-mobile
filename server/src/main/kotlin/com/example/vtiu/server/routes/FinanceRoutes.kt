@@ -12,10 +12,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.toKotlinLocalDateTime
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 import io.ktor.client.call.*
+import java.time.LocalDate
 
 fun Route.financeRoutes() {
     route("/api/finance") {
@@ -119,13 +119,13 @@ fun Route.financeRoutes() {
         // --- Standard Finance Endpoints ---
         get("/summary") {
             val summary = transaction {
-                val totalRevenue = StudentFeeTransactions.select { StudentFeeTransactions.isApproved eq true }
+                val totalRevenue = StudentFeeTransactions.selectAll().where { StudentFeeTransactions.isApproved eq true }
                     .sumOf { it[StudentFeeTransactions.amount].toDouble() }
                 
                 val outstanding = StudentFeeBalances.selectAll()
                     .sumOf { (it[StudentFeeBalances.amountDue] - it[StudentFeeBalances.amountPaid]).toDouble() }
                 
-                val pendingCount = StudentFeeTransactions.select { StudentFeeTransactions.isApproved eq false }.count()
+                val pendingCount = StudentFeeTransactions.selectAll().where { StudentFeeTransactions.isApproved eq false }.count()
                 
                 mapOf(
                     "total_revenue" to totalRevenue,
@@ -155,7 +155,7 @@ fun Route.financeRoutes() {
         post("/approve-payment/{id}") {
             val id = call.parameters["id"]?.toIntOrNull() ?: return@post call.respond(HttpStatusCode.BadRequest)
             val success = transaction {
-                val txn = StudentFeeTransactions.select { StudentFeeTransactions.id eq id }.singleOrNull() ?: return@transaction false
+                val txn = StudentFeeTransactions.selectAll().where { StudentFeeTransactions.id eq id }.singleOrNull() ?: return@transaction false
                 if (txn[StudentFeeTransactions.isApproved]) return@transaction false
 
                 StudentFeeTransactions.update({ StudentFeeTransactions.id eq id }) {
@@ -166,7 +166,7 @@ fun Route.financeRoutes() {
                 val studentId = txn[StudentFeeTransactions.studentId]
                 val amount = txn[StudentFeeTransactions.amount]
                 
-                val user = Users.select { Users.id eq studentId }.single()
+                val user = Users.selectAll().where { Users.id eq studentId }.single()
                 StudentFeeBalances.update({ StudentFeeBalances.studentId eq user[Users.userId] }) {
                     with(SqlExpressionBuilder) {
                         it.update(amountPaid, amountPaid + amount)
@@ -184,9 +184,9 @@ private fun processSuccessfulPayment(data: PaystackVerifyData) {
     val amountGhs = data.amount / 100.0
     
     transaction {
-        val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction
+        val userRow = Users.selectAll().where { Users.userId eq userId }.singleOrNull() ?: return@transaction
         val settings = SchoolSettings.selectAll().singleOrNull()
-        val currentYear = settings?.get(SchoolSettings.currentAcademicYear) ?: java.time.LocalDate.now().year.toString()
+        val currentYear = settings?.get(SchoolSettings.currentAcademicYear) ?: LocalDate.now().year.toString()
         val currentSem = settings?.get(SchoolSettings.currentSemester) ?: "First"
         
         StudentFeeTransactions.insert {

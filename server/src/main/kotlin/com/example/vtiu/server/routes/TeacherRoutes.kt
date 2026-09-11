@@ -19,8 +19,8 @@ fun Route.teacherRoutes() {
         get("/classes/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val classes = transaction {
-                val teacherRow = TeacherProfiles.select { TeacherProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<TeacherClassApi>()
-                (TeacherCourseAssignments innerJoin Courses).select { TeacherCourseAssignments.teacherId eq teacherRow[TeacherProfiles.id] }.map {
+                val teacherRow = TeacherProfiles.selectAll().where { TeacherProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<TeacherClassApi>()
+                (TeacherCourseAssignments innerJoin Courses).selectAll().where { TeacherCourseAssignments.teacherId eq teacherRow[TeacherProfiles.id] }.map {
                     TeacherClassApi(
                         id = it[Courses.id],
                         courseName = it[Courses.name],
@@ -36,11 +36,11 @@ fun Route.teacherRoutes() {
         get("/submissions/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val submissions = transaction {
-                val teacherRow = TeacherProfiles.select { TeacherProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<AssignmentSubmissionApi>()
+                val teacherRow = TeacherProfiles.selectAll().where { TeacherProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<AssignmentSubmissionApi>()
                 val teacherId = teacherRow[TeacherProfiles.id]
                 
-                (AssignmentSubmissions innerJoin Assignments innerJoin Users).select { Assignments.courseId inList (
-                    TeacherCourseAssignments.select { TeacherCourseAssignments.teacherId eq teacherId }.map { it[TeacherCourseAssignments.courseId] }
+                (AssignmentSubmissions innerJoin Assignments innerJoin Users).selectAll().where { Assignments.courseId inList (
+                    TeacherCourseAssignments.selectAll().where { TeacherCourseAssignments.teacherId eq teacherId }.map { it[TeacherCourseAssignments.courseId] }
                 ) }.map {
                     val scoreVal = it[AssignmentSubmissions.score]
                     AssignmentSubmissionApi(
@@ -74,8 +74,8 @@ fun Route.teacherRoutes() {
         get("/schemes/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val schemes = transaction {
-                val teacherRow = TeacherProfiles.select { TeacherProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<CourseAssessmentSchemeApi>()
-                (CourseAssessmentSchemes innerJoin Courses).select { CourseAssessmentSchemes.teacherId eq teacherRow[TeacherProfiles.id] }.map {
+                val teacherRow = TeacherProfiles.selectAll().where { TeacherProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<CourseAssessmentSchemeApi>()
+                (CourseAssessmentSchemes innerJoin Courses).selectAll().where { CourseAssessmentSchemes.teacherId eq teacherRow[TeacherProfiles.id] }.map {
                     CourseAssessmentSchemeApi(
                         id = it[CourseAssessmentSchemes.id],
                         courseId = it[Courses.id],
@@ -97,9 +97,9 @@ fun Route.teacherRoutes() {
         get("/timetable/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val entries = transaction {
-                val teacherRow = TeacherProfiles.select { TeacherProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<TimetableEntryApi>()
-                (TimetableEntries innerJoin Courses).select { TimetableEntries.courseId inList (
-                    TeacherCourseAssignments.select { TeacherCourseAssignments.teacherId eq teacherRow[TeacherProfiles.id] }.map { it[TeacherCourseAssignments.courseId] }
+                val teacherRow = TeacherProfiles.selectAll().where { TeacherProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<TimetableEntryApi>()
+                (TimetableEntries innerJoin Courses).selectAll().where { TimetableEntries.courseId inList (
+                    TeacherCourseAssignments.selectAll().where { TeacherCourseAssignments.teacherId eq teacherRow[TeacherProfiles.id] }.map { it[TeacherCourseAssignments.courseId] }
                 ) }.map {
                     TimetableEntryApi(
                         id = it[TimetableEntries.id],
@@ -116,10 +116,10 @@ fun Route.teacherRoutes() {
         get("/meetings/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val meetings = transaction {
-                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<VClassMeetingApi>()
+                val userRow = Users.selectAll().where { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<VClassMeetingApi>()
                 val internalId = userRow[Users.id]
                 
-                (Meetings innerJoin Courses).select { Meetings.hostId eq internalId }.map {
+                (Meetings innerJoin Courses).selectAll().where { Meetings.hostId eq internalId }.map {
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                     val startStr = it[Meetings.scheduledStart]?.let { dt -> 
                         LocalDateTime.of(dt.year, dt.monthNumber, dt.dayOfMonth, dt.hour, dt.minute, dt.second).format(formatter)
@@ -147,7 +147,7 @@ fun Route.teacherRoutes() {
         post("/mark") {
             val request = call.receive<MarkAttendanceRequest>()
             val success = transaction {
-                val teacherRow = TeacherProfiles.select { TeacherProfiles.userId eq request.teacherId }.singleOrNull() ?: return@transaction false
+                val teacherRow = TeacherProfiles.selectAll().where { TeacherProfiles.userId eq request.teacherId }.singleOrNull() ?: return@transaction false
                 val teacherIntId = teacherRow[TeacherProfiles.id]
                 
                 request.records.forEach { record ->
@@ -175,7 +175,7 @@ fun Route.teacherRoutes() {
             val courseId = call.parameters["courseId"]?.toIntOrNull() ?: 0
             val analytics = transaction {
                 // In a real app, calculate counts and percentages
-                AttendanceRecords.select { AttendanceRecords.courseId eq courseId }
+                AttendanceRecords.selectAll().where { AttendanceRecords.courseId eq courseId }
                     .groupBy({ it[AttendanceRecords.studentId] }) { row ->
                         AttendanceAnalyticsApi(
                             studentName = row[AttendanceRecords.studentId], // Simplified

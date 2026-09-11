@@ -22,7 +22,7 @@ fun Route.authRoutes() {
         get("/debug/user/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val user = transaction {
-                Users.select { Users.userId eq userId }.map {
+                Users.selectAll().where { Users.userId eq userId }.map {
                     mapOf(
                         "userId" to it[Users.userId],
                         "username" to it[Users.username],
@@ -42,7 +42,7 @@ fun Route.authRoutes() {
                     println("Login attempt: ID=${request.userId}, Username=${request.username}, Role=${request.role}")
                     // Find user by userId and role first
                     // Case-insensitive ID and Role check
-                    val query = Users.select { 
+                    val query = Users.selectAll().where { 
                         (Users.userId.lowerCase() eq request.userId.trim().lowercase()) and 
                         (Users.role.lowerCase() eq request.role.trim().lowercase()) 
                     }
@@ -104,7 +104,7 @@ fun Route.authRoutes() {
             val userId = call.parameters["userId"] ?: ""
 
             val profile = transaction {
-                val userRow = Users.select { Users.userId.lowerCase() eq userId.trim().lowercase() }.singleOrNull() ?: return@transaction null
+                val userRow = Users.selectAll().where { Users.userId.lowerCase() eq userId.trim().lowercase() }.singleOrNull() ?: return@transaction null
                 
                 val rawProfilePic = userRow[Users.profilePicture]
                 val profilePicPath = if (rawProfilePic.isNullOrBlank() || rawProfilePic == "default.png") {
@@ -116,7 +116,7 @@ fun Route.authRoutes() {
 
                 val profileData = when (role.lowercase()) {
                     "student" -> {
-                        val studentRow = StudentProfiles.select { StudentProfiles.userId.lowerCase() eq userRow[Users.userId].lowercase() }.singleOrNull()
+                        val studentRow = StudentProfiles.selectAll().where { StudentProfiles.userId.lowerCase() eq userRow[Users.userId].lowercase() }.singleOrNull()
                         UserProfileData(
                             userId = userRow[Users.userId],
                             username = userRow[Users.username],
@@ -133,7 +133,7 @@ fun Route.authRoutes() {
                         )
                     }
                     "teacher" -> {
-                        val teacherRow = TeacherProfiles.select { TeacherProfiles.userId.lowerCase() eq userRow[Users.userId].lowercase() }.singleOrNull()
+                        val teacherRow = TeacherProfiles.selectAll().where { TeacherProfiles.userId.lowerCase() eq userRow[Users.userId].lowercase() }.singleOrNull()
                         UserProfileData(
                             userId = userRow[Users.userId],
                             username = userRow[Users.username],

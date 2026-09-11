@@ -14,6 +14,7 @@ import io.ktor.server.routing.*
 import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -34,9 +35,9 @@ fun Route.vClassRoutes() {
             val courseId = call.parameters["courseId"]?.toIntOrNull() ?: 0
             val materials = transaction {
                 // Find course name first since course_id column is missing in materials table
-                val courseName = Courses.select { Courses.id eq courseId }.singleOrNull()?.get(Courses.name) ?: ""
+                val courseName = Courses.selectAll().where { Courses.id eq courseId }.singleOrNull()?.get(Courses.name) ?: ""
                 
-                CourseMaterials.select { CourseMaterials.courseName eq courseName }.map {
+                CourseMaterials.selectAll().where { CourseMaterials.courseName eq courseName }.map {
                     MaterialApi(
                         id = it[CourseMaterials.id],
                         title = it[CourseMaterials.title],
@@ -53,7 +54,7 @@ fun Route.vClassRoutes() {
         get("/vclass/material/{materialId}") {
             val materialId = call.parameters["materialId"]?.toIntOrNull() ?: 0
             val material = transaction {
-                CourseMaterials.select { CourseMaterials.id eq materialId }.singleOrNull()?.let {
+                CourseMaterials.selectAll().where { CourseMaterials.id eq materialId }.singleOrNull()?.let {
                     MaterialApi(
                         id = it[CourseMaterials.id],
                         title = it[CourseMaterials.title],
@@ -71,7 +72,7 @@ fun Route.vClassRoutes() {
         get("/vclass/assignments/{courseId}") {
             val courseId = call.parameters["courseId"]?.toIntOrNull() ?: 0
             val list = transaction {
-                Assignments.select { Assignments.courseId eq courseId }.map {
+                Assignments.selectAll().where { Assignments.courseId eq courseId }.map {
                     VClassAssignmentApi(
                         id = it[Assignments.id],
                         title = it[Assignments.title],
@@ -91,7 +92,7 @@ fun Route.vClassRoutes() {
             val filename = data["filename"] ?: ""
 
             val success = transaction {
-                val userRow = Users.select { Users.userId eq studentId }.singleOrNull() ?: return@transaction false
+                val userRow = Users.selectAll().where { Users.userId eq studentId }.singleOrNull() ?: return@transaction false
                 AssignmentSubmissions.insert {
                     it[AssignmentSubmissions.assignmentId] = assignmentId
                     it[AssignmentSubmissions.studentId] = userRow[Users.id]
@@ -107,16 +108,14 @@ fun Route.vClassRoutes() {
         get("/vclass/meetings/{courseId}") {
             val courseId = call.parameters["courseId"]?.toIntOrNull() ?: 0
             val meetings = transaction {
-                (Meetings innerJoin Courses).select { Meetings.courseId eq courseId }.map {
+                (Meetings innerJoin Courses).selectAll().where { Meetings.courseId eq courseId }.map {
                     VClassMeetingApi(
                         id = it[Meetings.id],
                         title = it[Meetings.title],
-                        description = it[Meetings.description],
                         courseName = it[Courses.name],
-                        scheduledStart = it[Meetings.scheduledStart].toString(),
-                        scheduledEnd = it[Meetings.scheduledEnd].toString(),
-                        joinUrl = it[Meetings.joinUrl],
-                        meetingCode = it[Meetings.meetingCode]
+                        start = it[Meetings.scheduledStart].toString(),
+                        end = it[Meetings.scheduledEnd].toString(),
+                        isLive = true
                     )
                 }
             }
@@ -128,10 +127,10 @@ fun Route.vClassRoutes() {
             val userId = call.parameters["userId"] ?: ""
             val list = transaction {
                 // Simplified: return all quizzes for the student's programme level
-                val studentProfile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<QuizDetailApi>()
+                val studentProfile = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<QuizDetailApi>()
                 val level = studentProfile[StudentProfiles.programmeLevel].toString()
                 
-                Quizzes.select { Quizzes.programmeLevel eq level }.map {
+                Quizzes.selectAll().where { Quizzes.programmeLevel eq level }.map {
                     QuizDetailApi(
                         id = it[Quizzes.id],
                         title = it[Quizzes.title],
@@ -150,14 +149,14 @@ fun Route.vClassRoutes() {
         get("/vclass/quiz/{quizId}") {
             val quizId = call.parameters["quizId"]?.toIntOrNull() ?: 0
             val quiz = transaction {
-                val q = Quizzes.select { Quizzes.id eq quizId }.singleOrNull() ?: return@transaction null
-                val questionsList = Questions.select { Questions.quizId eq quizId }.map { row ->
+                val q = Quizzes.selectAll().where { Quizzes.id eq quizId }.singleOrNull() ?: return@transaction null
+                val questionsList = Questions.selectAll().where { Questions.quizId eq quizId }.map { row ->
                     QuizQuestionApi(
                         id = row[Questions.id],
                         questionText = row[Questions.text],
                         questionType = row[Questions.questionType],
                         points = row[Questions.points],
-                        options = Options.select { Options.questionId eq row[Questions.id] }.map { opt ->
+                        options = Options.selectAll().where { Options.questionId eq row[Questions.id] }.map { opt ->
                             QuizOptionApi(
                                 id = opt[Options.id],
                                 text = opt[Options.text],
@@ -185,10 +184,10 @@ fun Route.vClassRoutes() {
         get("/student/exams/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val list = transaction {
-                val studentProfile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<ExamSubmissionApi>()
+                val studentProfile = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<ExamSubmissionApi>()
                 val level = studentProfile[StudentProfiles.programmeLevel].toString()
                 
-                Exams.select { Exams.programmeLevel eq level }.map {
+                Exams.selectAll().where { Exams.programmeLevel eq level }.map {
                     ExamSubmissionApi(
                         id = it[Exams.id],
                         studentName = "N/A",
@@ -204,7 +203,7 @@ fun Route.vClassRoutes() {
         get("/exam/{examId}") {
             val examId = call.parameters["examId"]?.toIntOrNull() ?: 0
             val exam = transaction {
-                Exams.select { Exams.id eq examId }.singleOrNull()?.let {
+                Exams.selectAll().where { Exams.id eq examId }.singleOrNull()?.let {
                     mapOf(
                         "id" to it[Exams.id],
                         "title" to it[Exams.title],
@@ -222,7 +221,7 @@ fun Route.vClassRoutes() {
             // 1. Get Whiteboard Settings and check if roomUuid already exists
             val (appId, sdkToken, existingUuid) = transaction {
                 val settings = SchoolSettings.selectAll().singleOrNull() ?: return@transaction Triple("", "", null)
-                val meeting = Meetings.select { Meetings.id eq meetingId }.singleOrNull()
+                val meeting = Meetings.selectAll().where { Meetings.id eq meetingId }.singleOrNull()
                 Triple(
                     settings[SchoolSettings.agoraWhiteboardId],
                     settings[SchoolSettings.agoraWhiteboardToken],
@@ -317,7 +316,7 @@ fun Route.vClassRoutes() {
             val userId = call.parameters["userId"] ?: ""
             println("VClass: Fetching meetings for user $userId")
             val meetings = transaction {
-                val studentProfile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() 
+                val studentProfile = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull() 
                 if (studentProfile == null) {
                     println("VClass: No student profile found for $userId")
                     return@transaction emptyList<VClassMeetingApi>()
@@ -327,7 +326,7 @@ fun Route.vClassRoutes() {
                 val level = studentProfile[StudentProfiles.programmeLevel].toString()
                 println("VClass: Student profile found. Prog=$programme, Level=$level")
 
-                val query = (Meetings innerJoin Courses).select { 
+                val query = (Meetings innerJoin Courses).selectAll().where { 
                     (Courses.programmeName.lowerCase() eq programme.lowercase()) and 
                     (Courses.programmeLevel.lowerCase() eq level.lowercase())
                 }
@@ -336,7 +335,7 @@ fun Route.vClassRoutes() {
 
                 query.map {
                     val teacher = (TeacherCourseAssignments innerJoin TeacherProfiles innerJoin Users)
-                        .select { TeacherCourseAssignments.courseId eq it[Courses.id] }
+                        .selectAll().where { TeacherCourseAssignments.courseId eq it[Courses.id] }
                         .singleOrNull()
                     
                     // Format dates to "yyyy-MM-dd HH:mm:ss" for the app
@@ -365,11 +364,11 @@ fun Route.vClassRoutes() {
         get("/student/vclass/materials/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val materials = transaction {
-                val studentProfile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<MaterialApi>()
+                val studentProfile = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<MaterialApi>()
                 val programme = studentProfile[StudentProfiles.currentProgramme]
                 val level = studentProfile[StudentProfiles.programmeLevel].toString()
                 
-                CourseMaterials.select { (CourseMaterials.programmeName eq programme) and (CourseMaterials.programmeLevel eq level) }.map {
+                CourseMaterials.selectAll().where { (CourseMaterials.programmeName eq programme) and (CourseMaterials.programmeLevel eq level) }.map {
                     MaterialApi(
                         id = it[CourseMaterials.id],
                         title = it[CourseMaterials.title],

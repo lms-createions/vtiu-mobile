@@ -16,7 +16,7 @@ fun Route.appointmentRoutes() {
     route("/api/appointments") {
         get("/slots") {
             val slots = transaction {
-                (AppointmentSlots innerJoin TeacherProfiles innerJoin Users).select { AppointmentSlots.isBooked eq false }.map {
+                (AppointmentSlots innerJoin TeacherProfiles innerJoin Users).selectAll().where { AppointmentSlots.isBooked eq false }.map {
                     AppointmentSlotApi(
                         id = it[AppointmentSlots.id],
                         teacherName = "${it[Users.firstName]} ${it[Users.lastName]}",
@@ -32,8 +32,8 @@ fun Route.appointmentRoutes() {
         get("/my-bookings/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val bookings = transaction {
-                val studentRow = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<AppointmentBookingApi>()
-                (AppointmentBookings innerJoin AppointmentSlots innerJoin TeacherProfiles innerJoin Users).select { 
+                val studentRow = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<AppointmentBookingApi>()
+                (AppointmentBookings innerJoin AppointmentSlots innerJoin TeacherProfiles innerJoin Users).selectAll().where { 
                     AppointmentBookings.studentId eq studentRow[StudentProfiles.id] 
                 }.map {
                     AppointmentBookingApi(
@@ -57,8 +57,8 @@ fun Route.appointmentRoutes() {
             val note = request["note"] ?: ""
 
             val success = transaction {
-                val studentRow = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction false
-                val slot = AppointmentSlots.select { AppointmentSlots.id eq slotId }.singleOrNull() ?: return@transaction false
+                val studentRow = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction false
+                val slot = AppointmentSlots.selectAll().where { AppointmentSlots.id eq slotId }.singleOrNull() ?: return@transaction false
                 if (slot[AppointmentSlots.isBooked]) return@transaction false
 
                 AppointmentBookings.insert {

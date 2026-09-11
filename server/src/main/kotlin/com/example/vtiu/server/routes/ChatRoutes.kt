@@ -2,21 +2,17 @@ package com.example.vtiu.server.routes
 
 import com.example.vtiu.server.models.*
 import com.example.vtiu.server.db.*
-import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.datetime.toKotlinLocalDateTime
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 val chatSessions = ConcurrentHashMap<String, DefaultWebSocketServerSession>()
@@ -26,10 +22,10 @@ fun Route.chatRoutes() {
         get("/history/{receiverId}") {
             val receiverId = call.parameters["receiverId"] ?: "global"
             val history = transaction {
-                ChatMessages.select { ChatMessages.receiverId eq receiverId }
+                ChatMessages.selectAll().where { ChatMessages.receiverId eq receiverId }
                     .orderBy(ChatMessages.timestamp, SortOrder.ASC)
                     .map {
-                        val sender = Users.select { Users.userId eq it[ChatMessages.senderId] }.singleOrNull()
+                        val sender = Users.selectAll().where { Users.userId eq it[ChatMessages.senderId] }.singleOrNull()
                         ChatMessageApi(
                             id = it[ChatMessages.id],
                             senderId = it[ChatMessages.senderId],
@@ -64,7 +60,7 @@ fun Route.chatRoutes() {
                                 it[timestamp] = LocalDateTime.now().toKotlinLocalDateTime()
                             } get ChatMessages.id
 
-                            val sender = Users.select { Users.userId eq userId }.singleOrNull()
+                            val sender = Users.selectAll().where { Users.userId eq userId }.singleOrNull()
                             ChatMessageApi(
                                 id = id,
                                 senderId = userId,

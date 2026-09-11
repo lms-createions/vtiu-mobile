@@ -19,8 +19,8 @@ fun Route.studentRoutes() {
         get("/student/courses/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val courses = transaction {
-                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<StudentCourseApi>()
-                (StudentCourseRegistrations innerJoin Courses).select { StudentCourseRegistrations.studentId eq userRow[Users.id] }.map {
+                val userRow = Users.selectAll().where { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<StudentCourseApi>()
+                (StudentCourseRegistrations innerJoin Courses).selectAll().where { StudentCourseRegistrations.studentId eq userRow[Users.id] }.map {
                     StudentCourseApi(
                         id = it[Courses.id],
                         name = it[Courses.name],
@@ -36,11 +36,11 @@ fun Route.studentRoutes() {
         get("/student/registration/available/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val available = transaction {
-                val studentProfile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<CourseRegistrationApi>()
+                val studentProfile = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<CourseRegistrationApi>()
                 val programme = studentProfile[StudentProfiles.currentProgramme]
                 val level = studentProfile[StudentProfiles.programmeLevel].toString()
                 
-                Courses.select { (Courses.programmeName eq programme) and (Courses.programmeLevel eq level) }.map {
+                Courses.selectAll().where { (Courses.programmeName eq programme) and (Courses.programmeLevel eq level) }.map {
                     CourseRegistrationApi(
                         id = it[Courses.id],
                         name = it[Courses.name],
@@ -58,7 +58,7 @@ fun Route.studentRoutes() {
         post("/student/register") {
             val request = call.receive<RegisterCoursesRequest>()
             val success = transaction {
-                val userRow = Users.select { Users.userId eq request.userId }.singleOrNull() ?: return@transaction false
+                val userRow = Users.selectAll().where { Users.userId eq request.userId }.singleOrNull() ?: return@transaction false
                 StudentCourseRegistrations.deleteWhere { 
                     (studentId eq userRow[Users.id]) and (semester eq request.semester) and (academicYear eq request.academicYear) 
                 }
@@ -95,10 +95,10 @@ fun Route.studentRoutes() {
         get("/student/timetable/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val entries = transaction {
-                val studentProfile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<TimetableEntryApi>()
+                val studentProfile = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<TimetableEntryApi>()
                 val level = studentProfile[StudentProfiles.programmeLevel].toString()
                 
-                (TimetableEntries innerJoin Courses).select { TimetableEntries.programmeLevel eq level }.map {
+                (TimetableEntries innerJoin Courses).selectAll().where { TimetableEntries.programmeLevel eq level }.map {
                     TimetableEntryApi(
                         id = it[TimetableEntries.id],
                         courseName = it[Courses.name],
@@ -115,10 +115,10 @@ fun Route.studentRoutes() {
         get("/student/assessments/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val assessments = transaction {
-                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<StudentAssessmentApi>()
+                val userRow = Users.selectAll().where { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<StudentAssessmentApi>()
                 val list = mutableListOf<StudentAssessmentApi>()
                 
-                (StudentQuizSubmissions innerJoin Quizzes).select { StudentQuizSubmissions.studentId eq userRow[Users.id] }.forEach {
+                (StudentQuizSubmissions innerJoin Quizzes).selectAll().where { StudentQuizSubmissions.studentId eq userRow[Users.id] }.forEach {
                     list.add(StudentAssessmentApi(
                         type = "Quiz",
                         course = it[Quizzes.courseName],
@@ -129,7 +129,7 @@ fun Route.studentRoutes() {
                     ))
                 }
                 
-                (AssignmentSubmissions innerJoin Assignments).select { AssignmentSubmissions.studentId eq userRow[Users.id] }.forEach {
+                (AssignmentSubmissions innerJoin Assignments).selectAll().where { AssignmentSubmissions.studentId eq userRow[Users.id] }.forEach {
                     list.add(StudentAssessmentApi(
                         type = "Assignment",
                         course = it[Assignments.courseName],
@@ -148,10 +148,10 @@ fun Route.studentRoutes() {
         get("/student/quizzes/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val list = transaction {
-                val studentProfile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<QuizDetailApi>()
+                val studentProfile = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull() ?: return@transaction emptyList<QuizDetailApi>()
                 val level = studentProfile[StudentProfiles.programmeLevel].toString()
                 
-                Quizzes.select { Quizzes.programmeLevel eq level }.map {
+                Quizzes.selectAll().where { Quizzes.programmeLevel eq level }.map {
                     QuizDetailApi(
                         id = it[Quizzes.id],
                         title = it[Quizzes.title],
@@ -171,8 +171,8 @@ fun Route.studentRoutes() {
         get("/student/results/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val results = transaction {
-                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<StudentResultApi>()
-                (StudentCourseGrades innerJoin Courses).select { StudentCourseGrades.studentId eq userRow[Users.id] }.map { row ->
+                val userRow = Users.selectAll().where { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<StudentResultApi>()
+                (StudentCourseGrades innerJoin Courses).selectAll().where { StudentCourseGrades.studentId eq userRow[Users.id] }.map { row ->
                     StudentResultApi(
                         id = row[StudentCourseGrades.id],
                         courseName = row[Courses.name],
@@ -189,12 +189,12 @@ fun Route.studentRoutes() {
         get("/student/results/full/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val results = transaction {
-                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<StudentFullResultApi>()
+                val userRow = Users.selectAll().where { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<StudentFullResultApi>()
                 val studentId = userRow[Users.id]
                 
-                (StudentCourseGrades innerJoin Courses).select { StudentCourseGrades.studentId eq studentId }.map { row ->
+                (StudentCourseGrades innerJoin Courses).selectAll().where { StudentCourseGrades.studentId eq studentId }.map { row ->
                     val courseId = row[Courses.id]
-                    val scheme = CourseAssessmentSchemes.select { CourseAssessmentSchemes.courseId eq courseId }.singleOrNull()
+                    val scheme = CourseAssessmentSchemes.selectAll().where { CourseAssessmentSchemes.courseId eq courseId }.singleOrNull()
                     
                     StudentFullResultApi(
                         courseName = row[Courses.name],
@@ -217,10 +217,10 @@ fun Route.studentRoutes() {
         get("/student/transcript/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val transcript = transaction {
-                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction null
+                val userRow = Users.selectAll().where { Users.userId eq userId }.singleOrNull() ?: return@transaction null
                 val studentId = userRow[Users.id]
                 
-                val allGrades = (StudentCourseGrades innerJoin Courses).select {
+                val allGrades = (StudentCourseGrades innerJoin Courses).selectAll().where {
                     StudentCourseGrades.studentId eq studentId
                 }.groupBy({ row -> row[StudentCourseGrades.academicYear] to row[StudentCourseGrades.semester] }) { row ->
                     TranscriptCourseApi(
@@ -255,16 +255,17 @@ fun Route.studentRoutes() {
             if (transcript != null) call.respond(transcript) else call.respond(HttpStatusCode.NotFound)
         }
 
+        // --- Fees & Transactions ---
         get("/fees/balance/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val balance = transaction {
                 println("Fees: Checking balance for $userId")
-                var studentRow = StudentFeeBalances.select { StudentFeeBalances.studentId eq userId }.singleOrNull()
+                var studentRow = StudentFeeBalances.selectAll().where { StudentFeeBalances.studentId eq userId }.singleOrNull()
                 
                 if (studentRow == null) {
                     println("Fees: No balance record found for $userId. Attempting to initialize...")
                     // Try to initialize balance from ProgrammeFeeStructures
-                    val profile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull()
+                    val profile = StudentProfiles.selectAll().where { StudentProfiles.userId eq userId }.singleOrNull()
                     if (profile != null) {
                         val prog = profile[StudentProfiles.currentProgramme]
                         val lvl = profile[StudentProfiles.programmeLevel].toString()
@@ -281,7 +282,7 @@ fun Route.studentRoutes() {
                         
                         println("Fees: Searching for structure: Prog=$prog, Lvl=$lvl, Format=$format, Year=$year, Sem=$sem")
                         
-                        val structure = ProgrammeFeeStructures.select { 
+                        val structure = ProgrammeFeeStructures.selectAll().where { 
                             (ProgrammeFeeStructures.programmeName eq prog) and 
                             (ProgrammeFeeStructures.programmeLevel eq lvl) and
                             (ProgrammeFeeStructures.studyFormat eq format) and
@@ -306,7 +307,7 @@ fun Route.studentRoutes() {
                                 it[StudentFeeBalances.updatedAt] = LocalDateTime.now().toKotlinLocalDateTime()
                             }
                             // Re-fetch
-                            studentRow = StudentFeeBalances.select { StudentFeeBalances.studentId eq userId }.singleOrNull()
+                            studentRow = StudentFeeBalances.selectAll().where { StudentFeeBalances.studentId eq userId }.singleOrNull()
                         } else {
                             println("Fees: FAILED to find a matching fee structure for student profile.")
                         }
@@ -332,8 +333,8 @@ fun Route.studentRoutes() {
         get("/student/fees/transactions/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val txns = transaction {
-                val userRow = Users.select { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<FeeTransactionApi>()
-                StudentFeeTransactions.select { StudentFeeTransactions.studentId eq userRow[Users.id] }.map {
+                val userRow = Users.selectAll().where { Users.userId eq userId }.singleOrNull() ?: return@transaction emptyList<FeeTransactionApi>()
+                StudentFeeTransactions.selectAll().where { StudentFeeTransactions.studentId eq userRow[Users.id] }.map {
                     FeeTransactionApi(
                         id = it[StudentFeeTransactions.id],
                         amount = it[StudentFeeTransactions.amount].toDouble(),
@@ -351,7 +352,7 @@ fun Route.studentRoutes() {
         post("/student/fees/pay") {
             val request = call.receive<PayFeesRequest>()
             val success = transaction {
-                val userRow = Users.select { Users.userId eq request.userId }.singleOrNull() ?: return@transaction false
+                val userRow = Users.selectAll().where { Users.userId eq request.userId }.singleOrNull() ?: return@transaction false
                 StudentFeeTransactions.insert {
                     it[studentId] = userRow[Users.id]
                     it[amount] = request.amount.toFloat()
@@ -369,7 +370,7 @@ fun Route.studentRoutes() {
         get("/notifications/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val list = transaction {
-                Notifications.select { Notifications.userId eq userId }.map {
+                Notifications.selectAll().where { Notifications.userId eq userId }.map {
                     NotificationApi(
                         id = it[Notifications.id],
                         title = it[Notifications.title],
