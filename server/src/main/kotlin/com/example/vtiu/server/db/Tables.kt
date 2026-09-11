@@ -441,3 +441,14 @@ object SchoolSettings : Table("school_settings") {
 
     override val primaryKey = PrimaryKey(id)
 }
+
+object ChatMessages : Table("chat_messages") {
+    val id = integer("id").autoIncrement()
+    val senderId = varchar("sender_id", 50)
+    val receiverId = varchar("receiver_id", 50) // "global" or specific userId
+    val message = text("message")
+    val timestamp = datetime("timestamp")
+    val isRead = bool("is_read").default(false)
+
+    override val primaryKey = PrimaryKey(id)
+}

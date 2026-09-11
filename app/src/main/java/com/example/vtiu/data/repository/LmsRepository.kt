@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class LmsRepository @Inject constructor(
     private val client: HttpClient,
-    private val baseUrl: String,
+    @javax.inject.Named("baseUrl") private val baseUrl: String,
     private val profileDao: ProfileDao,
     private val timetableDao: TimetableDao,
     private val courseDao: CourseDao
@@ -689,6 +689,14 @@ class LmsRepository @Inject constructor(
             if (response.status == HttpStatusCode.OK) response.body<PaystackVerifyResponse>() else null
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun getChatHistory(receiverId: String): List<ChatMessageApi> {
+        return try {
+            client.get("$baseUrl/api/chat/history/$receiverId").body()
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 }

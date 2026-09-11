@@ -82,7 +82,8 @@ fun DashboardScreen(
         DashboardTile("Academic Calendar", Icons.Default.Event, "View school events", Color(0xFF607D8B)),
         DashboardTile("Timetable", Icons.Default.CalendarToday, "Daily class schedule", Color(0xFFF57C00)),
         DashboardTile("Fees", Icons.Default.Payments, "View and pay school fees", Color(0xFF388E3C)),
-        DashboardTile("Virtual Class", Icons.Default.Laptop, "Quizzes and materials", SchoolPrimary)
+        DashboardTile("Virtual Class", Icons.Default.Laptop, "Quizzes and materials", SchoolPrimary),
+        DashboardTile("Global Chat", Icons.Default.Chat, "Chat with other students", Color(0xFF007AFF))
     )
 
     Surface(

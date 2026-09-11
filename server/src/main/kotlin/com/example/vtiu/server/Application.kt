@@ -10,6 +10,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.plugins.cors.routing.*
 import io.ktor.http.*
+import io.ktor.server.websocket.*
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
@@ -40,6 +41,12 @@ fun Application.module() {
         } catch (e: Exception) {
             println("Failed to initialize database: ${e.message}")
         }
+    }
+    install(WebSockets) {
+        pingPeriod = java.time.Duration.ofSeconds(15)
+        timeout = java.time.Duration.ofSeconds(15)
+        maxFrameSize = Long.MAX_VALUE
+        masking = false
     }
     install(ContentNegotiation) {
         json(Json {
@@ -78,5 +85,6 @@ fun Application.module() {
         vClassRoutes()
         financeRoutes()
         appointmentRoutes()
+        chatRoutes()
     }
 }

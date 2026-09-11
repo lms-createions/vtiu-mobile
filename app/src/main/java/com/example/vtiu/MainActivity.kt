@@ -46,6 +46,7 @@ import com.example.vtiu.ui.auth.LoginScreen
 import com.example.vtiu.ui.auth.PortalSelectionScreen
 import com.example.vtiu.ui.auth.TeacherLoginScreen
 import com.example.vtiu.ui.assessments.AssessmentsScreen
+import com.example.vtiu.ui.chat.ChatScreen
 import com.example.vtiu.ui.calendar.AcademicCalendarScreen
 import com.example.vtiu.ui.appointments.AppointmentBookingScreen
 import com.example.vtiu.ui.appointments.MyAppointmentsScreen
@@ -218,6 +219,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                                 "Timetable" -> navController.navigate(Screen.Timetable.route)
                                 "Fees" -> navController.navigate(Screen.Fees.route)
                                 "Virtual Class" -> navController.navigate(Screen.VClassDashboard.route)
+                                "Global Chat" -> navController.navigate(Screen.Chat.route)
                             }
                         },
                         onNotificationClick = {
@@ -507,6 +509,13 @@ fun VtiuApp(sessionManager: SessionManager) {
                 }
                 composable(Screen.Transcript.route) {
                     TranscriptScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        sessionManager = sessionManager
+                    )
+                }
+                composable(Screen.Chat.route) {
+                    ChatScreen(
                         onBackClick = { navController.popBackStack() },
                         onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
@@ -835,7 +844,7 @@ fun AppDrawer(
                 // Section 1: Main
                 DrawerItem(label = "Home", icon = Icons.Default.Home, selected = currentRoute == Screen.Dashboard.route, onClick = { onNavigate(Screen.Dashboard.route) })
                 DrawerItem(label = "Courses", icon = Icons.Default.AutoStories, selected = currentRoute == Screen.Courses.route, onClick = { onNavigate(Screen.Courses.route) })
-                DrawerItem(label = "Chat", icon = Icons.Default.ChatBubbleOutline, selected = false, onClick = { /* TODO */ })
+                DrawerItem(label = "Chat", icon = Icons.Default.ChatBubbleOutline, selected = currentRoute == Screen.Chat.route, onClick = { onNavigate(Screen.Chat.route) })
                 DrawerItem(label = "Profile", icon = Icons.Default.PersonOutline, selected = currentRoute == Screen.Profile.route, onClick = { onNavigate(Screen.Profile.route) })
                 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = Color.LightGray.copy(alpha = 0.5f))

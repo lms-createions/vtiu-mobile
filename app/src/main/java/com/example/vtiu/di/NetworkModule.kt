@@ -47,6 +47,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @javax.inject.Named("baseUrl")
     fun provideBaseUrl(): String = BASE_URL
 }
 

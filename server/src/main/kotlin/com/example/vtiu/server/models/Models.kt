@@ -526,3 +526,15 @@ data class PaystackVerifyData(
     val amount: Long,
     val metadata: Map<String, String>? = null
 )
+
+// Chat Models
+@Serializable
+data class ChatMessageApi(
+    val id: Int? = null,
+    @SerialName("sender_id") val senderId: String,
+    @SerialName("sender_name") val senderName: String? = null,
+    @SerialName("receiver_id") val receiverId: String,
+    val message: String,
+    val timestamp: String? = null,
+    @SerialName("is_read") val isRead: Boolean = false
+)
