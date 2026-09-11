@@ -369,13 +369,11 @@ data class NotificationApi(
 data class VClassMeetingApi(
     val id: Int,
     val title: String,
-    val description: String?,
     @SerialName("course_name") val courseName: String,
-    @SerialName("scheduled_start") val scheduledStart: String,
-    @SerialName("scheduled_end") val scheduledEnd: String,
-    @SerialName("join_url") val joinUrl: String?,
-    @SerialName("meeting_code") val meetingCode: String,
-    val status: String = "Upcoming"
+    @SerialName("teacher_name") val teacherName: String? = null,
+    val start: String,
+    val end: String,
+    @SerialName("is_live") val isLive: Boolean = false
 )
 
 @Serializable

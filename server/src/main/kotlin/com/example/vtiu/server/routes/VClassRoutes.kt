@@ -16,6 +16,7 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Serializable
 data class NetlessRoomRequest(val isRecord: Boolean = false, val limit: Int = 0)
@@ -314,17 +315,47 @@ fun Route.vClassRoutes() {
         // --- Student Dashboard Views ---
         get("/student/vclass/meetings/{userId}") {
             val userId = call.parameters["userId"] ?: ""
+            println("VClass: Fetching meetings for user $userId")
             val meetings = transaction {
-                (Meetings innerJoin Courses).selectAll().map {
+                val studentProfile = StudentProfiles.select { StudentProfiles.userId eq userId }.singleOrNull() 
+                if (studentProfile == null) {
+                    println("VClass: No student profile found for $userId")
+                    return@transaction emptyList<VClassMeetingApi>()
+                }
+                
+                val programme = studentProfile[StudentProfiles.currentProgramme]
+                val level = studentProfile[StudentProfiles.programmeLevel].toString()
+                println("VClass: Student profile found. Prog=$programme, Level=$level")
+
+                val query = (Meetings innerJoin Courses).select { 
+                    (Courses.programmeName.lowerCase() eq programme.lowercase()) and 
+                    (Courses.programmeLevel.lowerCase() eq level.lowercase())
+                }
+                
+                println("VClass: Query executed. Found ${query.count()} meetings.")
+
+                query.map {
+                    val teacher = (TeacherCourseAssignments innerJoin TeacherProfiles innerJoin Users)
+                        .select { TeacherCourseAssignments.courseId eq it[Courses.id] }
+                        .singleOrNull()
+                    
+                    // Format dates to "yyyy-MM-dd HH:mm:ss" for the app
+                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    val startStr = it[Meetings.scheduledStart]?.let { dt -> 
+                        LocalDateTime.of(dt.year, dt.monthNumber, dt.dayOfMonth, dt.hour, dt.minute, dt.second).format(formatter)
+                    } ?: ""
+                    val endStr = it[Meetings.scheduledEnd]?.let { dt -> 
+                        LocalDateTime.of(dt.year, dt.monthNumber, dt.dayOfMonth, dt.hour, dt.minute, dt.second).format(formatter)
+                    } ?: ""
+
                     VClassMeetingApi(
                         id = it[Meetings.id],
                         title = it[Meetings.title],
-                        description = it[Meetings.description],
                         courseName = it[Courses.name],
-                        scheduledStart = it[Meetings.scheduledStart].toString(),
-                        scheduledEnd = it[Meetings.scheduledEnd].toString(),
-                        joinUrl = it[Meetings.joinUrl],
-                        meetingCode = it[Meetings.meetingCode]
+                        teacherName = if (teacher != null) "${teacher[Users.firstName]} ${teacher[Users.lastName]}" else "Teacher",
+                        start = startStr,
+                        end = endStr,
+                        isLive = true
                     )
                 }
             }
