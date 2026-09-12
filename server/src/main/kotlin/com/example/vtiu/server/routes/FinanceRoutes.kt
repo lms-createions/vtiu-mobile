@@ -32,17 +32,23 @@ fun Route.financeRoutes() {
                 val mode = settings?.get(SchoolSettings.paystackMode) ?: "test"
                 val dbKey = if (mode == "live") settings?.get(SchoolSettings.paystackLiveSecretKey) else settings?.get(SchoolSettings.paystackTestSecretKey)
                 
-                // Priority: Environment Variable > Database Setting
-                val envKey = System.getenv("PAYSTACK_SECRET_KEY")
-                when {
-                    !envKey.isNullOrBlank() -> envKey
+                // Priority: Specific Env Var > Generic Env Var > Database Setting
+                val envTestKey = System.getenv("PAYSTACK_TEST_SECRET_KEY")
+                val envLiveKey = System.getenv("PAYSTACK_LIVE_SECRET_KEY")
+                val envGenericKey = System.getenv("PAYSTACK_SECRET_KEY")
+
+                val finalKey = when {
+                    mode == "live" && !envLiveKey.isNullOrBlank() -> envLiveKey
+                    mode == "test" && !envTestKey.isNullOrBlank() -> envTestKey
+                    !envGenericKey.isNullOrBlank() -> envGenericKey
                     !dbKey.isNullOrBlank() -> dbKey
                     else -> "" 
                 }
+                finalKey
             }
 
             if (secretKey.isBlank()) {
-                println("Paystack Error: Secret key is blank. Env PAYSTACK_SECRET_KEY is null or empty.")
+                println("Paystack Error: Secret key is blank. Checked PAYSTACK_TEST_SECRET_KEY, PAYSTACK_LIVE_SECRET_KEY, and PAYSTACK_SECRET_KEY.")
                 return@post call.respond(HttpStatusCode.InternalServerError, "Paystack API Key not configured")
             }
 
@@ -84,9 +90,14 @@ fun Route.financeRoutes() {
                 val mode = settings?.get(SchoolSettings.paystackMode) ?: "test"
                 val dbKey = if (mode == "live") settings?.get(SchoolSettings.paystackLiveSecretKey) else settings?.get(SchoolSettings.paystackTestSecretKey)
                 
-                val envKey = System.getenv("PAYSTACK_SECRET_KEY")
+                val envTestKey = System.getenv("PAYSTACK_TEST_SECRET_KEY")
+                val envLiveKey = System.getenv("PAYSTACK_LIVE_SECRET_KEY")
+                val envGenericKey = System.getenv("PAYSTACK_SECRET_KEY")
+
                 when {
-                    !envKey.isNullOrBlank() -> envKey
+                    mode == "live" && !envLiveKey.isNullOrBlank() -> envLiveKey
+                    mode == "test" && !envTestKey.isNullOrBlank() -> envTestKey
+                    !envGenericKey.isNullOrBlank() -> envGenericKey
                     !dbKey.isNullOrBlank() -> dbKey
                     else -> ""
                 }
