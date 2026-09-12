@@ -10,14 +10,11 @@ import android.view.SurfaceView
 
 class AgoraManager(private val context: Context) {
     private var rtcEngine: RtcEngine? = null
-    
-    // PLACEHOLDER: Replace with your actual App ID from Agora Console
-    private val appId = "c79f6fe95bad487cafec43820f0200cb"
+    private var isInitialized = false
 
     private val mRtcEventHandler = object : IRtcEngineEventHandler() {
         override fun onUserJoined(uid: Int, elapsed: Int) {
             Log.i("AgoraManager", "User joined: $uid")
-            // Notify UI to setup remote video
         }
 
         override fun onUserOffline(uid: Int, reason: Int) {
@@ -29,7 +26,8 @@ class AgoraManager(private val context: Context) {
         }
     }
 
-    init {
+    fun init(appId: String) {
+        if (isInitialized) return
         try {
             val config = RtcEngineConfig()
             config.mContext = context
@@ -49,13 +47,17 @@ class AgoraManager(private val context: Context) {
                 VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE
             )
             rtcEngine?.setVideoEncoderConfiguration(videoConfig)
-            
+            isInitialized = true
         } catch (e: Exception) {
             Log.e("AgoraManager", "Initialization failed: ${e.message}")
         }
     }
 
     fun joinChannel(channelName: String, uid: Int = 0, token: String? = null, role: Int = Constants.CLIENT_ROLE_BROADCASTER) {
+        if (!isInitialized) {
+            Log.e("AgoraManager", "Cannot join channel: RTC Engine not initialized")
+            return
+        }
         rtcEngine?.setClientRole(role)
         
         val options = ChannelMediaOptions()

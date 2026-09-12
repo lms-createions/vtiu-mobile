@@ -88,8 +88,9 @@ fun VClassLiveClassRoomScreen(
 
     LaunchedEffect(agoraTokenResponse, hasPermissions) {
         if (hasPermissions && agoraTokenResponse != null) {
+            agoraManager.init(agoraTokenResponse!!.appId)
             agoraManager.joinChannel(
-                channelName = meeting.courseName,
+                channelName = "vtiu_meeting_${meeting.id}",
                 uid = numericId,
                 token = agoraTokenResponse!!.token.ifEmpty { null },
                 role = Constants.CLIENT_ROLE_AUDIENCE
@@ -99,7 +100,7 @@ fun VClassLiveClassRoomScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadWhiteboardRoom(meetingId)
-        viewModel.loadAgoraToken(meeting.courseName, numericId.toString())
+        viewModel.loadAgoraToken("vtiu_meeting_$meetingId", numericId.toString())
         chatViewModel.connect(userId, chatRoomId)
     }
 

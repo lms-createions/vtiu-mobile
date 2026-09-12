@@ -85,14 +85,14 @@ fun TeacherLiveRoomScreen(
         }
     }
 
-    LaunchedEffect(meeting.courseName) {
+    LaunchedEffect(meeting.id, meeting.courseName) {
         if (meeting.courseName.isNotEmpty()) {
             val course = viewModel.teacherClasses.value.find { it.courseName == meeting.courseName }
             course?.let {
                 viewModel.loadPerformance(it.id)
             }
-            // Load Agora Token for Teacher
-            viewModel.loadAgoraToken(meeting.courseName, numericId.toString())
+            // Load Agora Token for Teacher using unique meeting channel
+            viewModel.loadAgoraToken("vtiu_meeting_${meeting.id}", numericId.toString())
         }
     }
 
@@ -174,10 +174,11 @@ fun TeacherLiveRoomScreen(
                         if (!isStreaming) {
                             Button(
                                 onClick = {
-                                    if (hasPermissions) {
+                                    if (hasPermissions && agoraTokenResponse != null) {
+                                        agoraManager.init(agoraTokenResponse!!.appId)
                                         agoraManager.stopPreview() // Stop preview before joining to avoid conflicts
                                         agoraManager.joinChannel(
-                                            channelName = meeting.courseName,
+                                            channelName = "vtiu_meeting_${meeting.id}",
                                             uid = numericId,
                                             token = agoraTokenResponse?.token?.ifEmpty { null },
                                             role = Constants.CLIENT_ROLE_BROADCASTER
@@ -188,7 +189,7 @@ fun TeacherLiveRoomScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C950)),
                                 contentPadding = PaddingValues(horizontal = 12.dp),
                                 modifier = Modifier.height(32.dp).padding(end = 8.dp),
-                                enabled = meeting.courseName.isNotEmpty()
+                                enabled = meeting.courseName.isNotEmpty() && agoraTokenResponse != null
                             ) {
                                 Text("Start Live", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
