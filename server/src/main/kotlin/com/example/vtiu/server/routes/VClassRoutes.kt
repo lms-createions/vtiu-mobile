@@ -18,15 +18,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-@Serializable
-data class NetlessRoomRequest(val isRecord: Boolean = false, val limit: Int = 0)
-
-@Serializable
-data class NetlessRoomResponse(val uuid: String)
-
-@Serializable
-data class NetlessTokenRequest(val lifespan: Long = 3600000, val role: String = "admin")
+import java.util.UUID
 
 fun Route.vClassRoutes() {
     route("/api") {
@@ -214,64 +206,35 @@ fun Route.vClassRoutes() {
             if (exam != null) call.respond(exam) else call.respond(HttpStatusCode.NotFound)
         }
 
-        // --- Whiteboard ---
+        // --- Whiteboard (Excalidraw) ---
         get("/vclass/whiteboard/{meetingId}") {
             val meetingId = call.parameters["meetingId"]?.toIntOrNull() ?: 0
             
-            // 1. Get Whiteboard Settings and check if roomUuid already exists
-            val (appId, sdkToken, existingUuid) = transaction {
-                val settings = SchoolSettings.selectAll().singleOrNull() ?: return@transaction Triple("", "", null)
-                val meeting = Meetings.selectAll().where { Meetings.id eq meetingId }.singleOrNull()
-                Triple(
-                    settings[SchoolSettings.agoraWhiteboardId],
-                    settings[SchoolSettings.agoraWhiteboardToken],
-                    meeting?.get(Meetings.whiteboardRoomUuid)
-                )
-            }
-
-            if (appId.isBlank()) {
-                return@get call.respond(HttpStatusCode.PreconditionFailed, "Whiteboard App ID missing")
-            }
-
             try {
-                var roomUuid = existingUuid
-
-                // Step A: Create a Room only if it doesn't exist
-                if (roomUuid == null) {
-                    val createResponse = paystackClient.post("https://api.netless.link/v1/rooms") {
-                        header("token", sdkToken)
-                        contentType(ContentType.Application.Json)
-                        setBody(NetlessRoomRequest())
-                    }
+                val roomUuid = transaction {
+                    val meeting = Meetings.selectAll().where { Meetings.id eq meetingId }.singleOrNull()
+                    var uuid = meeting?.get(Meetings.whiteboardRoomUuid)
                     
-                    if (createResponse.status != HttpStatusCode.Created && createResponse.status != HttpStatusCode.OK) {
-                        val error = createResponse.body<String>()
-                        return@get call.respond(HttpStatusCode.InternalServerError, "Netless Room Creation Failed: $error")
-                    }
-                    
-                    roomUuid = createResponse.body<NetlessRoomResponse>().uuid
-                    
-                    // Save the new UUID to the database
-                    transaction {
+                    if (uuid == null) {
+                        // Generate a unique Excalidraw room ID and key
+                        // Format: ROOM_ID,SECRET_KEY (Excalidraw uses a 20-char ID and 22-char key typically)
+                        val roomId = UUID.randomUUID().toString().replace("-", "").take(20)
+                        val key = UUID.randomUUID().toString().replace("-", "").take(22)
+                        uuid = "$roomId,$key"
+                        
                         Meetings.update({ Meetings.id eq meetingId }) {
-                            it[whiteboardRoomUuid] = roomUuid
+                            it[whiteboardRoomUuid] = uuid
                         }
                     }
+                    uuid
                 }
-                
-                // Step B: Generate a Room Token for the (new or existing) UUID
-                val tokenResponse = paystackClient.post("https://api.netless.link/v1/tokens/rooms/$roomUuid") {
-                    header("token", sdkToken)
-                    contentType(ContentType.Application.Json)
-                    setBody(NetlessTokenRequest())
-                }
-                
-                val roomToken = tokenResponse.body<String>().replace("\"", "") // Simple string return
+
+                val roomUrl = "https://excalidraw.com/#room=$roomUuid"
                 
                 call.respond(WhiteboardRoomResponse(
-                    appId = appId,
-                    roomUuid = roomUuid,
-                    roomToken = roomToken
+                    type = "excalidraw",
+                    roomUrl = roomUrl,
+                    roomUuid = roomUuid!!
                 ))
                 
             } catch (e: Exception) {

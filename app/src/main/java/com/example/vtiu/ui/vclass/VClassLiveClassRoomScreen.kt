@@ -1,6 +1,8 @@
 package com.example.vtiu.ui.vclass
 
 import android.view.SurfaceView
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
@@ -32,9 +34,7 @@ import com.example.vtiu.ui.dashboard.StudentViewModel
 import com.example.vtiu.ui.chat.ChatViewModel
 import com.example.vtiu.data.model.VClassMeeting
 import com.example.vtiu.data.remote.AgoraManager
-import com.example.vtiu.data.remote.WhiteboardManager
 import com.example.vtiu.ui.theme.VClassPrimary
-import io.agora.board.fast.FastboardView
 import io.agora.rtc2.Constants
 import kotlinx.coroutines.delay
 
@@ -51,7 +51,6 @@ fun VClassLiveClassRoomScreen(
     var isApproved by remember { mutableStateOf(!meeting.requiresApproval) }
     
     val agoraManager = remember { AgoraManager(context) }
-    val whiteboardManager = remember { WhiteboardManager(context) }
     var hostUid by remember { mutableIntStateOf(0) }
     var hasPermissions by remember { mutableStateOf(false) }
     
@@ -98,7 +97,6 @@ fun VClassLiveClassRoomScreen(
         onDispose {
             agoraManager.leaveChannel()
             agoraManager.release()
-            whiteboardManager.release()
             chatViewModel.disconnect()
         }
     }
@@ -114,7 +112,7 @@ fun VClassLiveClassRoomScreen(
         if (!approved) {
             WaitingRoom(meeting, onLeaveClick)
         } else {
-            ActiveTeachingRoom(meeting, hostUid, agoraManager, whiteboardManager, userId, viewModel, chatViewModel, chatRoomId, onLeaveClick)
+            ActiveTeachingRoom(meeting, hostUid, agoraManager, userId, viewModel, chatViewModel, chatRoomId, onLeaveClick)
         }
     }
 }
@@ -165,7 +163,6 @@ fun ActiveTeachingRoom(
     meeting: com.example.vtiu.data.model.VClassMeeting, 
     hostUid: Int,
     agoraManager: AgoraManager,
-    whiteboardManager: WhiteboardManager,
     currentUserId: String,
     viewModel: StudentViewModel,
     chatViewModel: ChatViewModel,
@@ -250,14 +247,11 @@ fun ActiveTeachingRoom(
                     if (showWhiteboard && whiteboardRoom != null) {
                         AndroidView(
                             factory = { ctx ->
-                                FastboardView(ctx).apply {
-                                    whiteboardManager.setupWhiteboard(
-                                        this,
-                                        whiteboardRoom!!.appId,
-                                        whiteboardRoom!!.roomUuid,
-                                        whiteboardRoom!!.roomToken,
-                                        "student_${System.currentTimeMillis()}" // Unique UID for whiteboard
-                                    )
+                                WebView(ctx).apply {
+                                    settings.javaScriptEnabled = true
+                                    settings.domStorageEnabled = true
+                                    webViewClient = WebViewClient()
+                                    loadUrl(whiteboardRoom!!.roomUrl)
                                 }
                             },
                             modifier = Modifier.fillMaxSize()

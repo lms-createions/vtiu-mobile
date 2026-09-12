@@ -527,9 +527,9 @@ data class ChatMessageApi(
 
 @Serializable
 data class WhiteboardRoomResponse(
-    val appId: String,
-    val roomUuid: String,
-    val roomToken: String
+    val type: String = "excalidraw",
+    val roomUrl: String,
+    val roomUuid: String = ""
 )
 
 @Serializable

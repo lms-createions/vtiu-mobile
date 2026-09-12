@@ -78,7 +78,6 @@ dependencies {
     implementation(libs.androidx.media3.common)
     implementation(libs.agora.rtc)
     implementation(libs.agora.screen.capture)
-    implementation(libs.agora.whiteboard)
 
     // Ktor
     implementation(libs.ktor.client.core)
