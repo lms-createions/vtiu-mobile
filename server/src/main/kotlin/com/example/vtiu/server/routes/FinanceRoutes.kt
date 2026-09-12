@@ -27,14 +27,22 @@ fun Route.financeRoutes() {
             val amountGhs = requestData["amount"]?.toDoubleOrNull() ?: return@post call.respond(HttpStatusCode.BadRequest, "Amount missing")
             val email = if (requestData["email"].isNullOrBlank()) "student@vtiu.edu" else requestData["email"]!!
             
-            val (secretKey, _) = transaction {
-                val settings = SchoolSettings.selectAll().singleOrNull() ?: return@transaction "sk_test_e69d621029fa90b2fde0eec8d8be4b6ba77fe098" to "test"
-                val mode = settings[SchoolSettings.paystackMode]
-                val key = if (mode == "live") settings[SchoolSettings.paystackLiveSecretKey] else settings[SchoolSettings.paystackTestSecretKey]
+            val secretKey = transaction {
+                val settings = SchoolSettings.selectAll().singleOrNull()
+                val mode = settings?.get(SchoolSettings.paystackMode) ?: "test"
+                val dbKey = if (mode == "live") settings?.get(SchoolSettings.paystackLiveSecretKey) else settings?.get(SchoolSettings.paystackTestSecretKey)
                 
-                // Fallback to demo key if not configured
-                val finalKey = if (key.isBlank()) "sk_test_e69d621029fa90b2fde0eec8d8be4b6ba77fe098" else key
-                finalKey to mode
+                // Priority: Environment Variable > Database Setting
+                val envKey = System.getenv("PAYSTACK_SECRET_KEY")
+                when {
+                    !envKey.isNullOrBlank() -> envKey
+                    !dbKey.isNullOrBlank() -> dbKey
+                    else -> "" 
+                }
+            }
+
+            if (secretKey.isBlank()) {
+                return@post call.respond(HttpStatusCode.InternalServerError, "Paystack API Key not configured")
             }
 
             val amountKobo = (amountGhs * 100).toLong()
@@ -44,6 +52,7 @@ fun Route.financeRoutes() {
                 email = email,
                 amount = amountKobo.toString(),
                 reference = reference,
+                callbackUrl = "https://vtiu-lms-production.up.railway.app/student/paystack/callback",
                 metadata = mapOf("user_id" to userId)
             )
 
@@ -70,12 +79,20 @@ fun Route.financeRoutes() {
             val reference = call.parameters["reference"] ?: return@get call.respond(HttpStatusCode.BadRequest)
             
             val secretKey = transaction {
-                val settings = SchoolSettings.selectAll().singleOrNull() ?: return@transaction "sk_test_e69d621029fa90b2fde0eec8d8be4b6ba77fe098"
-                if (settings[SchoolSettings.paystackMode] == "live") {
-                    settings[SchoolSettings.paystackLiveSecretKey]
-                } else {
-                    settings[SchoolSettings.paystackTestSecretKey]
+                val settings = SchoolSettings.selectAll().singleOrNull()
+                val mode = settings?.get(SchoolSettings.paystackMode) ?: "test"
+                val dbKey = if (mode == "live") settings?.get(SchoolSettings.paystackLiveSecretKey) else settings?.get(SchoolSettings.paystackTestSecretKey)
+                
+                val envKey = System.getenv("PAYSTACK_SECRET_KEY")
+                when {
+                    !envKey.isNullOrBlank() -> envKey
+                    !dbKey.isNullOrBlank() -> dbKey
+                    else -> ""
                 }
+            }
+
+            if (secretKey.isBlank()) {
+                return@get call.respond(HttpStatusCode.InternalServerError, "Paystack API Key not configured")
             }
 
             try {
@@ -95,26 +112,6 @@ fun Route.financeRoutes() {
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, e.message ?: "Error")
             }
-        }
-
-        post("/paystack/webhook") {
-            val body = call.receive<Map<String, Any?>>()
-            val event = body["event"] as? String
-            val data = body["data"] as? Map<String, Any?>
-            
-            if (event == "charge.success" && data != null) {
-                val reference = data["reference"] as? String ?: ""
-                val amountKobo = (data["amount"] as? Number)?.toLong() ?: 0L
-                val metadata = data["metadata"] as? Map<String, String?>
-                
-                processSuccessfulPayment(PaystackVerifyData(
-                    status = "success",
-                    reference = reference,
-                    amount = amountKobo,
-                    metadata = metadata?.mapValues { it.value ?: "" }
-                ))
-            }
-            call.respond(HttpStatusCode.OK)
         }
 
         // --- Standard Finance Endpoints ---
@@ -177,6 +174,31 @@ fun Route.financeRoutes() {
             }
             if (success) call.respond(HttpStatusCode.OK) else call.respond(HttpStatusCode.BadRequest)
         }
+    }
+
+    // --- New Paystack Webhook and Callback URLs ---
+    post("/api/paystack/webhook") {
+        val body = call.receive<Map<String, Any?>>()
+        val event = body["event"] as? String
+        val data = body["data"] as? Map<String, Any?>
+        
+        if (event == "charge.success" && data != null) {
+            val reference = data["reference"] as? String ?: ""
+            val amountKobo = (data["amount"] as? Number)?.toLong() ?: 0L
+            val metadata = data["metadata"] as? Map<String, String?>
+            
+            processSuccessfulPayment(PaystackVerifyData(
+                status = "success",
+                reference = reference,
+                amount = amountKobo,
+                metadata = metadata?.mapValues { it.value ?: "" }
+            ))
+        }
+        call.respond(HttpStatusCode.OK)
+    }
+
+    get("/student/paystack/callback") {
+        call.respondText("<html><body><h2>Payment Successful!</h2><p>Your payment has been received. You can now close this window and return to the VTIU app.</p></body></html>", ContentType.Text.Html)
     }
 }
 

@@ -78,9 +78,10 @@ fun PaystackPaymentScreen(
                                 }
 
                                 override fun shouldOverrideUrlLoading(view: WebView?, urlStr: String?): Boolean {
-                                    // Detect Paystack success or callback (simplified)
-                                    // You can use a custom callback URL in initialize if needed
-                                    if (urlStr?.contains("verify") == true || urlStr?.contains("success") == true) {
+                                    // Detect Paystack success or callback
+                                    if (urlStr?.contains("paystack/callback") == true || 
+                                        urlStr?.contains("verify") == true || 
+                                        urlStr?.contains("success") == true) {
                                         viewModel.verifyPayment(reference) {
                                             onSuccess()
                                         }
