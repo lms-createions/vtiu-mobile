@@ -220,12 +220,18 @@ fun Route.vClassRoutes() {
 
         get("/vclass/meeting/{meetingId}") {
             val meetingId = call.parameters["meetingId"]?.toIntOrNull() ?: 0
+            println("VClass: Fetching detail for meeting $meetingId")
             val meeting = transaction {
                 // Use leftJoin to be safe if course info is missing
                 val row = (Meetings leftJoin Courses).selectAll().where { Meetings.id eq meetingId }.singleOrNull()
-                if (row == null) return@transaction null
+                if (row == null) {
+                    println("VClass: Meeting $meetingId not found in DB")
+                    return@transaction null
+                }
 
                 val hostIdValue = row[Meetings.hostId]
+                println("VClass: Meeting $meetingId found. Host ID: $hostIdValue")
+                
                 val teacherRow = if (hostIdValue != null) {
                     Users.selectAll().where { Users.id eq hostIdValue }.singleOrNull()
                 } else {
@@ -241,14 +247,19 @@ fun Route.vClassRoutes() {
                     id = row[Meetings.id],
                     title = row[Meetings.title],
                     courseName = row.getOrNull(Courses.name) ?: "General",
-                    teacherName = if (teacherRow != null) "${teacherRow[Users.firstName]} ${teacherRow[Users.lastName]}" else "Teacher",
+                    teacherName = if (teacherRow != null) "${teacherRow[Users.firstName]} ${teacherRow[Users.lastName]}" else "LMS Teacher",
                     hostId = hostIdValue ?: teacherRow?.get(Users.id),
                     start = row[Meetings.scheduledStart]?.toString() ?: "",
                     end = row[Meetings.scheduledEnd]?.toString() ?: "",
                     isLive = true
                 )
             }
-            if (meeting != null) call.respond(meeting) else call.respond(HttpStatusCode.NotFound)
+            if (meeting != null) {
+                println("VClass: Returning detail for ${meeting.title} - Host: ${meeting.teacherName}")
+                call.respond(meeting)
+            } else {
+                call.respond(HttpStatusCode.NotFound, "Meeting not found")
+            }
         }
 
         // --- Whiteboard (Excalidraw) ---
