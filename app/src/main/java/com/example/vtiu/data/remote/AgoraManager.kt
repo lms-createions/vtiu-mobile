@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import io.agora.rtc2.*
 import io.agora.rtc2.video.VideoCanvas
+import io.agora.rtc2.video.VideoEncoderConfiguration
 import android.view.SurfaceView
 
 class AgoraManager(private val context: Context) {
@@ -35,19 +36,40 @@ class AgoraManager(private val context: Context) {
             config.mAppId = appId
             config.mEventHandler = mRtcEventHandler
             rtcEngine = RtcEngine.create(config)
+            
+            // Critical for Cross-Platform Compatibility
+            rtcEngine?.setChannelProfile(Constants.CHANNEL_PROFILE_LIVE_BROADCASTING)
             rtcEngine?.enableVideo()
+            
+            // Set Video Encoder Configuration for better web compatibility
+            val videoConfig = VideoEncoderConfiguration(
+                VideoEncoderConfiguration.VD_640x360,
+                VideoEncoderConfiguration.FRAME_RATE.FRAME_RATE_FPS_15,
+                VideoEncoderConfiguration.STANDARD_BITRATE,
+                VideoEncoderConfiguration.ORIENTATION_MODE.ORIENTATION_MODE_ADAPTIVE
+            )
+            rtcEngine?.setVideoEncoderConfiguration(videoConfig)
+            
         } catch (e: Exception) {
             Log.e("AgoraManager", "Initialization failed: ${e.message}")
         }
     }
 
     fun joinChannel(channelName: String, uid: Int = 0, token: String? = null, role: Int = Constants.CLIENT_ROLE_BROADCASTER) {
+        rtcEngine?.setClientRole(role)
+        
         val options = ChannelMediaOptions()
         options.clientRoleType = role
         options.channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING
-        options.publishCameraTrack = true
-        options.publishMicrophoneTrack = true
         
+        // Only publish if the user is a broadcaster (Teacher)
+        val isBroadcaster = role == Constants.CLIENT_ROLE_BROADCASTER
+        options.publishCameraTrack = isBroadcaster
+        options.publishMicrophoneTrack = isBroadcaster
+        options.autoSubscribeAudio = true
+        options.autoSubscribeVideo = true
+        
+        Log.d("AgoraManager", "Joining channel: $channelName as ${if(isBroadcaster) "Broadcaster" else "Audience"}")
         rtcEngine?.joinChannel(token, channelName, uid, options)
     }
 

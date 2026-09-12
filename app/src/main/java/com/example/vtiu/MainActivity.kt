@@ -173,8 +173,8 @@ fun VtiuApp(sessionManager: SessionManager) {
                 }
                 composable(Screen.StudentLogin.route) {
                     LoginScreen(
-                        onLoginSuccess = { userId, userName, profilePic ->
-                            sessionManager.saveSession(userId, "student", userName, profilePic)
+                        onLoginSuccess = { userId, userName, profilePic, numericId ->
+                            sessionManager.saveSession(userId, "student", userName, profilePic, numericId)
                             navController.navigate(Screen.Dashboard.route) {
                                 popUpTo(Screen.PortalSelection.route) { inclusive = true }
                             }
@@ -183,8 +183,8 @@ fun VtiuApp(sessionManager: SessionManager) {
                 }
                 composable(Screen.TeacherLogin.route) {
                     TeacherLoginScreen(
-                        onLoginSuccess = { userId, userName, profilePic ->
-                            sessionManager.saveSession(userId, "teacher", userName, profilePic)
+                        onLoginSuccess = { userId, userName, profilePic, numericId ->
+                            sessionManager.saveSession(userId, "teacher", userName, profilePic, numericId)
                             navController.navigate(Screen.TeacherDashboard.route) {
                                 popUpTo(Screen.PortalSelection.route) { inclusive = true }
                             }
@@ -194,8 +194,8 @@ fun VtiuApp(sessionManager: SessionManager) {
                 }
                 composable(Screen.ExamLogin.route) {
                     ExamLoginScreen(
-                        onLoginSuccess = { userId, userName, profilePic ->
-                            sessionManager.saveSession(userId, "student", userName, profilePic)
+                        onLoginSuccess = { userId, userName, profilePic, numericId ->
+                            sessionManager.saveSession(userId, "student", userName, profilePic, numericId)
                             navController.navigate(Screen.Exams.route) {
                                 popUpTo(Screen.PortalSelection.route) { inclusive = true }
                             }
@@ -755,7 +755,8 @@ fun VtiuApp(sessionManager: SessionManager) {
                     VClassLiveClassRoomScreen(
                         meetingId = id,
                         userId = sessionManager.getUserId() ?: "",
-                        onLeaveClick = { navController.popBackStack() }
+                        onLeaveClick = { navController.popBackStack() },
+                        sessionManager = sessionManager
                     )
                 }
                 composable(Screen.VClassAssignments.route) {

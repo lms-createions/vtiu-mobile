@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.vtiu.data.local.SessionManager
 import com.example.vtiu.ui.dashboard.StudentViewModel
 import com.example.vtiu.ui.chat.ChatViewModel
 import com.example.vtiu.data.model.VClassMeeting
@@ -45,9 +46,11 @@ fun VClassLiveClassRoomScreen(
     userId: String,
     onLeaveClick: () -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
-    chatViewModel: ChatViewModel = hiltViewModel()
+    chatViewModel: ChatViewModel = hiltViewModel(),
+    sessionManager: SessionManager
 ) {
     val context = LocalContext.current
+    val numericId = sessionManager.getNumericId()
     
     val studentMeetings by viewModel.vclassMeetings
     val meeting = studentMeetings.find { it.id == meetingId } ?: VClassMeetingApi(
@@ -81,7 +84,7 @@ fun VClassLiveClassRoomScreen(
         if (hasPermissions && agoraTokenResponse != null) {
             agoraManager.joinChannel(
                 channelName = meeting.courseName,
-                uid = userId.toIntOrNull() ?: 0,
+                uid = numericId,
                 token = agoraTokenResponse!!.token.ifEmpty { null },
                 role = Constants.CLIENT_ROLE_AUDIENCE
             )
@@ -90,7 +93,7 @@ fun VClassLiveClassRoomScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadWhiteboardRoom(meetingId)
-        viewModel.loadAgoraToken(meeting.courseName, userId)
+        viewModel.loadAgoraToken(meeting.courseName, numericId.toString())
         chatViewModel.connect(userId, chatRoomId)
     }
 

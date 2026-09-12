@@ -11,12 +11,13 @@ class SessionManager @Inject constructor(
 ) {
     private val prefs = context.getSharedPreferences("vtiu_prefs", Context.MODE_PRIVATE)
 
-    fun saveSession(userId: String, role: String, userName: String? = null, profilePic: String? = null) {
+    fun saveSession(userId: String, role: String, userName: String? = null, profilePic: String? = null, numericId: Int = 0) {
         prefs.edit()
             .putString("user_id", userId)
             .putString("user_role", role)
             .putString("user_name", userName)
             .putString("profile_pic", profilePic)
+            .putInt("numeric_id", numericId)
             .apply()
     }
 
@@ -24,6 +25,7 @@ class SessionManager @Inject constructor(
     fun getUserRole(): String? = prefs.getString("user_role", null)
     fun getUserName(): String? = prefs.getString("user_name", null)
     fun getProfilePic(): String? = prefs.getString("profile_pic", null)
+    fun getNumericId(): Int = prefs.getInt("numeric_id", 0)
 
     fun isLoggedIn(): Boolean {
         return getUserId() != null

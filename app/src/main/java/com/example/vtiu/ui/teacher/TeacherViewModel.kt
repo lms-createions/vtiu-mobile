@@ -84,6 +84,9 @@ class TeacherViewModel @Inject constructor(
     private val _quizDetail = mutableStateOf<QuizDetailApi?>(null)
     val quizDetail: State<QuizDetailApi?> = _quizDetail
 
+    private val _agoraToken = mutableStateOf<AgoraTokenResponse?>(null)
+    val agoraToken: State<AgoraTokenResponse?> = _agoraToken
+
     fun loadTeacherClasses(userId: String) {
         viewModelScope.launch {
             _profile.value = repository.getProfile("teacher", userId).profile
@@ -323,6 +326,12 @@ class TeacherViewModel @Inject constructor(
                 _teacherMeetings.value = repository.getTeacherMeetings(userId)
                 onSuccess()
             }
+        }
+    }
+
+    fun loadAgoraToken(channelName: String, userId: String) {
+        viewModelScope.launch {
+            _agoraToken.value = repository.getAgoraToken(channelName, userId)
         }
     }
 }

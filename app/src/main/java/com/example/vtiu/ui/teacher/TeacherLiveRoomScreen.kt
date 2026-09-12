@@ -35,6 +35,7 @@ import com.example.vtiu.data.model.api.VClassMeetingApi
 import com.example.vtiu.data.remote.AgoraManager
 import com.example.vtiu.ui.chat.ChatViewModel
 import com.example.vtiu.ui.theme.TeacherPrimary
+import io.agora.rtc2.Constants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,10 +48,12 @@ fun TeacherLiveRoomScreen(
 ) {
     val context = LocalContext.current
     val userId = sessionManager.getUserId() ?: ""
+    val numericId = sessionManager.getNumericId()
     
     val teacherMeetings by viewModel.teacherMeetings
     val profile by viewModel.profile
     val students by viewModel.courseStudents
+    val agoraTokenResponse by viewModel.agoraToken
     
     val meeting = teacherMeetings.find { it.id == meetingId } ?: VClassMeetingApi(
         id = meetingId, 
@@ -88,6 +91,8 @@ fun TeacherLiveRoomScreen(
             course?.let {
                 viewModel.loadPerformance(it.id)
             }
+            // Load Agora Token for Teacher
+            viewModel.loadAgoraToken(meeting.courseName, numericId.toString())
         }
     }
 
@@ -171,7 +176,12 @@ fun TeacherLiveRoomScreen(
                                 onClick = {
                                     if (hasPermissions) {
                                         agoraManager.stopPreview() // Stop preview before joining to avoid conflicts
-                                        agoraManager.joinChannel(meeting.courseName)
+                                        agoraManager.joinChannel(
+                                            channelName = meeting.courseName,
+                                            uid = numericId,
+                                            token = agoraTokenResponse?.token?.ifEmpty { null },
+                                            role = Constants.CLIENT_ROLE_BROADCASTER
+                                        )
                                         isStreaming = true
                                     }
                                 },

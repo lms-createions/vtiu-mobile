@@ -31,7 +31,7 @@ import com.example.vtiu.R
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (String, String, String?) -> Unit,
+    onLoginSuccess: (String, String, String?, Int) -> Unit,
     viewModel: TeacherViewModel = hiltViewModel() // We can reuse the same VM for now or create a separate one later
 ) {
     var username by remember { mutableStateOf("") }
@@ -44,7 +44,7 @@ fun LoginScreen(
     LaunchedEffect(loginState) {
         loginState?.let {
             if (it.success && it.user != null) {
-                onLoginSuccess(it.user.userId, it.user.name, it.user.profilePictureUrl)
+                onLoginSuccess(it.user.userId, it.user.name, it.user.profilePictureUrl, it.user.id)
             }
         }
     }

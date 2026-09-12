@@ -31,7 +31,7 @@ import com.example.vtiu.R
 
 @Composable
 fun ExamLoginScreen(
-    onLoginSuccess: (String, String, String?) -> Unit,
+    onLoginSuccess: (String, String, String?, Int) -> Unit,
     onBackClick: () -> Unit,
     viewModel: TeacherViewModel = hiltViewModel()
 ) {
@@ -45,7 +45,7 @@ fun ExamLoginScreen(
     LaunchedEffect(loginState) {
         loginState?.let {
             if (it.success && it.user != null) {
-                onLoginSuccess(it.user.userId, it.user.name, it.user.profilePictureUrl)
+                onLoginSuccess(it.user.userId, it.user.name, it.user.profilePictureUrl, it.user.id)
             }
         }
     }
