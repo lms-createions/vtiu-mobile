@@ -127,6 +127,7 @@ data class VClassMeetingApi(
     @SerialName("course_name") val courseName: String,
     @SerialName("teacher_name") val teacherName: String? = null,
     @SerialName("host_id") val hostId: Int? = null,
+    @SerialName("meeting_code") val meetingCode: String,
     val start: String,
     val end: String,
     @SerialName("is_live") val isLive: Boolean

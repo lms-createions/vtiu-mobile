@@ -117,6 +117,7 @@ fun Route.vClassRoutes() {
                         courseName = it[Courses.name],
                         teacherName = if (teacher != null) "${teacher[Users.firstName]} ${teacher[Users.lastName]}" else "Teacher",
                         hostId = hostId ?: teacher?.get(Users.id),
+                        meetingCode = it[Meetings.meetingCode],
                         start = it[Meetings.scheduledStart].toString(),
                         end = it[Meetings.scheduledEnd].toString(),
                         isLive = true
@@ -249,6 +250,7 @@ fun Route.vClassRoutes() {
                     courseName = row.getOrNull(Courses.name) ?: "General",
                     teacherName = if (teacherRow != null) "${teacherRow[Users.firstName]} ${teacherRow[Users.lastName]}" else "LMS Teacher",
                     hostId = hostIdValue ?: teacherRow?.get(Users.id),
+                    meetingCode = row[Meetings.meetingCode],
                     start = row[Meetings.scheduledStart]?.toString() ?: "",
                     end = row[Meetings.scheduledEnd]?.toString() ?: "",
                     isLive = true
@@ -377,6 +379,7 @@ fun Route.vClassRoutes() {
                         courseName = it[Courses.name],
                         teacherName = if (teacher != null) "${teacher[Users.firstName]} ${teacher[Users.lastName]}" else "Teacher",
                         hostId = meetingHostId ?: teacher?.get(Users.id),
+                        meetingCode = it[Meetings.meetingCode],
                         start = startStr,
                         end = endStr,
                         isLive = true

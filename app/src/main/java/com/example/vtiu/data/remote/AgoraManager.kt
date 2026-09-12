@@ -70,8 +70,8 @@ class AgoraManager(private val context: Context) {
         uid: Int = 0, 
         token: String? = null, 
         role: Int = Constants.CLIENT_ROLE_BROADCASTER,
-        publishCamera: Boolean = true,
-        publishMic: Boolean = true
+        publishCamera: Boolean = false, // Changed to false by default to allow preview before live
+        publishMic: Boolean = false
     ) {
         if (!isInitialized) {
             Log.e("AgoraManager", "Cannot join channel: RTC Engine not initialized")
@@ -92,6 +92,14 @@ class AgoraManager(private val context: Context) {
         
         Log.d("AgoraManager", "Joining channel: $channelName as ${if(isBroadcaster) "Broadcaster" else "Audience"}")
         rtcEngine?.joinChannel(token, channelName, uid, options)
+    }
+
+    fun updatePublishState(publishCamera: Boolean, publishMic: Boolean) {
+        val options = ChannelMediaOptions()
+        options.publishCameraTrack = publishCamera
+        options.publishMicrophoneTrack = publishMic
+        rtcEngine?.updateChannelMediaOptions(options)
+        Log.d("AgoraManager", "Updated publish state: Camera=$publishCamera, Mic=$publishMic")
     }
 
     fun startPreview() {

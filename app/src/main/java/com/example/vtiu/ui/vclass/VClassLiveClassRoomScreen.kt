@@ -100,13 +100,13 @@ fun VClassLiveClassRoomScreen(
     }
 
     LaunchedEffect(agoraTokenResponse, hasPermissions) {
-        if (hasPermissions && agoraTokenResponse != null) {
+        if (hasPermissions && agoraTokenResponse != null && meeting.meetingCode.isNotEmpty()) {
             agoraManager.init(agoraTokenResponse!!.appId)
             agoraManager.joinChannel(
-                channelName = "vtiu_meeting_${meeting.id}",
+                channelName = meeting.meetingCode,
                 uid = numericId,
                 token = agoraTokenResponse!!.token.ifEmpty { null },
-                role = Constants.CLIENT_ROLE_AUDIENCE // Students join as audience by default
+                role = Constants.CLIENT_ROLE_AUDIENCE // Default to audience
             )
         }
     }
@@ -114,11 +114,16 @@ fun VClassLiveClassRoomScreen(
     LaunchedEffect(Unit) {
         viewModel.loadMeetingDetail(meetingId)
         viewModel.loadWhiteboardRoom(meetingId)
-        viewModel.loadAgoraToken("vtiu_meeting_$meetingId", numericId.toString())
         chatViewModel.connect(userId, chatRoomId)
         
         // Request Audio permission
         permissionLauncher.launch(arrayOf(Manifest.permission.RECORD_AUDIO))
+    }
+
+    LaunchedEffect(meeting.meetingCode, numericId) {
+        if (meeting.meetingCode.isNotEmpty() && numericId != 0) {
+            viewModel.loadAgoraToken(meeting.meetingCode, numericId.toString())
+        }
     }
 
     LaunchedEffect(userId) {
@@ -324,11 +329,13 @@ fun ActiveTeachingRoom(
                         )
                     } else {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Person, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(64.dp))
+                            Icon(Icons.Default.VideocamOff, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(64.dp))
                             Text(
-                                text = "Connecting to ${meeting.teacherName}...",
+                                text = if (hostUid != 0) "Connected. Waiting for teacher video..." else "Connecting to session...",
                                 color = Color.White,
-                                fontSize = 14.sp
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 32.dp)
                             )
                         }
                     }

@@ -78,10 +78,19 @@ fun TeacherLiveRoomScreen(
                          perms[Manifest.permission.RECORD_AUDIO] == true
     }
 
+    // Auto-join with NO publishing for preview mode
     LaunchedEffect(agoraTokenResponse, hasPermissions) {
-        if (agoraTokenResponse != null && hasPermissions) {
+        if (agoraTokenResponse != null && hasPermissions && meeting.meetingCode.isNotEmpty()) {
             agoraManager.init(agoraTokenResponse!!.appId)
             agoraManager.startPreview()
+            agoraManager.joinChannel(
+                channelName = meeting.meetingCode,
+                uid = numericId,
+                token = agoraTokenResponse?.token?.ifEmpty { null },
+                role = Constants.CLIENT_ROLE_BROADCASTER,
+                publishCamera = false,
+                publishMic = false
+            )
         }
     }
 
@@ -92,9 +101,9 @@ fun TeacherLiveRoomScreen(
     }
 
     LaunchedEffect(meeting.id) {
-        if (meetingId != 0) {
-            // Load Agora Token for Teacher using unique meeting channel
-            viewModel.loadAgoraToken("vtiu_meeting_$meetingId", numericId.toString())
+        if (meeting.id != 0 && meeting.meetingCode.isNotEmpty()) {
+            // Load Agora Token for Teacher using real meeting code
+            viewModel.loadAgoraToken(meeting.meetingCode, numericId.toString())
         }
     }
 
@@ -186,32 +195,28 @@ fun TeacherLiveRoomScreen(
                             Button(
                                 onClick = {
                                     if (hasPermissions && agoraTokenResponse != null) {
-                                        agoraManager.init(agoraTokenResponse!!.appId)
-                                        agoraManager.stopPreview() // Stop preview before joining to avoid conflicts
-                                        agoraManager.joinChannel(
-                                            channelName = "vtiu_meeting_${meeting.id}",
-                                            uid = numericId,
-                                            token = agoraTokenResponse?.token?.ifEmpty { null },
-                                            role = Constants.CLIENT_ROLE_BROADCASTER
-                                        )
+                                        agoraManager.updatePublishState(publishCamera = true, publishMic = true)
                                         isStreaming = true
                                     }
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C950)),
                                 contentPadding = PaddingValues(horizontal = 12.dp),
                                 modifier = Modifier.height(32.dp).padding(end = 8.dp),
-                                enabled = meeting.courseName.isNotEmpty() && agoraTokenResponse != null
+                                enabled = meeting.meetingCode.isNotEmpty() && agoraTokenResponse != null
                             ) {
                                 Text("Start Live", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         } else {
                             Button(
-                                onClick = onEndClick,
+                                onClick = {
+                                    agoraManager.updatePublishState(publishCamera = false, publishMic = false)
+                                    isStreaming = false
+                                },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                                 contentPadding = PaddingValues(horizontal = 12.dp),
                                 modifier = Modifier.height(32.dp).padding(end = 8.dp)
                             ) {
-                                Text("End", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text("Stop", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     },
