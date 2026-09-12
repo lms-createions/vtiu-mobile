@@ -101,16 +101,22 @@ fun Route.vClassRoutes() {
             val courseId = call.parameters["courseId"]?.toIntOrNull() ?: 0
             val meetings = transaction {
                 (Meetings innerJoin Courses).selectAll().where { Meetings.courseId eq courseId }.map {
-                    val teacher = (TeacherCourseAssignments innerJoin Users)
-                        .selectAll().where { TeacherCourseAssignments.courseId eq courseId }
-                        .singleOrNull()
+                    // Try to get hostId from Meeting table first, fallback to TeacherCourseAssignments
+                    val hostId = it[Meetings.hostId]
+                    val teacher = if (hostId != null) {
+                        Users.selectAll().where { Users.id eq hostId }.singleOrNull()
+                    } else {
+                        (TeacherCourseAssignments innerJoin Users)
+                            .selectAll().where { TeacherCourseAssignments.courseId eq courseId }
+                            .singleOrNull()
+                    }
 
                     VClassMeetingApi(
                         id = it[Meetings.id],
                         title = it[Meetings.title],
                         courseName = it[Courses.name],
                         teacherName = if (teacher != null) "${teacher[Users.firstName]} ${teacher[Users.lastName]}" else "Teacher",
-                        hostId = teacher?.get(Users.id),
+                        hostId = hostId ?: teacher?.get(Users.id),
                         start = it[Meetings.scheduledStart].toString(),
                         end = it[Meetings.scheduledEnd].toString(),
                         isLive = true
@@ -303,9 +309,14 @@ fun Route.vClassRoutes() {
                 println("VClass: Query executed. Found ${query.count()} meetings.")
 
                 query.map {
-                    val teacher = (TeacherCourseAssignments innerJoin TeacherProfiles innerJoin Users)
-                        .selectAll().where { TeacherCourseAssignments.courseId eq it[Courses.id] }
-                        .singleOrNull()
+                    val meetingHostId = it[Meetings.hostId]
+                    val teacher = if (meetingHostId != null) {
+                        Users.selectAll().where { Users.id eq meetingHostId }.singleOrNull()
+                    } else {
+                        (TeacherCourseAssignments innerJoin TeacherProfiles innerJoin Users)
+                            .selectAll().where { TeacherCourseAssignments.courseId eq it[Courses.id] }
+                            .singleOrNull()
+                    }
                     
                     // Format dates to "yyyy-MM-dd HH:mm:ss" for the app
                     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -321,7 +332,7 @@ fun Route.vClassRoutes() {
                         title = it[Meetings.title],
                         courseName = it[Courses.name],
                         teacherName = if (teacher != null) "${teacher[Users.firstName]} ${teacher[Users.lastName]}" else "Teacher",
-                        hostId = teacher?.get(Users.id),
+                        hostId = meetingHostId ?: teacher?.get(Users.id),
                         start = startStr,
                         end = endStr,
                         isLive = true

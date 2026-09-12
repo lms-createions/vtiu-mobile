@@ -285,9 +285,10 @@ fun ActiveTeachingRoom(
                     } else if (hostUid != 0) {
                         AndroidView(
                             factory = { ctx ->
-                                SurfaceView(ctx).apply {
-                                    agoraManager.setupRemoteVideo(this, hostUid)
-                                }
+                                SurfaceView(ctx)
+                            },
+                            update = { view ->
+                                agoraManager.setupRemoteVideo(view, hostUid)
                             },
                             modifier = Modifier.fillMaxSize()
                         )
