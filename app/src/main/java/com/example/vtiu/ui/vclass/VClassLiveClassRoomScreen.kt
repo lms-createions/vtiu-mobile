@@ -66,13 +66,19 @@ fun VClassLiveClassRoomScreen(
     var isApproved by remember { mutableStateOf(true) } // Simplified for now, or use real logic
     
     val agoraManager = remember { AgoraManager(context) }
-    var hostUid by remember { mutableIntStateOf(0) }
+    var hostUid by remember { mutableIntStateOf(meeting.hostId ?: 0) }
     var hasPermissions by remember { mutableStateOf(false) }
     
     val whiteboardRoom by viewModel.whiteboardRoom
     val agoraTokenResponse by viewModel.agoraToken
 
     val chatRoomId = "meeting_$meetingId"
+
+    LaunchedEffect(meeting.hostId) {
+        if (meeting.hostId != null) {
+            hostUid = meeting.hostId
+        }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -110,7 +116,6 @@ fun VClassLiveClassRoomScreen(
                 android.Manifest.permission.CAMERA
             ))
             delay(2000)
-            hostUid = 123
         }
     }
 

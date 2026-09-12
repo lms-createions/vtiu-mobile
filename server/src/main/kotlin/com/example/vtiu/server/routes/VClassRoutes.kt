@@ -101,10 +101,16 @@ fun Route.vClassRoutes() {
             val courseId = call.parameters["courseId"]?.toIntOrNull() ?: 0
             val meetings = transaction {
                 (Meetings innerJoin Courses).selectAll().where { Meetings.courseId eq courseId }.map {
+                    val teacher = (TeacherCourseAssignments innerJoin Users)
+                        .selectAll().where { TeacherCourseAssignments.courseId eq courseId }
+                        .singleOrNull()
+
                     VClassMeetingApi(
                         id = it[Meetings.id],
                         title = it[Meetings.title],
                         courseName = it[Courses.name],
+                        teacherName = if (teacher != null) "${teacher[Users.firstName]} ${teacher[Users.lastName]}" else "Teacher",
+                        hostId = teacher?.get(Users.id),
                         start = it[Meetings.scheduledStart].toString(),
                         end = it[Meetings.scheduledEnd].toString(),
                         isLive = true
@@ -315,6 +321,7 @@ fun Route.vClassRoutes() {
                         title = it[Meetings.title],
                         courseName = it[Courses.name],
                         teacherName = if (teacher != null) "${teacher[Users.firstName]} ${teacher[Users.lastName]}" else "Teacher",
+                        hostId = teacher?.get(Users.id),
                         start = startStr,
                         end = endStr,
                         isLive = true
