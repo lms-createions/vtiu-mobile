@@ -1,5 +1,6 @@
 package com.example.vtiu.ui.teacher
 
+import android.Manifest
 import android.view.SurfaceView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,8 +74,13 @@ fun TeacherLiveRoomScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { perms ->
-        hasPermissions = perms.values.all { it }
-        if (hasPermissions) {
+        hasPermissions = perms[Manifest.permission.CAMERA] == true &&
+                         perms[Manifest.permission.RECORD_AUDIO] == true
+    }
+
+    LaunchedEffect(agoraTokenResponse, hasPermissions) {
+        if (agoraTokenResponse != null && hasPermissions) {
+            agoraManager.init(agoraTokenResponse!!.appId)
             agoraManager.startPreview()
         }
     }
@@ -85,14 +91,19 @@ fun TeacherLiveRoomScreen(
         }
     }
 
-    LaunchedEffect(meeting.id, meeting.courseName) {
+    LaunchedEffect(meeting.id) {
+        if (meetingId != 0) {
+            // Load Agora Token for Teacher using unique meeting channel
+            viewModel.loadAgoraToken("vtiu_meeting_$meetingId", numericId.toString())
+        }
+    }
+
+    LaunchedEffect(meeting.courseName) {
         if (meeting.courseName.isNotEmpty()) {
             val course = viewModel.teacherClasses.value.find { it.courseName == meeting.courseName }
             course?.let {
                 viewModel.loadPerformance(it.id)
             }
-            // Load Agora Token for Teacher using unique meeting channel
-            viewModel.loadAgoraToken("vtiu_meeting_${meeting.id}", numericId.toString())
         }
     }
 
@@ -227,9 +238,10 @@ fun TeacherLiveRoomScreen(
                     if (hasPermissions && isCameraOn) {
                         AndroidView(
                             factory = { ctx ->
-                                SurfaceView(ctx).apply {
-                                    agoraManager.setupLocalVideo(this)
-                                }
+                                SurfaceView(ctx)
+                            },
+                            update = { view ->
+                                agoraManager.setupLocalVideo(view)
                             },
                             modifier = Modifier.fillMaxSize()
                         )

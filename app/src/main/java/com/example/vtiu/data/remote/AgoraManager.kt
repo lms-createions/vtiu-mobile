@@ -37,6 +37,7 @@ class AgoraManager(private val context: Context) {
 
     fun init(appId: String) {
         if (isInitialized) return
+        Log.d("AgoraManager", "Initializing with App ID: $appId")
         try {
             val config = RtcEngineConfig()
             config.mContext = context
@@ -47,6 +48,7 @@ class AgoraManager(private val context: Context) {
             // Critical for Cross-Platform Compatibility
             rtcEngine?.setChannelProfile(Constants.CHANNEL_PROFILE_LIVE_BROADCASTING)
             rtcEngine?.enableVideo()
+            Log.d("AgoraManager", "Video enabled")
             
             // Set Video Encoder Configuration for better web compatibility
             val videoConfig = VideoEncoderConfiguration(
@@ -57,6 +59,7 @@ class AgoraManager(private val context: Context) {
             )
             rtcEngine?.setVideoEncoderConfiguration(videoConfig)
             isInitialized = true
+            Log.d("AgoraManager", "Initialization complete")
         } catch (e: Exception) {
             Log.e("AgoraManager", "Initialization failed: ${e.message}")
         }
@@ -92,10 +95,12 @@ class AgoraManager(private val context: Context) {
     }
 
     fun startPreview() {
+        Log.d("AgoraManager", "Starting preview")
         rtcEngine?.startPreview()
     }
 
     fun stopPreview() {
+        Log.d("AgoraManager", "Stopping preview")
         rtcEngine?.stopPreview()
     }
 
@@ -139,6 +144,7 @@ class AgoraManager(private val context: Context) {
     }
 
     fun setupLocalVideo(surfaceView: SurfaceView) {
+        Log.d("AgoraManager", "Setting up local video")
         rtcEngine?.setupLocalVideo(VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_HIDDEN, 0))
     }
 
