@@ -742,7 +742,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     VClassJoinMeetingScreen(
                         meetingId = id,
                         onBackClick = { navController.popBackStack() },
-                        onJoinNowClick = { meetingId -> 
+                        onJoinNowClick = { meetingId ->
                             navController.navigate(Screen.LiveClassRoom.createRoute(meetingId))
                         }
                     )

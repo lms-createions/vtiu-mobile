@@ -239,14 +239,6 @@ class StudentViewModel @Inject constructor(
         }
     }
 
-    fun loadMeetingByCode(code: String) {
-        viewModelScope.launch {
-            println("VClass: Loading meeting by code: $code")
-            val detail = repository.getMeetingByCode(code)
-            _meetingDetail.value = detail
-        }
-    }
-
     fun loadAgoraToken(channelName: String, userId: String) {
         viewModelScope.launch {
             _agoraToken.value = repository.getAgoraToken(channelName, userId)

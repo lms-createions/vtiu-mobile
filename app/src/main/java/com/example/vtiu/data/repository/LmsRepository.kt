@@ -168,20 +168,6 @@ class LmsRepository @Inject constructor(
         }
     }
 
-    suspend fun getMeetingByCode(code: String): VClassMeetingApi? {
-        return try {
-            val url = "$baseUrl/api/vclass/meeting/code/$code"
-            val response: HttpResponse = client.get(url)
-            if (response.status == HttpStatusCode.OK) {
-                response.body<VClassMeetingApi>()
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     suspend fun getStudentQuizzes(userId: String): List<QuizDetailApi> {
         return try {
             client.get("$baseUrl/api/student/quizzes/$userId").body()

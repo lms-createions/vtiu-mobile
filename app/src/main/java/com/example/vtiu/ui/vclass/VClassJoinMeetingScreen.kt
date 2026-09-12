@@ -168,18 +168,21 @@ fun VClassJoinMeetingScreen(
                 OutlinedTextField(
                     value = enteredRoomId,
                     onValueChange = { enteredRoomId = it },
-                    placeholder = { Text("vtiu-xxx-yyy", color = Color.Gray) },
+                    placeholder = { Text("vtiu-xxx-yyy", color = Color.LightGray.copy(alpha = 0.6f)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
+                    textStyle = LocalTextStyle.current.copy(color = Color.White),
                     isError = enteredRoomId.isNotEmpty() && !isIdCorrect,
                     colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedTextColor = Color.White,
                         focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
                         cursorColor = VClassPrimary,
                         focusedBorderColor = if (isIdCorrect) Color.Green else VClassPrimary,
                         unfocusedBorderColor = if (isIdCorrect) Color.Green else Color.Gray,
-                        errorBorderColor = Color.Red
+                        errorBorderColor = Color.Red,
+                        focusedContainerColor = Color.White.copy(alpha = 0.05f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.05f)
                     ),
                     trailingIcon = {
                         if (isIdCorrect) {
@@ -230,7 +233,10 @@ fun VClassJoinMeetingScreen(
                         .fillMaxWidth()
                         .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isIdCorrect) Color(0xFF00C950) else Color.Gray
+                        containerColor = Color(0xFF00C950),
+                        contentColor = Color.White,
+                        disabledContainerColor = Color.White.copy(alpha = 0.1f),
+                        disabledContentColor = Color.Gray
                     ),
                     shape = RoundedCornerShape(28.dp),
                     enabled = isIdCorrect
