@@ -212,12 +212,6 @@ object StudentFeeBalances : Table("student_fee_balance") {
     val isPaid = bool("is_paid").default(false)
     val paidOn = datetime("paid_on").nullable()
     val createdAt = datetime("created_at")
-    // Agora Settings
-    val agoraAppId = varchar("agora_app_id", 100).default("c79f6fe95bad487cafec43820f0200cb")
-    val agoraAppCertificate = varchar("agora_app_certificate", 100).default("")
-    val agoraWhiteboardId = varchar("agora_whiteboard_id", 100).default("") // Identifier for Netless
-    val agoraWhiteboardToken = varchar("agora_whiteboard_token", 255).default("") // SDK Token for Netless
-
     val updatedAt = datetime("updated_at")
 
     override val primaryKey = PrimaryKey(id)
@@ -240,7 +234,7 @@ object ProgrammeFeeStructures : Table("programme_fee_structure") {
 
 object Notifications : Table("notification") {
     val id = integer("id").autoIncrement()
-    val userId = varchar("user_id", 50)
+    val userId = varchar("user_id", 50).nullable()
     val title = varchar("title", 255)
     val message = text("message")
     val date = varchar("date", 50)
