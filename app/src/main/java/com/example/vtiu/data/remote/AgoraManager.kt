@@ -53,7 +53,14 @@ class AgoraManager(private val context: Context) {
         }
     }
 
-    fun joinChannel(channelName: String, uid: Int = 0, token: String? = null, role: Int = Constants.CLIENT_ROLE_BROADCASTER) {
+    fun joinChannel(
+        channelName: String, 
+        uid: Int = 0, 
+        token: String? = null, 
+        role: Int = Constants.CLIENT_ROLE_BROADCASTER,
+        publishCamera: Boolean = true,
+        publishMic: Boolean = true
+    ) {
         if (!isInitialized) {
             Log.e("AgoraManager", "Cannot join channel: RTC Engine not initialized")
             return
@@ -64,10 +71,10 @@ class AgoraManager(private val context: Context) {
         options.clientRoleType = role
         options.channelProfile = Constants.CHANNEL_PROFILE_LIVE_BROADCASTING
         
-        // Only publish if the user is a broadcaster (Teacher)
+        // Use provided flags if role is Broadcaster, else don't publish
         val isBroadcaster = role == Constants.CLIENT_ROLE_BROADCASTER
-        options.publishCameraTrack = isBroadcaster
-        options.publishMicrophoneTrack = isBroadcaster
+        options.publishCameraTrack = isBroadcaster && publishCamera
+        options.publishMicrophoneTrack = isBroadcaster && publishMic
         options.autoSubscribeAudio = true
         options.autoSubscribeVideo = true
         

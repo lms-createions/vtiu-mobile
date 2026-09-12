@@ -1,5 +1,6 @@
 package com.example.vtiu.ui.vclass
 
+import android.Manifest
 import android.view.SurfaceView
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -69,6 +70,7 @@ fun VClassLiveClassRoomScreen(
     
     val agoraManager = remember { AgoraManager(context) }
     var hostUid by remember { mutableIntStateOf(meeting.hostId ?: 0) }
+    var hasPermissions by remember { mutableStateOf(false) }
     
     val whiteboardRoom by viewModel.whiteboardRoom
     val agoraTokenResponse by viewModel.agoraToken
@@ -81,15 +83,25 @@ fun VClassLiveClassRoomScreen(
         }
     }
 
-    LaunchedEffect(agoraTokenResponse) {
-        if (agoraTokenResponse != null) {
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { perms ->
+        hasPermissions = perms.values.all { it }
+    }
+
+    LaunchedEffect(agoraTokenResponse, hasPermissions) {
+        if (hasPermissions && agoraTokenResponse != null) {
             agoraManager.init(agoraTokenResponse!!.appId)
             agoraManager.joinChannel(
                 channelName = "vtiu_meeting_${meeting.id}",
                 uid = numericId,
                 token = agoraTokenResponse!!.token.ifEmpty { null },
-                role = Constants.CLIENT_ROLE_AUDIENCE
+                role = Constants.CLIENT_ROLE_BROADCASTER, // Join as Broadcaster to use Mic
+                publishCamera = false, // Students don't need camera
+                publishMic = true
             )
+            // Start muted by default
+            agoraManager.muteLocalAudio(true)
         }
     }
 
@@ -98,6 +110,9 @@ fun VClassLiveClassRoomScreen(
         viewModel.loadWhiteboardRoom(meetingId)
         viewModel.loadAgoraToken("vtiu_meeting_$meetingId", numericId.toString())
         chatViewModel.connect(userId, chatRoomId)
+        
+        // Request Audio permission
+        permissionLauncher.launch(arrayOf(Manifest.permission.RECORD_AUDIO))
     }
 
     LaunchedEffect(userId) {
@@ -186,6 +201,7 @@ fun ActiveTeachingRoom(
     val messages = chatViewModel.messages
     var isFullScreen by remember { mutableStateOf(false) }
     var showWhiteboard by remember { mutableStateOf(false) }
+    var isMuted by remember { mutableStateOf(true) }
     val whiteboardRoom by viewModel.whiteboardRoom
     val listState = rememberLazyListState()
 
@@ -229,6 +245,20 @@ fun ActiveTeachingRoom(
                         }
                         
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(
+                                onClick = { 
+                                    isMuted = !isMuted
+                                    agoraManager.muteLocalAudio(isMuted)
+                                },
+                                modifier = Modifier.size(32.dp).padding(end = 8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (isMuted) Icons.Default.MicOff else Icons.Default.Mic,
+                                    contentDescription = "Toggle Mic",
+                                    tint = if (isMuted) Color.Red else Color(0xFF00C950)
+                                )
+                            }
+
                             Button(
                                 onClick = { showWhiteboard = !showWhiteboard },
                                 colors = ButtonDefaults.buttonColors(containerColor = VClassPrimary),
@@ -418,6 +448,26 @@ fun ActiveTeachingRoom(
                         modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)
                     ) {
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Back", tint = Color.White)
+                    }
+                }
+
+                // Small Mic Overlay at Bottom Right
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    IconButton(
+                        onClick = { 
+                            isMuted = !isMuted
+                            agoraManager.muteLocalAudio(isMuted)
+                        },
+                        modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = if (isMuted) Icons.Default.MicOff else Icons.Default.Mic,
+                            contentDescription = "Toggle Mic",
+                            tint = if (isMuted) Color.Red else Color(0xFF00C950)
+                        )
                     }
                 }
             }

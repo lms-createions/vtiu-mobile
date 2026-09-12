@@ -54,6 +54,8 @@ fun VClassJoinMeetingScreen(
 
     val meeting = meetingDetail!!
     
+    var isMicOn by remember { mutableStateOf(false) }
+
     Scaffold(
         containerColor = Color(0xFF0F1720),
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
@@ -116,6 +118,7 @@ fun VClassJoinMeetingScreen(
                             }
                         }
                         
+                        // ... (keep the rest of the text info)
                         Spacer(modifier = Modifier.height(24.dp))
                         
                         Text(
@@ -145,7 +148,19 @@ fun VClassJoinMeetingScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Restore Mic Button
+                FloatingActionButton(
+                    onClick = { isMicOn = !isMicOn },
+                    containerColor = if (isMicOn) Color.White.copy(alpha = 0.1f) else Color.Red,
+                    contentColor = Color.White,
+                    shape = CircleShape
+                ) {
+                    Icon(if (isMicOn) Icons.Default.Mic else Icons.Default.MicOff, contentDescription = "Mic")
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
                     onClick = { onJoinNowClick(meetingId) },
@@ -165,10 +180,10 @@ fun VClassJoinMeetingScreen(
                     Text("Not Now", color = Color.Gray)
                 }
                 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 
                 Text(
-                    text = "You will join as a viewer. Only the teacher can broadcast audio and video.",
+                    text = "You will join as a participant. You can use your microphone to ask questions.",
                     color = Color.Gray.copy(alpha = 0.6f),
                     fontSize = 11.sp,
                     textAlign = TextAlign.Center,
