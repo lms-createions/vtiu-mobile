@@ -96,12 +96,8 @@ fun VClassLiveClassRoomScreen(
                 channelName = "vtiu_meeting_${meeting.id}",
                 uid = numericId,
                 token = agoraTokenResponse!!.token.ifEmpty { null },
-                role = Constants.CLIENT_ROLE_BROADCASTER, // Join as Broadcaster to use Mic
-                publishCamera = false, // Students don't need camera
-                publishMic = true
+                role = Constants.CLIENT_ROLE_AUDIENCE // Students join as audience by default
             )
-            // Start muted by default
-            agoraManager.muteLocalAudio(true)
         }
     }
 
@@ -248,7 +244,13 @@ fun ActiveTeachingRoom(
                             IconButton(
                                 onClick = { 
                                     isMuted = !isMuted
-                                    agoraManager.muteLocalAudio(isMuted)
+                                    if (isMuted) {
+                                        agoraManager.muteLocalAudio(true)
+                                        agoraManager.setRole(Constants.CLIENT_ROLE_AUDIENCE)
+                                    } else {
+                                        agoraManager.setRole(Constants.CLIENT_ROLE_BROADCASTER)
+                                        agoraManager.muteLocalAudio(false)
+                                    }
                                 },
                                 modifier = Modifier.size(32.dp).padding(end = 8.dp)
                             ) {
@@ -459,7 +461,13 @@ fun ActiveTeachingRoom(
                     IconButton(
                         onClick = { 
                             isMuted = !isMuted
-                            agoraManager.muteLocalAudio(isMuted)
+                            if (isMuted) {
+                                agoraManager.muteLocalAudio(true)
+                                agoraManager.setRole(Constants.CLIENT_ROLE_AUDIENCE)
+                            } else {
+                                agoraManager.setRole(Constants.CLIENT_ROLE_BROADCASTER)
+                                agoraManager.muteLocalAudio(false)
+                            }
                         },
                         modifier = Modifier.background(Color.Black.copy(alpha = 0.3f), CircleShape)
                     ) {

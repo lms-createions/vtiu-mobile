@@ -145,6 +145,10 @@ class AgoraManager(private val context: Context) {
         rtcEngine?.muteLocalVideoStream(muted)
     }
 
+    fun setRole(role: Int) {
+        rtcEngine?.setClientRole(role)
+    }
+
     fun release() {
         RtcEngine.destroy()
         rtcEngine = null
