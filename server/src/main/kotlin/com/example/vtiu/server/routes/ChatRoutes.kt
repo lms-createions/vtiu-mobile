@@ -2,20 +2,73 @@ package com.example.vtiu.server.routes
 
 import com.example.vtiu.server.models.*
 import com.example.vtiu.server.db.*
+import com.example.vtiu.server.redis.RedisFactory
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import redis.clients.jedis.JedisPubSub
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 
 val chatSessions = ConcurrentHashMap<String, DefaultWebSocketServerSession>()
+private const val REDIS_CHAT_CHANNEL = "vtiu_chat_broadcast"
+
+fun initChatRedisSubscriber() {
+    GlobalScope.launch(Dispatchers.IO) {
+        try {
+            RedisFactory.getJedis().use { jedis ->
+                println("Redis: Chat Subscriber started on channel $REDIS_CHAT_CHANNEL")
+                jedis.subscribe(object : JedisPubSub() {
+                    override fun onMessage(channel: String, message: String) {
+                        val msg = Json.decodeFromString<ChatMessageApi>(message)
+                        broadcastToLocalSessions(msg)
+                    }
+                }, REDIS_CHAT_CHANNEL)
+            }
+        } catch (e: Exception) {
+            println("Redis: Chat Subscriber Error: ${e.message}")
+        }
+    }
+}
+
+private fun broadcastToLocalSessions(msg: ChatMessageApi) {
+    val msgJson = Json.encodeToString(msg)
+    if (msg.receiverId == "global" || msg.receiverId.startsWith("meeting_")) {
+        chatSessions.values.forEach { session ->
+            GlobalScope.launch {
+                try {
+                    session.send(Frame.Text(msgJson))
+                } catch (e: Exception) {}
+            }
+        }
+    } else {
+        chatSessions[msg.receiverId]?.let { session ->
+            GlobalScope.launch {
+                try {
+                    session.send(Frame.Text(msgJson))
+                } catch (e: Exception) {}
+            }
+        }
+        // Also echo to sender if they are on this instance
+        chatSessions[msg.senderId]?.let { session ->
+            GlobalScope.launch {
+                try {
+                    session.send(Frame.Text(msgJson))
+                } catch (e: Exception) {}
+            }
+        }
+    }
+}
 
 fun Route.chatRoutes() {
     route("/api/chat") {
@@ -72,22 +125,9 @@ fun Route.chatRoutes() {
                             )
                         }
 
-                        // Broadcast
+                        // Broadcast via Redis
                         val msgJson = Json.encodeToString(savedMsg)
-                        if (savedMsg.receiverId == "global" || savedMsg.receiverId.startsWith("meeting_")) {
-                            chatSessions.values.forEach { 
-                                try {
-                                    it.send(Frame.Text(msgJson)) 
-                                } catch (e: Exception) {
-                                    // Handle stale sessions if necessary
-                                }
-                            }
-                        } else {
-                            chatSessions[savedMsg.receiverId]?.send(Frame.Text(msgJson))
-                            if (savedMsg.receiverId != userId) {
-                                chatSessions[userId]?.send(Frame.Text(msgJson)) // Echo to sender
-                            }
-                        }
+                        RedisFactory.getJedis().use { it.publish(REDIS_CHAT_CHANNEL, msgJson) }
                     }
                 }
             } catch (e: Exception) {

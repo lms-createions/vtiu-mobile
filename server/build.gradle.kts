@@ -36,6 +36,9 @@ dependencies {
     implementation(libs.postgresql)
     implementation(libs.hikaricp)
     implementation(libs.kotlinx.datetime)
+
+    // Redis
+    implementation(libs.redis.jedis)
 }
 
 kotlin {

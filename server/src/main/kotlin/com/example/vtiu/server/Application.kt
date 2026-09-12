@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.example.vtiu.server.db.*
 import com.example.vtiu.server.routes.*
+import com.example.vtiu.server.redis.RedisFactory
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.selectAll
 
@@ -36,12 +37,14 @@ fun main() {
 }
 
 fun Application.module() {
-    // Initialize Database in the background to prevent blocking server startup
+    // Initialize Redis & Database in the background to prevent blocking server startup
     launch {
         try {
+            RedisFactory.init()
+            initChatRedisSubscriber()
             DatabaseFactory.init()
         } catch (e: Exception) {
-            println("Failed to initialize database: ${e.message}")
+            println("Failed to initialize server components: ${e.message}")
         }
     }
     install(WebSockets) {
