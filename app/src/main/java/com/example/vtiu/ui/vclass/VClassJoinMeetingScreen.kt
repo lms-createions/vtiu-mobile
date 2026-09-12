@@ -87,98 +87,104 @@ fun VClassJoinMeetingScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .aspectRatio(16f / 9f)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFF1E2732)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isCamOn) {
-                        Text("Camera Preview", color = Color.White, fontWeight = FontWeight.Bold)
-                    } else {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.VideocamOff, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(48.dp))
-                            Text("Camera is off", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp)
+                if (meetingApi == null) {
+                    CircularProgressIndicator(color = Color(0xFF00C950))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Fetching meeting details...", color = Color.White)
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .aspectRatio(16f / 9f)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(Color(0xFF1E2732)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isCamOn) {
+                            Text("Camera Preview", color = Color.White, fontWeight = FontWeight.Bold)
+                        } else {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(Icons.Default.VideocamOff, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(48.dp))
+                                Text("Camera is off", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp)
+                            }
+                        }
+
+                        Surface(
+                            color = VClassPrimary.copy(alpha = 0.8f),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+                        ) {
+                            Text(
+                                text = meeting.courseName,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
 
-                    Surface(
-                        color = VClassPrimary.copy(alpha = 0.8f),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
-                    ) {
-                        Text(
-                            text = meeting.courseName,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+                    Spacer(modifier = Modifier.height(32.dp))
 
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    FloatingActionButton(
-                        onClick = { isMicOn = !isMicOn },
-                        containerColor = if (isMicOn) Color.White.copy(alpha = 0.1f) else Color.Red,
-                        contentColor = Color.White,
-                        shape = CircleShape
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(24.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(if (isMicOn) Icons.Default.Mic else Icons.Default.MicOff, contentDescription = "Mic")
+                        FloatingActionButton(
+                            onClick = { isMicOn = !isMicOn },
+                            containerColor = if (isMicOn) Color.White.copy(alpha = 0.1f) else Color.Red,
+                            contentColor = Color.White,
+                            shape = CircleShape
+                        ) {
+                            Icon(if (isMicOn) Icons.Default.Mic else Icons.Default.MicOff, contentDescription = "Mic")
+                        }
+
+                        FloatingActionButton(
+                            onClick = { isCamOn = !isCamOn },
+                            containerColor = if (isCamOn) Color.White.copy(alpha = 0.1f) else Color.Red,
+                            contentColor = Color.White,
+                            shape = CircleShape
+                        ) {
+                            Icon(if (isCamOn) Icons.Default.Videocam else Icons.Default.VideocamOff, contentDescription = "Camera")
+                        }
                     }
 
-                    FloatingActionButton(
-                        onClick = { isCamOn = !isCamOn },
-                        containerColor = if (isCamOn) Color.White.copy(alpha = 0.1f) else Color.Red,
-                        contentColor = Color.White,
-                        shape = CircleShape
+                    Spacer(modifier = Modifier.height(48.dp))
+
+                    Text(
+                        text = meeting.title,
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                    Text(
+                        text = "Host: ${meeting.teacherName}",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(48.dp))
+
+                    Button(
+                        onClick = { onJoinNowClick(meetingId) },
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C950)),
+                        shape = RoundedCornerShape(28.dp)
                     ) {
-                        Icon(if (isCamOn) Icons.Default.Videocam else Icons.Default.VideocamOff, contentDescription = "Camera")
+                        Text("Join Now", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
-                }
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Text(
-                    text = meeting.title,
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-                Text(
-                    text = "Host: ${meeting.teacherName}",
-                    color = Color.Gray,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Button(
-                    onClick = { onJoinNowClick(meetingId) },
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C950)),
-                    shape = RoundedCornerShape(28.dp)
-                ) {
-                    Text("Join Now", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                }
-                
-                TextButton(
-                    onClick = onBackClick,
-                    modifier = Modifier.padding(top = 16.dp)
-                ) {
-                    Text("Not Now", color = Color.Gray)
+                    
+                    TextButton(
+                        onClick = onBackClick,
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Text("Not Now", color = Color.Gray)
+                    }
                 }
             }
         }
