@@ -153,8 +153,17 @@ class LmsRepository @Inject constructor(
 
     suspend fun getMeetingDetail(meetingId: Int): VClassMeetingApi? {
         return try {
-            client.get("$baseUrl/api/vclass/meeting/$meetingId").body()
+            val url = "$baseUrl/api/vclass/meeting/$meetingId"
+            println("VClass: Calling API: $url")
+            val response: HttpResponse = client.get(url)
+            println("VClass: API Status: ${response.status}")
+            if (response.status == HttpStatusCode.OK) {
+                response.body<VClassMeetingApi>()
+            } else {
+                null
+            }
         } catch (e: Exception) {
+            println("VClass: API Error: ${e.message}")
             null
         }
     }

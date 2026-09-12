@@ -232,7 +232,10 @@ class StudentViewModel @Inject constructor(
 
     fun loadMeetingDetail(meetingId: Int) {
         viewModelScope.launch {
-            _meetingDetail.value = repository.getMeetingDetail(meetingId)
+            println("VClass: Loading meeting detail for $meetingId")
+            val detail = repository.getMeetingDetail(meetingId)
+            println("VClass: Detail received: ${detail?.title}")
+            _meetingDetail.value = detail
         }
     }
 

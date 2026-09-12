@@ -221,26 +221,30 @@ fun Route.vClassRoutes() {
         get("/vclass/meeting/{meetingId}") {
             val meetingId = call.parameters["meetingId"]?.toIntOrNull() ?: 0
             val meeting = transaction {
-                val row = (Meetings innerJoin Courses).selectAll().where { Meetings.id eq meetingId }.singleOrNull()
+                // Use leftJoin to be safe if course info is missing
+                val row = (Meetings leftJoin Courses).selectAll().where { Meetings.id eq meetingId }.singleOrNull()
                 if (row == null) return@transaction null
 
                 val hostIdValue = row[Meetings.hostId]
                 val teacherRow = if (hostIdValue != null) {
                     Users.selectAll().where { Users.id eq hostIdValue }.singleOrNull()
                 } else {
-                    (TeacherCourseAssignments innerJoin Users)
-                        .selectAll().where { TeacherCourseAssignments.courseId eq row[Courses.id] }
-                        .singleOrNull()
+                    val cId = row[Meetings.courseId]
+                    if (cId != null) {
+                        (TeacherCourseAssignments innerJoin Users)
+                            .selectAll().where { TeacherCourseAssignments.courseId eq cId }
+                            .singleOrNull()
+                    } else null
                 }
 
                 VClassMeetingApi(
                     id = row[Meetings.id],
                     title = row[Meetings.title],
-                    courseName = row[Courses.name],
+                    courseName = row.getOrNull(Courses.name) ?: "General",
                     teacherName = if (teacherRow != null) "${teacherRow[Users.firstName]} ${teacherRow[Users.lastName]}" else "Teacher",
                     hostId = hostIdValue ?: teacherRow?.get(Users.id),
-                    start = row[Meetings.scheduledStart].toString(),
-                    end = row[Meetings.scheduledEnd].toString(),
+                    start = row[Meetings.scheduledStart]?.toString() ?: "",
+                    end = row[Meetings.scheduledEnd]?.toString() ?: "",
                     isLive = true
                 )
             }
