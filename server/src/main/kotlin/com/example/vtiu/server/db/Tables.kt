@@ -238,7 +238,7 @@ object ProgrammeFeeStructures : Table("programme_fee_structure") {
     override val primaryKey = PrimaryKey(id)
 }
 
-object Notifications : Table("notifications") {
+object Notifications : Table("notification") {
     val id = integer("id").autoIncrement()
     val userId = varchar("user_id", 50)
     val title = varchar("title", 255)
@@ -348,7 +348,7 @@ object CourseAssessmentSchemes : Table("course_assessment_scheme") {
     override val primaryKey = PrimaryKey(id)
 }
 
-object AssignmentSubmissions : Table("assignment_submissions") {
+object AssignmentSubmissions : Table("assignment_submission") {
     val id = integer("id").autoIncrement()
     val assignmentId = integer("assignment_id").references(Assignments.id)
     val studentId = integer("student_id").references(Users.id)
@@ -391,7 +391,7 @@ object Questions : Table("question") {
     override val primaryKey = PrimaryKey(id)
 }
 
-object Options : Table("options") {
+object Options : Table("option") {
     val id = integer("id").autoIncrement()
     val questionId = integer("question_id").references(Questions.id)
     val text = varchar("text", 1000)
@@ -401,7 +401,7 @@ object Options : Table("options") {
     override val primaryKey = PrimaryKey(id)
 }
 
-object StudentQuizSubmissions : Table("student_quiz_submissions") {
+object StudentQuizSubmissions : Table("student_quiz_submission") {
     val id = integer("id").autoIncrement()
     val studentId = integer("student_id").references(Users.id)
     val quizId = integer("quiz_id").references(Quizzes.id)
@@ -437,7 +437,7 @@ object SemesterResultReleases : Table("semester_result_release") {
     override val primaryKey = PrimaryKey(id)
 }
 
-object SchoolSettings : Table("school_settings") {
+object SchoolSettings : Table("school_setting") {
     val id = integer("id").autoIncrement()
     val schoolName = varchar("school_name", 255)
     val currentAcademicYear = varchar("current_academic_year", 20)
@@ -461,7 +461,7 @@ object SchoolSettings : Table("school_settings") {
     override val primaryKey = PrimaryKey(id)
 }
 
-object ChatMessages : Table("chat_messages") {
+object ChatMessages : Table("chat_message") {
     val id = integer("id").autoIncrement()
     val senderId = varchar("sender_id", 50)
     val receiverId = varchar("receiver_id", 50) // "global" or specific userId
