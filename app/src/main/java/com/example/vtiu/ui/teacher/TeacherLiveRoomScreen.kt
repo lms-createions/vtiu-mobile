@@ -30,7 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.vtiu.data.local.SessionManager
+import com.example.vtiu.data.model.api.VClassMeetingApi
 import com.example.vtiu.data.remote.AgoraManager
+import com.example.vtiu.ui.chat.ChatViewModel
 import com.example.vtiu.ui.theme.TeacherPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,10 +41,26 @@ import com.example.vtiu.ui.theme.TeacherPrimary
 fun TeacherLiveRoomScreen(
     meetingId: Int,
     onEndClick: () -> Unit,
-    viewModel: TeacherViewModel = hiltViewModel()
+    viewModel: TeacherViewModel = hiltViewModel(),
+    chatViewModel: ChatViewModel = hiltViewModel(),
+    sessionManager: SessionManager
 ) {
     val context = LocalContext.current
-    val meeting = com.example.vtiu.data.model.VClassMeeting(meetingId, "Session", "Course", "Teacher", "", "", null, true, false)
+    val userId = sessionManager.getUserId() ?: ""
+    
+    val teacherMeetings by viewModel.teacherMeetings
+    val profile by viewModel.profile
+    val students by viewModel.courseStudents
+    
+    val meeting = teacherMeetings.find { it.id == meetingId } ?: VClassMeetingApi(
+        id = meetingId, 
+        title = "Loading...", 
+        courseName = "", 
+        teacherName = profile?.name ?: "Teacher", 
+        start = "", 
+        end = "", 
+        isLive = true
+    )
     
     // Agora Setup
     val agoraManager = remember { AgoraManager(context) }
@@ -57,6 +76,21 @@ fun TeacherLiveRoomScreen(
         }
     }
 
+    LaunchedEffect(userId) {
+        if (userId.isNotEmpty()) {
+            viewModel.loadTeacherClasses(userId)
+        }
+    }
+
+    LaunchedEffect(meeting.courseName) {
+        if (meeting.courseName.isNotEmpty()) {
+            val course = viewModel.teacherClasses.value.find { it.courseName == meeting.courseName }
+            course?.let {
+                viewModel.loadPerformance(it.id)
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         val permissions = mutableListOf(
             android.Manifest.permission.CAMERA,
@@ -66,6 +100,9 @@ fun TeacherLiveRoomScreen(
             permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
         }
         permissionLauncher.launch(permissions.toTypedArray())
+        
+        // Connect Chat
+        chatViewModel.connect(userId, "meeting_$meetingId")
     }
 
     DisposableEffect(Unit) {
@@ -73,11 +110,12 @@ fun TeacherLiveRoomScreen(
             agoraManager.stopPreview()
             agoraManager.leaveChannel()
             agoraManager.release()
+            chatViewModel.disconnect()
         }
     }
 
     var messageText by remember { mutableStateOf("") }
-    val messages = remember { mutableStateListOf("Hello everyone!", "Is the audio clear?") }
+    val messages = chatViewModel.messages
     
     // States for Controls
     var isMuted by remember { mutableStateOf(false) }
@@ -86,16 +124,13 @@ fun TeacherLiveRoomScreen(
     var showParticipants by remember { mutableStateOf(false) }
     var isFullScreen by remember { mutableStateOf(false) }
     
-    val participants = remember { 
-        mutableStateListOf(
-            Participant("Emmanuel T.K. Mensah (You)", false),
-            Participant("Jane Mensah", false),
-            Participant("Samuel Addo", true),
-            Participant("Alice Boateng", false),
-            Participant("Kofi Annan", false),
-            Participant("Efua Dankwa", false),
-            Participant("Prince Osei", true)
-        )
+    // Convert StudentShortApi to Participant
+    val participants = remember { mutableStateListOf<Participant>() }
+    
+    LaunchedEffect(students, profile) {
+        participants.clear()
+        participants.add(Participant("${profile?.name ?: "Teacher"} (You)", false))
+        participants.addAll(students.map { Participant(it.name, false) })
     }
 
     Scaffold(
@@ -142,7 +177,8 @@ fun TeacherLiveRoomScreen(
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C950)),
                                 contentPadding = PaddingValues(horizontal = 12.dp),
-                                modifier = Modifier.height(32.dp).padding(end = 8.dp)
+                                modifier = Modifier.height(32.dp).padding(end = 8.dp),
+                                enabled = meeting.courseName.isNotEmpty()
                             ) {
                                 Text("Start Live", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
@@ -326,8 +362,8 @@ fun TeacherLiveRoomScreen(
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column {
-                                        Text(text = "Host (You)", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TeacherPrimary)
-                                        Text(text = msg, fontSize = 14.sp)
+                                        Text(text = msg.senderName ?: "User", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TeacherPrimary)
+                                        Text(text = msg.message, fontSize = 14.sp)
                                     }
                                 }
                             }
@@ -356,7 +392,7 @@ fun TeacherLiveRoomScreen(
                                 )
                                 IconButton(onClick = { 
                                     if (messageText.isNotBlank()) {
-                                        messages.add(messageText)
+                                        chatViewModel.sendMessage(userId, messageText, "meeting_$meetingId")
                                         messageText = ""
                                     }
                                 }) {

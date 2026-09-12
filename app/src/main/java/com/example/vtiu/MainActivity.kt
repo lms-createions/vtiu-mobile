@@ -448,7 +448,11 @@ fun VtiuApp(sessionManager: SessionManager) {
                 }
                 composable(Screen.TeacherLiveRoom.route, arguments = listOf(navArgument("meetingId") { type = NavType.IntType })) { backStackEntry ->
                     val id = backStackEntry.arguments?.getInt("meetingId") ?: 0
-                    TeacherLiveRoomScreen(meetingId = id, onEndClick = { navController.popBackStack() })
+                    TeacherLiveRoomScreen(
+                        meetingId = id, 
+                        onEndClick = { navController.popBackStack() },
+                        sessionManager = sessionManager
+                    )
                 }
                 composable(Screen.TeacherMaterialsHub.route) {
                     TeacherMaterialsHubScreen(
