@@ -74,11 +74,19 @@ fun Route.chatRoutes() {
 
                         // Broadcast
                         val msgJson = Json.encodeToString(savedMsg)
-                        if (savedMsg.receiverId == "global") {
-                            chatSessions.values.forEach { it.send(Frame.Text(msgJson)) }
+                        if (savedMsg.receiverId == "global" || savedMsg.receiverId.startsWith("meeting_")) {
+                            chatSessions.values.forEach { 
+                                try {
+                                    it.send(Frame.Text(msgJson)) 
+                                } catch (e: Exception) {
+                                    // Handle stale sessions if necessary
+                                }
+                            }
                         } else {
                             chatSessions[savedMsg.receiverId]?.send(Frame.Text(msgJson))
-                            chatSessions[userId]?.send(Frame.Text(msgJson)) // Echo to sender
+                            if (savedMsg.receiverId != userId) {
+                                chatSessions[userId]?.send(Frame.Text(msgJson)) // Echo to sender
+                            }
                         }
                     }
                 }

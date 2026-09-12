@@ -33,6 +33,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vtiu.ui.dashboard.StudentViewModel
 import com.example.vtiu.ui.chat.ChatViewModel
 import com.example.vtiu.data.model.VClassMeeting
+import com.example.vtiu.data.model.api.VClassMeetingApi
 import com.example.vtiu.data.remote.AgoraManager
 import com.example.vtiu.ui.theme.VClassPrimary
 import io.agora.rtc2.Constants
@@ -47,8 +48,19 @@ fun VClassLiveClassRoomScreen(
     chatViewModel: ChatViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val meeting = VClassMeeting(meetingId, "Session", "Course", "Teacher", "", "", null, true, false)
-    var isApproved by remember { mutableStateOf(!meeting.requiresApproval) }
+    
+    val studentMeetings by viewModel.vclassMeetings
+    val meeting = studentMeetings.find { it.id == meetingId } ?: VClassMeetingApi(
+        id = meetingId,
+        title = "Loading...",
+        courseName = "Course",
+        teacherName = "Teacher",
+        start = "",
+        end = "",
+        isLive = true
+    )
+    
+    var isApproved by remember { mutableStateOf(true) } // Simplified for now, or use real logic
     
     val agoraManager = remember { AgoraManager(context) }
     var hostUid by remember { mutableIntStateOf(0) }
@@ -82,6 +94,12 @@ fun VClassLiveClassRoomScreen(
         chatViewModel.connect(userId, chatRoomId)
     }
 
+    LaunchedEffect(userId) {
+        if (userId.isNotEmpty()) {
+            viewModel.loadStudentData(userId)
+        }
+    }
+
     LaunchedEffect(isApproved) {
         if (isApproved) {
             permissionLauncher.launch(arrayOf(
@@ -101,7 +119,7 @@ fun VClassLiveClassRoomScreen(
         }
     }
 
-    if (meeting.requiresApproval && !isApproved) {
+    if (!isApproved) {
         LaunchedEffect(Unit) {
             delay(5000)
             isApproved = true
@@ -110,7 +128,7 @@ fun VClassLiveClassRoomScreen(
 
     Crossfade(targetState = isApproved, label = "room_state") { approved ->
         if (!approved) {
-            WaitingRoom(meeting, onLeaveClick)
+            WaitingRoom(meeting.teacherName ?: "Teacher", onLeaveClick)
         } else {
             ActiveTeachingRoom(meeting, hostUid, agoraManager, userId, viewModel, chatViewModel, chatRoomId, onLeaveClick)
         }
@@ -118,7 +136,7 @@ fun VClassLiveClassRoomScreen(
 }
 
 @Composable
-fun WaitingRoom(meeting: com.example.vtiu.data.model.VClassMeeting, onLeaveClick: () -> Unit) {
+fun WaitingRoom(teacherName: String, onLeaveClick: () -> Unit) {
     Scaffold(
         containerColor = Color(0xFF0F1720),
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
@@ -140,7 +158,7 @@ fun WaitingRoom(meeting: com.example.vtiu.data.model.VClassMeeting, onLeaveClick
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Please stay on this screen. ${meeting.teacherName} will let you into the class shortly.",
+                text = "Please stay on this screen. $teacherName will let you into the class shortly.",
                 color = Color.Gray,
                 textAlign = TextAlign.Center,
                 fontSize = 14.sp
@@ -160,7 +178,7 @@ fun WaitingRoom(meeting: com.example.vtiu.data.model.VClassMeeting, onLeaveClick
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActiveTeachingRoom(
-    meeting: com.example.vtiu.data.model.VClassMeeting, 
+    meeting: VClassMeetingApi,
     hostUid: Int,
     agoraManager: AgoraManager,
     currentUserId: String,
