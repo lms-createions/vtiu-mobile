@@ -154,19 +154,23 @@ fun Route.teacherRoutes() {
                 val teacherIntId = teacherRow[TeacherProfiles.id]
                 
                 request.records.forEach { record ->
-                    // Use update or insert pattern: delete existing for that day/student/course first to avoid duplicates
-                    AttendanceRecords.deleteWhere { 
-                        (AttendanceRecords.studentId eq record.studentId) and 
-                        (AttendanceRecords.courseId eq request.courseId) and 
-                        (AttendanceRecords.date eq request.date)
-                    }
-                    
-                    AttendanceRecords.insert {
-                        it[AttendanceRecords.studentId] = record.studentId
-                        it[AttendanceRecords.teacherId] = teacherIntId
-                        it[AttendanceRecords.courseId] = request.courseId
-                        it[AttendanceRecords.date] = request.date
-                        it[AttendanceRecords.isPresent] = record.isPresent
+                    val userRow = Users.selectAll().where { Users.userId eq record.studentId }.singleOrNull()
+                    if (userRow != null) {
+                        val studentInternalId = userRow[Users.id]
+                        // Use update or insert pattern: delete existing for that day/student/course first to avoid duplicates
+                        AttendanceRecords.deleteWhere { 
+                            (studentId eq studentInternalId) and 
+                            (courseId eq request.courseId) and 
+                            (date eq request.date)
+                        }
+                        
+                        AttendanceRecords.insert {
+                            it[AttendanceRecords.studentId] = studentInternalId
+                            it[AttendanceRecords.teacherId] = teacherIntId
+                            it[AttendanceRecords.courseId] = request.courseId
+                            it[AttendanceRecords.date] = request.date
+                            it[AttendanceRecords.isPresent] = record.isPresent
+                        }
                     }
                 }
                 true
@@ -178,10 +182,10 @@ fun Route.teacherRoutes() {
             val courseId = call.parameters["courseId"]?.toIntOrNull() ?: 0
             val analytics = transaction {
                 // In a real app, calculate counts and percentages
-                AttendanceRecords.selectAll().where { AttendanceRecords.courseId eq courseId }
+                (AttendanceRecords innerJoin Users).selectAll().where { AttendanceRecords.courseId eq courseId }
                     .groupBy({ it[AttendanceRecords.studentId] }) { row ->
                         AttendanceAnalyticsApi(
-                            studentName = row[AttendanceRecords.studentId], // Simplified
+                            studentName = "${row[Users.firstName]} ${row[Users.lastName]}",
                             totalClasses = 1,
                             attendedCount = if (row[AttendanceRecords.isPresent]) 1 else 0,
                             attendancePercentage = if (row[AttendanceRecords.isPresent]) 100f else 0f

@@ -322,7 +322,7 @@ object StudentCourseRegistrations : Table("student_course_registration") {
 
 object AttendanceRecords : Table("attendance_record") {
     val id = integer("id").autoIncrement()
-    val studentId = varchar("student_id", 20).references(Users.userId)
+    val studentId = integer("student_id").references(Users.id)
     val teacherId = integer("teacher_id").references(TeacherProfiles.id)
     val courseId = integer("course_id").references(Courses.id).nullable()
     val date = varchar("date", 50)
