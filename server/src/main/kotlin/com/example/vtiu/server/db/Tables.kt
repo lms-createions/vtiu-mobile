@@ -237,7 +237,7 @@ object Notifications : Table("notification") {
     val userId = varchar("user_id", 50).nullable()
     val title = varchar("title", 255)
     val message = text("message")
-    val date = varchar("date", 50)
+    val date = varchar("date", 50).nullable()
     val isRead = bool("is_read").default(false)
 
     override val primaryKey = PrimaryKey(id)
