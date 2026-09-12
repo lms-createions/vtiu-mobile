@@ -69,7 +69,6 @@ fun VClassLiveClassRoomScreen(
     
     val agoraManager = remember { AgoraManager(context) }
     var hostUid by remember { mutableIntStateOf(meeting.hostId ?: 0) }
-    var hasPermissions by remember { mutableStateOf(false) }
     
     val whiteboardRoom by viewModel.whiteboardRoom
     val agoraTokenResponse by viewModel.agoraToken
@@ -82,14 +81,8 @@ fun VClassLiveClassRoomScreen(
         }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { perms ->
-        hasPermissions = perms.values.all { it }
-    }
-
-    LaunchedEffect(agoraTokenResponse, hasPermissions) {
-        if (hasPermissions && agoraTokenResponse != null) {
+    LaunchedEffect(agoraTokenResponse) {
+        if (agoraTokenResponse != null) {
             agoraManager.init(agoraTokenResponse!!.appId)
             agoraManager.joinChannel(
                 channelName = "vtiu_meeting_${meeting.id}",
@@ -110,16 +103,6 @@ fun VClassLiveClassRoomScreen(
     LaunchedEffect(userId) {
         if (userId.isNotEmpty()) {
             viewModel.loadStudentData(userId)
-        }
-    }
-
-    LaunchedEffect(isApproved) {
-        if (isApproved) {
-            permissionLauncher.launch(arrayOf(
-                android.Manifest.permission.RECORD_AUDIO,
-                android.Manifest.permission.CAMERA
-            ))
-            delay(2000)
         }
     }
 

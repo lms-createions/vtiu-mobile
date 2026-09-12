@@ -54,9 +54,6 @@ fun VClassJoinMeetingScreen(
 
     val meeting = meetingDetail!!
     
-    var isMicOn by remember { mutableStateOf(false) }
-    var isCamOn by remember { mutableStateOf(false) }
-
     Scaffold(
         containerColor = Color(0xFF0F1720),
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
@@ -92,81 +89,63 @@ fun VClassJoinMeetingScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Box(
+                // Session Info Hero Card
+                Card(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
-                        .aspectRatio(16f / 9f)
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color(0xFF1E2732)),
-                    contentAlignment = Alignment.Center
+                        .padding(bottom = 32.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E2732))
                 ) {
-                    if (isCamOn) {
-                        Text("Camera Preview", color = Color.White, fontWeight = FontWeight.Bold)
-                    } else {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.VideocamOff, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(48.dp))
-                            Text("Camera is off", color = Color.White.copy(alpha = 0.5f), fontSize = 14.sp)
-                        }
-                    }
-
-                    Surface(
-                        color = VClassPrimary.copy(alpha = 0.8f),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Surface(
+                            color = VClassPrimary.copy(alpha = 0.1f),
+                            shape = CircleShape,
+                            modifier = Modifier.size(80.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Videocam,
+                                    contentDescription = null,
+                                    tint = VClassPrimary,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(24.dp))
+                        
                         Text(
                             text = meeting.courseName,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = Color.White,
-                            fontSize = 12.sp,
+                            color = VClassPrimary,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = meeting.title,
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = "Hosted by ${meeting.teacherName}",
+                            color = Color.Gray,
+                            fontSize = 14.sp
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    FloatingActionButton(
-                        onClick = { isMicOn = !isMicOn },
-                        containerColor = if (isMicOn) Color.White.copy(alpha = 0.1f) else Color.Red,
-                        contentColor = Color.White,
-                        shape = CircleShape
-                    ) {
-                        Icon(if (isMicOn) Icons.Default.Mic else Icons.Default.MicOff, contentDescription = "Mic")
-                    }
-
-                    FloatingActionButton(
-                        onClick = { isCamOn = !isCamOn },
-                        containerColor = if (isCamOn) Color.White.copy(alpha = 0.1f) else Color.Red,
-                        contentColor = Color.White,
-                        shape = CircleShape
-                    ) {
-                        Icon(if (isCamOn) Icons.Default.Videocam else Icons.Default.VideocamOff, contentDescription = "Camera")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Text(
-                    text = meeting.title,
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 24.dp)
-                )
-                Text(
-                    text = "Host: ${meeting.teacherName}",
-                    color = Color.Gray,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = { onJoinNowClick(meetingId) },
@@ -185,6 +164,16 @@ fun VClassJoinMeetingScreen(
                 ) {
                     Text("Not Now", color = Color.Gray)
                 }
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Text(
+                    text = "You will join as a viewer. Only the teacher can broadcast audio and video.",
+                    color = Color.Gray.copy(alpha = 0.6f),
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 48.dp)
+                )
             }
         }
     }
