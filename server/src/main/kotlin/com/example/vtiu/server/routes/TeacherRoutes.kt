@@ -135,6 +135,8 @@ fun Route.teacherRoutes() {
                         title = it[Meetings.title],
                         courseName = it.getOrNull(Courses.name) ?: "General Session",
                         teacherName = "${userRow[Users.firstName]} ${userRow[Users.lastName]}",
+                        hostId = userRow[Users.id],
+                        meetingCode = it[Meetings.meetingCode],
                         start = startStr,
                         end = endStr,
                         isLive = true

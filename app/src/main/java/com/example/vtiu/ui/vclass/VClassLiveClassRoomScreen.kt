@@ -62,6 +62,7 @@ fun VClassLiveClassRoomScreen(
         title = "Loading...",
         courseName = "Course",
         teacherName = "Teacher",
+        meetingCode = "",
         start = "",
         end = "",
         isLive = true

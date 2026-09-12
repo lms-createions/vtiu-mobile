@@ -1,6 +1,7 @@
 package com.example.vtiu.ui.teacher
 
 import android.Manifest
+import android.os.Build
 import android.view.SurfaceView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,6 +62,7 @@ fun TeacherLiveRoomScreen(
         title = "Loading...", 
         courseName = "", 
         teacherName = profile?.name ?: "Teacher", 
+        meetingCode = "",
         start = "", 
         end = "", 
         isLive = true
@@ -118,11 +120,11 @@ fun TeacherLiveRoomScreen(
 
     LaunchedEffect(Unit) {
         val permissions = mutableListOf(
-            android.Manifest.permission.CAMERA,
-            android.Manifest.permission.RECORD_AUDIO
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
         )
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
         }
         permissionLauncher.launch(permissions.toTypedArray())
         
@@ -208,16 +210,18 @@ fun TeacherLiveRoomScreen(
                             }
                         } else {
                             Button(
-                                onClick = {
-                                    agoraManager.updatePublishState(publishCamera = false, publishMic = false)
-                                    isStreaming = false
-                                },
+                                onClick = onEndClick,
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                                 contentPadding = PaddingValues(horizontal = 12.dp),
                                 modifier = Modifier.height(32.dp).padding(end = 8.dp)
                             ) {
-                                Text("Stop", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Text("End", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onEndClick) {
+                            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Back", tint = Color.White)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Black)
