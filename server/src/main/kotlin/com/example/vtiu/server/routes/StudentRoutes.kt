@@ -318,9 +318,9 @@ fun Route.studentRoutes() {
 
                 if (studentRow != null) {
                     FeeBalanceApi(
-                        balance = (studentRow[StudentFeeBalances.amountDue] - studentRow[StudentFeeBalances.amountPaid]).toDouble(),
-                        paid = studentRow[StudentFeeBalances.amountPaid].toDouble(),
-                        total = studentRow[StudentFeeBalances.amountDue].toDouble()
+                        amountDue = studentRow[StudentFeeBalances.amountDue].toDouble(),
+                        amountPaid = studentRow[StudentFeeBalances.amountPaid].toDouble(),
+                        balance = (studentRow[StudentFeeBalances.amountDue] - studentRow[StudentFeeBalances.amountPaid]).toDouble()
                     )
                 } else {
                     println("Fees: Returning 0.00 because no balance could be determined.")

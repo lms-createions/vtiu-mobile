@@ -31,8 +31,8 @@ object DatabaseFactory {
         
         try {
             transaction {
-                println("DatabaseFactory: Starting SchemaUtils.create (Creating tables if missing)...")
-                SchemaUtils.create(
+                println("DatabaseFactory: Syncing database schema (Creating/Updating tables)...")
+                SchemaUtils.createMissingTablesAndColumns(
                     Admins, Users, StudentProfiles, TeacherProfiles,
                     Courses, Assignments, Quizzes, Exams,
                     StudentFeeTransactions, StudentFeeBalances,
@@ -43,7 +43,7 @@ object DatabaseFactory {
                     CourseAssessmentSchemes, AssignmentSubmissions, SemesterResultReleases,
                     SchoolSettings, ProgrammeFeeStructures, ChatMessages
                 )
-                println("DatabaseFactory: SchemaUtils.create finished successfully.")
+                println("DatabaseFactory: Schema synchronization finished successfully.")
 
                 // Seed SchoolSettings if empty
                 if (SchoolSettings.selectAll().empty()) {

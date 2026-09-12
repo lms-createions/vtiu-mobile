@@ -331,9 +331,9 @@ data class FeeTransactionApi(
 
 @Serializable
 data class FeeBalanceApi(
-    val balance: Double,
-    val paid: Double,
-    val total: Double
+    @SerialName("amount_due") val amountDue: Double,
+    @SerialName("amount_paid") val amountPaid: Double,
+    val balance: Double
 )
 
 @Serializable
