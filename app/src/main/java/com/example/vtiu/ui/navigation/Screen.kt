@@ -76,9 +76,6 @@ sealed class Screen(val route: String) {
     object JoinMeeting : Screen("join_meeting/{meetingId}") {
         fun createRoute(meetingId: Int) = "join_meeting/$meetingId"
     }
-    object JoinMeetingByCode : Screen("join_meeting_by_code/{meetingCode}") {
-        fun createRoute(code: String) = "join_meeting_by_code/$code"
-    }
     object LiveClassRoom : Screen("live_class_room/{meetingId}") {
         fun createRoute(meetingId: Int) = "live_class_room/$meetingId"
     }
