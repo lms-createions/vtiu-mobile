@@ -53,7 +53,9 @@ fun VClassLiveClassRoomScreen(
     val numericId = sessionManager.getNumericId()
     
     val studentMeetings by viewModel.vclassMeetings
-    val meeting = studentMeetings.find { it.id == meetingId } ?: VClassMeetingApi(
+    val meetingDetail by viewModel.meetingDetail
+    
+    val meeting = studentMeetings.find { it.id == meetingId } ?: meetingDetail ?: VClassMeetingApi(
         id = meetingId,
         title = "Loading...",
         courseName = "Course",
@@ -99,6 +101,7 @@ fun VClassLiveClassRoomScreen(
     }
 
     LaunchedEffect(Unit) {
+        viewModel.loadMeetingDetail(meetingId)
         viewModel.loadWhiteboardRoom(meetingId)
         viewModel.loadAgoraToken("vtiu_meeting_$meetingId", numericId.toString())
         chatViewModel.connect(userId, chatRoomId)

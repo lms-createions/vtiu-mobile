@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.vtiu.ui.dashboard.StudentViewModel
-import com.example.vtiu.data.model.VClassMeeting
+import com.example.vtiu.data.model.api.VClassMeetingApi
 import com.example.vtiu.ui.theme.VClassPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +33,22 @@ fun VClassJoinMeetingScreen(
     onJoinNowClick: (Int) -> Unit,
     viewModel: StudentViewModel = hiltViewModel()
 ) {
-    val meeting = VClassMeeting(meetingId, "Session", "Course", "Teacher", "", "", null, true, false)
+    val meetingApi by viewModel.meetingDetail
+    
+    LaunchedEffect(meetingId) {
+        viewModel.loadMeetingDetail(meetingId)
+    }
+
+    val meeting = meetingApi ?: VClassMeetingApi(
+        id = meetingId, 
+        title = "Loading...", 
+        courseName = "Course", 
+        teacherName = "Teacher", 
+        start = "", 
+        end = "", 
+        isLive = true
+    )
+    
     var isMicOn by remember { mutableStateOf(false) }
     var isCamOn by remember { mutableStateOf(false) }
 

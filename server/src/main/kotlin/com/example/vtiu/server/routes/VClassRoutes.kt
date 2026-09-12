@@ -218,6 +218,35 @@ fun Route.vClassRoutes() {
             if (exam != null) call.respond(exam) else call.respond(HttpStatusCode.NotFound)
         }
 
+        get("/vclass/meeting/{meetingId}") {
+            val meetingId = call.parameters["meetingId"]?.toIntOrNull() ?: 0
+            val meeting = transaction {
+                val row = (Meetings innerJoin Courses).selectAll().where { Meetings.id eq meetingId }.singleOrNull()
+                if (row == null) return@transaction null
+
+                val hostIdValue = row[Meetings.hostId]
+                val teacherRow = if (hostIdValue != null) {
+                    Users.selectAll().where { Users.id eq hostIdValue }.singleOrNull()
+                } else {
+                    (TeacherCourseAssignments innerJoin Users)
+                        .selectAll().where { TeacherCourseAssignments.courseId eq row[Courses.id] }
+                        .singleOrNull()
+                }
+
+                VClassMeetingApi(
+                    id = row[Meetings.id],
+                    title = row[Meetings.title],
+                    courseName = row[Courses.name],
+                    teacherName = if (teacherRow != null) "${teacherRow[Users.firstName]} ${teacherRow[Users.lastName]}" else "Teacher",
+                    hostId = hostIdValue ?: teacherRow?.get(Users.id),
+                    start = row[Meetings.scheduledStart].toString(),
+                    end = row[Meetings.scheduledEnd].toString(),
+                    isLive = true
+                )
+            }
+            if (meeting != null) call.respond(meeting) else call.respond(HttpStatusCode.NotFound)
+        }
+
         // --- Whiteboard (Excalidraw) ---
         get("/vclass/whiteboard/{meetingId}") {
             val meetingId = call.parameters["meetingId"]?.toIntOrNull() ?: 0

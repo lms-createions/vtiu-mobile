@@ -151,6 +151,14 @@ class LmsRepository @Inject constructor(
         }
     }
 
+    suspend fun getMeetingDetail(meetingId: Int): VClassMeetingApi? {
+        return try {
+            client.get("$baseUrl/api/vclass/meeting/$meetingId").body()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     suspend fun getStudentQuizzes(userId: String): List<QuizDetailApi> {
         return try {
             client.get("$baseUrl/api/student/quizzes/$userId").body()

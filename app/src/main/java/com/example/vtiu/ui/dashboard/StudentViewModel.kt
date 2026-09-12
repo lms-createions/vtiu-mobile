@@ -78,6 +78,9 @@ class StudentViewModel @Inject constructor(
     private val _whiteboardRoom = mutableStateOf<WhiteboardRoomResponse?>(null)
     val whiteboardRoom: State<WhiteboardRoomResponse?> = _whiteboardRoom
 
+    private val _meetingDetail = mutableStateOf<VClassMeetingApi?>(null)
+    val meetingDetail: State<VClassMeetingApi?> = _meetingDetail
+
     private val _agoraToken = mutableStateOf<AgoraTokenResponse?>(null)
     val agoraToken: State<AgoraTokenResponse?> = _agoraToken
 
@@ -224,6 +227,12 @@ class StudentViewModel @Inject constructor(
     fun loadWhiteboardRoom(meetingId: Int) {
         viewModelScope.launch {
             _whiteboardRoom.value = repository.getWhiteboardRoom(meetingId)
+        }
+    }
+
+    fun loadMeetingDetail(meetingId: Int) {
+        viewModelScope.launch {
+            _meetingDetail.value = repository.getMeetingDetail(meetingId)
         }
     }
 
