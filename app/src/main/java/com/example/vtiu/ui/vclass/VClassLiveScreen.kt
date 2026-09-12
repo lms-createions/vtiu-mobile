@@ -100,7 +100,6 @@ fun VClassLiveScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Manual Join Section
                 item {
                     ManualJoinCard(onJoinClick = onJoinByCodeClick)
                 }

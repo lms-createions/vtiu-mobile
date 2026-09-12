@@ -2,10 +2,13 @@ package com.example.vtiu.ui.vclass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.Videocam
@@ -55,6 +58,8 @@ fun VClassJoinMeetingScreen(
     val meeting = meetingDetail!!
     
     var isMicOn by remember { mutableStateOf(false) }
+    var enteredRoomId by remember { mutableStateOf("") }
+    val isIdCorrect = enteredRoomId.trim().lowercase() == meeting.meetingCode.lowercase()
 
     Scaffold(
         containerColor = Color(0xFF0F1720),
@@ -64,6 +69,7 @@ fun VClassJoinMeetingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
+                .verticalScroll(rememberScrollState())
         ) {
             Row(
                 modifier = Modifier
@@ -87,15 +93,16 @@ fun VClassJoinMeetingScreen(
             }
 
             Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(modifier = Modifier.height(24.dp))
+
                 // Session Info Hero Card
                 Card(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .padding(bottom = 32.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFF1E2732))
                 ) {
@@ -118,7 +125,6 @@ fun VClassJoinMeetingScreen(
                             }
                         }
                         
-                        // ... (keep the rest of the text info)
                         Spacer(modifier = Modifier.height(24.dp))
                         
                         Text(
@@ -148,27 +154,86 @@ fun VClassJoinMeetingScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Room ID Entry
+                Text(
+                    text = "Enter Room ID to verify",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = enteredRoomId,
+                    onValueChange = { enteredRoomId = it },
+                    placeholder = { Text("vtiu-xxx-yyy", color = Color.Gray) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    isError = enteredRoomId.isNotEmpty() && !isIdCorrect,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedTextColor = Color.White,
+                        focusedTextColor = Color.White,
+                        cursorColor = VClassPrimary,
+                        focusedBorderColor = if (isIdCorrect) Color.Green else VClassPrimary,
+                        unfocusedBorderColor = if (isIdCorrect) Color.Green else Color.Gray,
+                        errorBorderColor = Color.Red
+                    ),
+                    trailingIcon = {
+                        if (isIdCorrect) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.Green)
+                        }
+                    }
+                )
+                
+                if (enteredRoomId.isNotEmpty() && !isIdCorrect) {
+                    Text(
+                        text = "Incorrect Room ID. Please check the ID shared by your teacher.",
+                        color = Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp).align(Alignment.Start)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Restore Mic Button
-                FloatingActionButton(
-                    onClick = { isMicOn = !isMicOn },
-                    containerColor = if (isMicOn) Color.White.copy(alpha = 0.1f) else Color.Red,
-                    contentColor = Color.White,
-                    shape = CircleShape
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Icon(if (isMicOn) Icons.Default.Mic else Icons.Default.MicOff, contentDescription = "Mic")
+                    FloatingActionButton(
+                        onClick = { isMicOn = !isMicOn },
+                        containerColor = if (isMicOn) Color.White.copy(alpha = 0.1f) else Color.Red,
+                        contentColor = Color.White,
+                        shape = CircleShape,
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(if (isMicOn) Icons.Default.Mic else Icons.Default.MicOff, contentDescription = "Mic")
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = if (isMicOn) "Microphone ON" else "Microphone OFF",
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = { onJoinNowClick(meetingId) },
+                    onClick = { onJoinNowClick(meeting.id) },
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
+                        .fillMaxWidth()
                         .height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C950)),
-                    shape = RoundedCornerShape(28.dp)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isIdCorrect) Color(0xFF00C950) else Color.Gray
+                    ),
+                    shape = RoundedCornerShape(28.dp),
+                    enabled = isIdCorrect
                 ) {
                     Text("Join Now", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
@@ -180,15 +245,7 @@ fun VClassJoinMeetingScreen(
                     Text("Not Now", color = Color.Gray)
                 }
                 
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                Text(
-                    text = "You will join as a participant. You can use your microphone to ask questions.",
-                    color = Color.Gray.copy(alpha = 0.6f),
-                    fontSize = 11.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 48.dp)
-                )
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
