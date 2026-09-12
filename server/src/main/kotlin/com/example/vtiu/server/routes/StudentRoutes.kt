@@ -366,7 +366,6 @@ fun Route.studentRoutes() {
             if (success) call.respond(HttpStatusCode.OK) else call.respond(HttpStatusCode.InternalServerError)
         }
 
-        // --- Notifications ---
         get("/notifications/{userId}") {
             val userId = call.parameters["userId"] ?: ""
             val list = transaction {
@@ -375,7 +374,7 @@ fun Route.studentRoutes() {
                         id = it[Notifications.id],
                         title = it[Notifications.title],
                         message = it[Notifications.message],
-                        date = it[Notifications.date],
+                        date = it[Notifications.date] ?: "",
                         isRead = it[Notifications.isRead]
                     )
                 }
