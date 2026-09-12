@@ -41,6 +41,7 @@ fun VClassLiveScreen(
     onBackClick: () -> Unit,
     onMenuClick: () -> Unit,
     onJoinClick: (Int) -> Unit,
+    onJoinByCodeClick: (String) -> Unit,
     onRecordingClick: (Int) -> Unit,
     viewModel: StudentViewModel = hiltViewModel(),
     sessionManager: com.example.vtiu.data.local.SessionManager
@@ -99,6 +100,11 @@ fun VClassLiveScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Manual Join Section
+                item {
+                    ManualJoinCard(onJoinClick = onJoinByCodeClick)
+                }
+
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -163,6 +169,55 @@ fun VClassLiveScreen(
                         date = recording.recordedAt,
                         onPlayClick = { onRecordingClick(recording.id) }
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ManualJoinCard(onJoinClick: (String) -> Unit) {
+    var roomCode by remember { mutableStateOf("") }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "Join with Room ID", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(text = "Enter the code shared by your teacher", fontSize = 12.sp, color = Color.Gray)
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = roomCode,
+                    onValueChange = { roomCode = it },
+                    placeholder = { Text("vtiu-xxx-yyy", fontSize = 14.sp) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = VClassPrimary,
+                        unfocusedBorderColor = Color.LightGray
+                    )
+                )
+                
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                Button(
+                    onClick = { if (roomCode.isNotBlank()) onJoinClick(roomCode.trim()) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = VClassPrimary),
+                    modifier = Modifier.height(56.dp),
+                    enabled = roomCode.isNotBlank()
+                ) {
+                    Text("Join")
                 }
             }
         }

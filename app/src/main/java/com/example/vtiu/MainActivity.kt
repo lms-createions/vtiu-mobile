@@ -719,6 +719,7 @@ fun VtiuApp(sessionManager: SessionManager) {
                     VClassLiveScreen(
                         onBackClick = { navController.popBackStack() },
                         onJoinClick = { id -> navController.navigate(Screen.JoinMeeting.createRoute(id)) },
+                        onJoinByCodeClick = { code -> navController.navigate(Screen.JoinMeetingByCode.createRoute(code)) },
                         onRecordingClick = { id -> navController.navigate(Screen.VClassPlayer.createRoute(id)) },
                         onMenuClick = { scope.launch { drawerState.open() } },
                         sessionManager = sessionManager
@@ -741,6 +742,19 @@ fun VtiuApp(sessionManager: SessionManager) {
                     val id = backStackEntry.arguments?.getInt("meetingId") ?: 0
                     VClassJoinMeetingScreen(
                         meetingId = id,
+                        onBackClick = { navController.popBackStack() },
+                        onJoinNowClick = { meetingId -> 
+                            navController.navigate(Screen.LiveClassRoom.createRoute(meetingId))
+                        }
+                    )
+                }
+                composable(
+                    route = Screen.JoinMeetingByCode.route,
+                    arguments = listOf(navArgument("meetingCode") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val code = backStackEntry.arguments?.getString("meetingCode") ?: ""
+                    VClassJoinMeetingByCodeScreen(
+                        meetingCode = code,
                         onBackClick = { navController.popBackStack() },
                         onJoinNowClick = { meetingId -> 
                             navController.navigate(Screen.LiveClassRoom.createRoute(meetingId))

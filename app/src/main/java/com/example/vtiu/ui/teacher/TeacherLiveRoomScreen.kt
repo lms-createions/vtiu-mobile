@@ -191,9 +191,15 @@ fun TeacherLiveRoomScreen(
                             Text(text = if (isStreaming) participants.size.toString() else "0", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                         
-                        Spacer(modifier = Modifier.width(12.dp))
-                        
+                        Spacer(modifier = Modifier.width(8.dp))
+
                         if (!isStreaming) {
+                            Text(
+                                text = "Code: ${meeting.meetingCode}",
+                                color = Color.White.copy(alpha = 0.7f),
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
                             Button(
                                 onClick = {
                                     if (hasPermissions && agoraTokenResponse != null) {
@@ -209,7 +215,27 @@ fun TeacherLiveRoomScreen(
                                 Text("Start Live", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         } else {
-                            Button(
+                            if (isStreaming) {
+                            Surface(
+                                color = Color.White.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.padding(end = 8.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "ID: ${meeting.meetingCode}",
+                                        color = Color.White,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+
+                        Button(
                                 onClick = onEndClick,
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                                 contentPadding = PaddingValues(horizontal = 12.dp),
