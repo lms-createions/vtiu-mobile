@@ -168,7 +168,7 @@ fun VClassJoinMeetingScreen(
                 OutlinedTextField(
                     value = enteredRoomId,
                     onValueChange = { enteredRoomId = it },
-                    placeholder = { Text("vtiu-xxx-yyy", color = Color.LightGray.copy(alpha = 0.6f)) },
+                    placeholder = { Text("e.g. A1B2C3D4", color = Color.LightGray.copy(alpha = 0.6f)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     singleLine = true,
