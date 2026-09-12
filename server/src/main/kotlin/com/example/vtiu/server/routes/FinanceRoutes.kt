@@ -42,6 +42,7 @@ fun Route.financeRoutes() {
             }
 
             if (secretKey.isBlank()) {
+                println("Paystack Error: Secret key is blank. Env PAYSTACK_SECRET_KEY is null or empty.")
                 return@post call.respond(HttpStatusCode.InternalServerError, "Paystack API Key not configured")
             }
 

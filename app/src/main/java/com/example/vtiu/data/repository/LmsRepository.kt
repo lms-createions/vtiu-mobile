@@ -677,18 +677,28 @@ class LmsRepository @Inject constructor(
                 contentType(ContentType.Application.Json)
                 setBody(mapOf("user_id" to userId, "amount" to amount.toString(), "email" to email))
             }
-            if (response.status == HttpStatusCode.OK) response.body<PaystackInitializeResponse>() else null
+            if (response.status == HttpStatusCode.OK) {
+                response.body<PaystackInitializeResponse>()
+            } else {
+                val errorMsg = response.bodyAsText()
+                PaystackInitializeResponse(status = false, message = errorMsg, data = null)
+            }
         } catch (e: Exception) {
-            null
+            PaystackInitializeResponse(status = false, message = e.message ?: "Connection Error", data = null)
         }
     }
 
     suspend fun verifyPaystack(reference: String): PaystackVerifyResponse? {
         return try {
             val response: HttpResponse = client.get("$baseUrl/api/finance/paystack/verify/$reference")
-            if (response.status == HttpStatusCode.OK) response.body<PaystackVerifyResponse>() else null
+            if (response.status == HttpStatusCode.OK) {
+                response.body<PaystackVerifyResponse>()
+            } else {
+                val errorMsg = response.bodyAsText()
+                PaystackVerifyResponse(status = false, message = errorMsg, data = null)
+            }
         } catch (e: Exception) {
-            null
+            PaystackVerifyResponse(status = false, message = e.message ?: "Connection Error", data = null)
         }
     }
 
