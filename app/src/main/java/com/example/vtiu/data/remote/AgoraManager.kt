@@ -3,6 +3,7 @@ package com.example.vtiu.data.remote
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
 import io.agora.rtc2.*
 import io.agora.rtc2.video.VideoCanvas
 import io.agora.rtc2.video.VideoEncoderConfiguration
@@ -12,13 +13,21 @@ class AgoraManager(private val context: Context) {
     private var rtcEngine: RtcEngine? = null
     private var isInitialized = false
 
+    // State to track remote users
+    private val _remoteUsers = mutableStateListOf<Int>()
+    val remoteUsers: List<Int> = _remoteUsers
+
     private val mRtcEventHandler = object : IRtcEngineEventHandler() {
         override fun onUserJoined(uid: Int, elapsed: Int) {
             Log.i("AgoraManager", "User joined: $uid")
+            if (!_remoteUsers.contains(uid)) {
+                _remoteUsers.add(uid)
+            }
         }
 
         override fun onUserOffline(uid: Int, reason: Int) {
             Log.i("AgoraManager", "User offline: $uid")
+            _remoteUsers.remove(uid)
         }
 
         override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {

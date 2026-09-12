@@ -1,6 +1,7 @@
 package com.example.vtiu.ui.vclass
 
 import android.Manifest
+import android.util.Log
 import android.view.SurfaceView
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -70,6 +71,15 @@ fun VClassLiveClassRoomScreen(
     
     val agoraManager = remember { AgoraManager(context) }
     var hostUid by remember { mutableIntStateOf(meeting.hostId ?: 0) }
+    val remoteUsers = agoraManager.remoteUsers
+    
+    // Auto-detect host if not provided by server but someone is in the room
+    LaunchedEffect(remoteUsers.size) {
+        if (hostUid == 0 && remoteUsers.isNotEmpty()) {
+            hostUid = remoteUsers.first()
+        }
+    }
+
     var hasPermissions by remember { mutableStateOf(false) }
     
     val whiteboardRoom by viewModel.whiteboardRoom
@@ -307,6 +317,7 @@ fun ActiveTeachingRoom(
                                 SurfaceView(ctx)
                             },
                             update = { view ->
+                                Log.d("VClass", "Attaching remote video for UID: $hostUid")
                                 agoraManager.setupRemoteVideo(view, hostUid)
                             },
                             modifier = Modifier.fillMaxSize()
