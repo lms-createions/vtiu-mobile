@@ -192,11 +192,17 @@ class StudentViewModel @Inject constructor(
     }
 
     // --- Paystack Integration ---
-    fun initializePayment(userId: String, amount: Double, email: String, onUrlReady: (String, String) -> Unit) {
+    fun initializePayment(userId: String, amount: Double, email: String, onUrlReady: (String, String) -> Unit, onFailure: (String) -> Unit) {
         viewModelScope.launch {
-            val response = repository.initializePaystack(userId, amount, email)
-            if (response != null && response.status && response.data != null) {
-                onUrlReady(response.data.authorizationUrl, response.data.reference)
+            try {
+                val response = repository.initializePaystack(userId, amount, email)
+                if (response != null && response.status && response.data != null) {
+                    onUrlReady(response.data.authorizationUrl, response.data.reference)
+                } else {
+                    onFailure("Initialization failed: ${response?.message ?: "Unknown error"}")
+                }
+            } catch (e: Exception) {
+                onFailure(e.message ?: "Connection error")
             }
         }
     }

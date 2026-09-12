@@ -22,18 +22,19 @@ fun Route.financeRoutes() {
         // --- Paystack Integration ---
         
         post("/paystack/initialize") {
-            val request = call.receive<Map<String, String>>()
-            val userId = request["user_id"] ?: return@post call.respond(HttpStatusCode.BadRequest, "User ID missing")
-            val amountGhs = request["amount"]?.toDoubleOrNull() ?: return@post call.respond(HttpStatusCode.BadRequest, "Amount missing")
-            val email = request["email"] ?: ""
+            val requestData = call.receive<Map<String, String>>()
+            val userId = requestData["user_id"] ?: return@post call.respond(HttpStatusCode.BadRequest, "User ID missing")
+            val amountGhs = requestData["amount"]?.toDoubleOrNull() ?: return@post call.respond(HttpStatusCode.BadRequest, "Amount missing")
+            val email = if (requestData["email"].isNullOrBlank()) "student@vtiu.edu" else requestData["email"]!!
             
             val (secretKey, _) = transaction {
                 val settings = SchoolSettings.selectAll().singleOrNull() ?: return@transaction "sk_test_e69d621029fa90b2fde0eec8d8be4b6ba77fe098" to "test"
-                if (settings[SchoolSettings.paystackMode] == "live") {
-                    settings[SchoolSettings.paystackLiveSecretKey] to "live"
-                } else {
-                    settings[SchoolSettings.paystackTestSecretKey] to "test"
-                }
+                val mode = settings[SchoolSettings.paystackMode]
+                val key = if (mode == "live") settings[SchoolSettings.paystackLiveSecretKey] else settings[SchoolSettings.paystackTestSecretKey]
+                
+                // Fallback to demo key if not configured
+                val finalKey = if (key.isBlank()) "sk_test_e69d621029fa90b2fde0eec8d8be4b6ba77fe098" else key
+                finalKey to mode
             }
 
             val amountKobo = (amountGhs * 100).toLong()

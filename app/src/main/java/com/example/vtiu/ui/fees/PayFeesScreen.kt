@@ -188,10 +188,21 @@ fun PayFeesScreen(
                                 onClick = {
                                     isSubmitting = true
                                     val amount = amountToPay.toDoubleOrNull() ?: 0.0
-                                    viewModel.initializePayment(userId, amount, profileApi?.email ?: "") { url, ref ->
-                                        isSubmitting = false
-                                        onInitiatePaystack(url, ref)
-                                    }
+                                    viewModel.initializePayment(
+                                        userId = userId,
+                                        amount = amount,
+                                        email = profileApi?.email ?: "student@vtiu.edu", // Fallback email
+                                        onUrlReady = { url, ref ->
+                                            isSubmitting = false
+                                            onInitiatePaystack(url, ref)
+                                        },
+                                        onFailure = { error ->
+                                            isSubmitting = false
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(error)
+                                            }
+                                        }
+                                    )
                                 },
                                 modifier = Modifier.fillMaxWidth().height(56.dp),
                                 enabled = amountToPay.isNotBlank() && !isSubmitting && selectedYear.isNotEmpty(),
