@@ -85,8 +85,10 @@ fun TeacherLiveRoomScreen(
         if (agoraTokenResponse != null && hasPermissions && meeting.meetingCode.isNotEmpty()) {
             agoraManager.init(agoraTokenResponse!!.appId)
             agoraManager.startPreview()
+            // Use only first 8 alphanumeric chars for the Agora channel
+            val channelId = meeting.meetingCode.filter { it.isLetterOrDigit() }.take(8).uppercase()
             agoraManager.joinChannel(
-                channelName = meeting.meetingCode,
+                channelName = channelId,
                 uid = numericId,
                 token = agoraTokenResponse?.token?.ifEmpty { null },
                 role = Constants.CLIENT_ROLE_BROADCASTER,
@@ -104,8 +106,9 @@ fun TeacherLiveRoomScreen(
 
     LaunchedEffect(meeting.id) {
         if (meeting.id != 0 && meeting.meetingCode.isNotEmpty()) {
-            // Load Agora Token for Teacher using real meeting code
-            viewModel.loadAgoraToken(meeting.meetingCode, numericId.toString())
+            // Load Agora Token using the truncated and normalized channel ID
+            val channelId = meeting.meetingCode.filter { it.isLetterOrDigit() }.take(8).uppercase()
+            viewModel.loadAgoraToken(channelId, numericId.toString())
         }
     }
 
@@ -194,8 +197,9 @@ fun TeacherLiveRoomScreen(
                         Spacer(modifier = Modifier.width(8.dp))
 
                         if (!isStreaming) {
+                            val displayCode = meeting.meetingCode.filter { it.isLetterOrDigit() }.take(8).uppercase()
                             Text(
-                                text = "Code: ${meeting.meetingCode}",
+                                text = "Code: $displayCode",
                                 color = Color.White.copy(alpha = 0.7f),
                                 fontSize = 12.sp,
                                 modifier = Modifier.padding(end = 8.dp)
@@ -225,8 +229,9 @@ fun TeacherLiveRoomScreen(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+                                    val displayId = meeting.meetingCode.filter { it.isLetterOrDigit() }.take(8).uppercase()
                                     Text(
-                                        text = "ID: ${meeting.meetingCode}",
+                                        text = "ID: $displayId",
                                         color = Color.White,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold

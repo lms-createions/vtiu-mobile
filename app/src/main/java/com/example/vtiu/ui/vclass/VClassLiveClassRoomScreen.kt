@@ -103,8 +103,10 @@ fun VClassLiveClassRoomScreen(
     LaunchedEffect(agoraTokenResponse, hasPermissions) {
         if (hasPermissions && agoraTokenResponse != null && meeting.meetingCode.isNotEmpty()) {
             agoraManager.init(agoraTokenResponse!!.appId)
+            // Use only first 8 alphanumeric chars for the Agora channel to match teacher's display
+            val channelId = meeting.meetingCode.filter { it.isLetterOrDigit() }.take(8).uppercase()
             agoraManager.joinChannel(
-                channelName = meeting.meetingCode,
+                channelName = channelId,
                 uid = numericId,
                 token = agoraTokenResponse!!.token.ifEmpty { null },
                 role = Constants.CLIENT_ROLE_AUDIENCE // Default to audience
@@ -123,7 +125,8 @@ fun VClassLiveClassRoomScreen(
 
     LaunchedEffect(meeting.meetingCode, numericId) {
         if (meeting.meetingCode.isNotEmpty() && numericId != 0) {
-            viewModel.loadAgoraToken(meeting.meetingCode, numericId.toString())
+            val channelId = meeting.meetingCode.filter { it.isLetterOrDigit() }.take(8).uppercase()
+            viewModel.loadAgoraToken(channelId, numericId.toString())
         }
     }
 

@@ -59,7 +59,17 @@ fun VClassJoinMeetingScreen(
     
     var isMicOn by remember { mutableStateOf(false) }
     var enteredRoomId by remember { mutableStateOf("") }
-    val isIdCorrect = enteredRoomId.trim().lowercase() == meeting.meetingCode.lowercase()
+    
+    // Normalize both for comparison. Filter out any non-alphanumeric characters (like dashes)
+    val targetCode = meeting.meetingCode.filter { it.isLetterOrDigit() }.take(8).uppercase()
+    val isIdCorrect = enteredRoomId.trim().uppercase() == targetCode
+
+    // Debugging: help identify why the match might fail
+    LaunchedEffect(enteredRoomId) {
+        if (enteredRoomId.length == 8) {
+            println("VClass: Comparing '$enteredRoomId' with target '$targetCode' (Raw: ${meeting.meetingCode})")
+        }
+    }
 
     Scaffold(
         containerColor = Color(0xFF0F1720),
@@ -158,7 +168,7 @@ fun VClassJoinMeetingScreen(
 
                 // Room ID Entry
                 Text(
-                    text = "Enter Room ID to verify",
+                    text = "Enter 8-digit Room ID to verify",
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
@@ -167,7 +177,12 @@ fun VClassJoinMeetingScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = enteredRoomId,
-                    onValueChange = { enteredRoomId = it },
+                    onValueChange = { input ->
+                        val filtered = input.uppercase().filter { it.isLetterOrDigit() }
+                        if (filtered.length <= 8) {
+                            enteredRoomId = filtered
+                        }
+                    },
                     placeholder = { Text("e.g. A1B2C3D4", color = Color.LightGray.copy(alpha = 0.6f)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -193,7 +208,7 @@ fun VClassJoinMeetingScreen(
                 
                 if (enteredRoomId.isNotEmpty() && !isIdCorrect) {
                     Text(
-                        text = "Incorrect Room ID. Please check the ID shared by your teacher.",
+                        text = "Incorrect Room ID. Please enter the 8 characters shared by your teacher.",
                         color = Color.Red,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(top = 4.dp).align(Alignment.Start)
