@@ -19,6 +19,12 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import kotlin.random.Random
+
+fun generateRoomId(): String {
+    val chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    return (1..8).map { chars[Random.nextInt(chars.length)] }.joinToString("")
+}
 
 fun Route.vClassRoutes() {
     route("/api") {
@@ -97,6 +103,25 @@ fun Route.vClassRoutes() {
         }
 
         // --- Meetings ---
+        post("/meetings/create") {
+            val request = call.receive<CreateMeetingRequest>()
+            val success = transaction {
+                val userRow = Users.selectAll().where { Users.userId eq request.hostUserId }.singleOrNull() ?: return@transaction false
+                val courseRow = Courses.selectAll().where { Courses.name eq request.courseName }.singleOrNull() ?: return@transaction false
+                
+                Meetings.insert {
+                    it[title] = request.title
+                    it[hostId] = userRow[Users.id]
+                    it[courseId] = courseRow[Courses.id]
+                    it[meetingCode] = generateRoomId()
+                    it[scheduledStart] = LocalDateTime.parse(request.start.replace(" ", "T")).toKotlinLocalDateTime()
+                    it[scheduledEnd] = LocalDateTime.parse(request.end.replace(" ", "T")).toKotlinLocalDateTime()
+                    it[createdAt] = LocalDateTime.now().toKotlinLocalDateTime()
+                }.insertedCount > 0
+            }
+            if (success) call.respond(HttpStatusCode.OK) else call.respond(HttpStatusCode.BadRequest)
+        }
+
         get("/vclass/meetings/{courseId}") {
             val courseId = call.parameters["courseId"]?.toIntOrNull() ?: 0
             val meetings = transaction {

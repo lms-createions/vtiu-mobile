@@ -207,10 +207,10 @@ data class CourseAssessmentSchemeApi(
 @Serializable
 data class CreateMeetingRequest(
     val title: String,
-    val description: String?,
-    @SerialName("course_id") val courseId: Int,
-    @SerialName("scheduled_start") val scheduledStart: String,
-    @SerialName("scheduled_end") val scheduledEnd: String
+    @SerialName("host_user_id") val hostUserId: String,
+    @SerialName("course_name") val courseName: String,
+    val start: String,
+    val end: String
 )
 
 @Serializable

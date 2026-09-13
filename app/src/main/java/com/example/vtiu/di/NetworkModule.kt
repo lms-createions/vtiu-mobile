@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://vtiu-lms-production.up.railway.app"
+    private const val BASE_URL = "https://vtiu-mobile-production.up.railway.app"
     const val STATIC_URL = "https://vtiu-lms-production.up.railway.app"
 
     @Provides
